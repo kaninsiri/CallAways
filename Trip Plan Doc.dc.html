@@ -206,7 +206,7 @@
                 <div class="ca-scroll" style="display:flex;align-items:center;gap:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:none;touch-action:pan-x;padding:16px 0 4px;scroll-snap-type:x mandatory;">
                   <sc-for list="{{ day.places }}" as="pl">
                     <div style="display:flex;align-items:center;flex:0 0 auto;">
-                      <div onClick="{{ pl.onOpenPd }}" style="flex:0 0 200px;scroll-snap-align:center;border:1px solid #ECE7E1;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 1px 2px rgba(43,33,24,.05);cursor:pointer;">
+                      <div onClick="{{ pl.onOpenPd }}" style="flex:0 0 200px;width:200px;min-width:200px;scroll-snap-align:center;border:1px solid #ECE7E1;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 1px 2px rgba(43,33,24,.05);cursor:pointer;">
                         <div style="{{ pl.thumbStyle }}">
                           {{ pl.iconEl }}
                           <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,0) 36%,rgba(42,33,28,.78) 100%);"></div>
@@ -214,7 +214,7 @@
                         </div>
                       </div>
                       <sc-if value="{{ pl.notLast }}" hint-placeholder-val="{{ true }}">
-                        <span style="display:flex;align-items:center;justify-content:center;flex:0 0 32px;">
+                        <span style="display:flex;align-items:center;justify-content:center;flex:0 0 32px;width:32px;min-width:32px;">
                           <svg style="width:20px;height:20px;color:#FD6318;"><use href="#i-chev"></use></svg>
                         </span>
                       </sc-if>
