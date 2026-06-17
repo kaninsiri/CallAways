@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  button{-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none;-webkit-touch-callout:none;}
+  html{background:#E7E2DC;interpolate-size:allow-keywords;}
+  body{margin:0;}
+  html,body{overscroll-behavior:none;}
+  .ca-scroll::-webkit-scrollbar{width:0;height:0;display:none;}
+  .ca-scroll{-ms-overflow-style:none;scrollbar-width:none;overscroll-behavior:contain;}
+  @keyframes caSlideIn{from{transform:translateX(60px);}to{transform:translateX(0);}}
+  @keyframes caPopIn{from{opacity:0;transform:translateY(-5px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+  /* Mobile: full-bleed app — drop the desktop "card on beige" frame */
+  @media (max-width:560px){
+    html,body{background:#FBFAF8;}
+    .ca-page{padding:0 !important;background:#FBFAF8 !important;min-height:100dvh !important;}
+    /* overflow:visible so the sticky day top bar can freeze to the viewport */
+    .ca-card{width:100% !important;max-width:none !important;border:none !important;border-radius:0 !important;box-shadow:none !important;min-height:100dvh;overflow:visible !important;}
+  }
+  /* MapLibre — themed to match CallAways, default chrome hidden (we use custom controls) */
+  .maplibregl-ctrl-top-right,.maplibregl-ctrl-top-left,.maplibregl-ctrl-bottom-left{display:none !important;}
+  .maplibregl-ctrl-bottom-right{margin:0 !important;}
+  .maplibregl-ctrl-attrib{display:none !important;}
+  .maplibregl-canvas{outline:none;}
+  /* Fixed-size wrapper so MapLibre's anchor never shifts; the inner dot scales on select.
+     position:absolute + top/left 0 is required because MapLibre does not add its
+     .maplibregl-marker class to custom elements — without it markers stack in normal
+     flow and drift by their height as you zoom out. */
+  .ca-pin{position:absolute;top:0;left:0;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .ca-dot{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:'IBM Plex Sans',sans-serif;border-radius:50%;background:#2A211C;width:22px;height:22px;font-size:10.5px;border:2px solid #fff;box-shadow:0 2px 6px -1px rgba(43,33,24,.45);transition:width .18s ease,height .18s ease,background .18s ease,box-shadow .18s ease;}
+  .ca-pin.on .ca-dot{width:30px;height:30px;font-size:13px;border:3px solid #fff;background:#FD6318;box-shadow:0 0 0 4px rgba(253,99,24,.18),0 4px 10px -2px rgba(43,33,24,.5);}
+  .maplibregl-popup.ca-pop .maplibregl-popup-content{padding:7px 11px;border-radius:10px;border:1px solid #E0D8D0;box-shadow:0 2px 4px -1px rgba(43,33,24,.1),0 12px 22px -10px rgba(43,33,24,.34);font-family:'IBM Plex Sans',sans-serif;}
+  .maplibregl-popup.ca-pop .maplibregl-popup-tip{display:none;}
+  .ca-pop-name{font-size:12px;font-weight:700;letter-spacing:-.01em;color:#2A211C;line-height:1.25;white-space:nowrap;}
+  .ca-pop-time{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;color:#FD6318;margin-top:1px;white-space:nowrap;}
+</style>
+</helmet>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-food" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v6a2 2 0 0 0 4 0V3M7 11v10"></path><path d="M16 3c-1.7 1.2-2.6 3.4-2.6 6 0 2 .9 3 2.6 3v9"></path></symbol>
+  <symbol id="i-coffee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9Z"></path><path d="M16 10h1.6a2.6 2.6 0 0 1 0 5.2H16"></path><path d="M8 3v2M11 3v2"></path></symbol>
+  <symbol id="i-bar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16l-8 9-8-9Z"></path><path d="M12 13v7M8 20h8"></path></symbol>
+  <symbol id="i-bed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8v11M3 13h18v6M21 19v-5.5a3 3 0 0 0-3-3h-7V13"></path><circle cx="7" cy="11.4" r="1.5"></circle></symbol>
+  <symbol id="i-temple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7h16L12 3Z"></path><path d="M5 7v11M9 7v11M15 7v11M19 7v11M3 21h18"></path></symbol>
+  <symbol id="i-museum" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 12 4l8 5M3 9h18M5 9v9M9 9v9M15 9v9M19 9v9M3 21h18"></path></symbol>
+  <symbol id="i-market" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.4-2h7.2L17 8h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><circle cx="12" cy="13" r="3.1"></circle></symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4 3 10l6 2.5L11.5 19 14 13l7-9Z"></path></symbol>
+  <symbol id="i-walk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.2" r="1.6"></circle><path d="M13 7v5l3 2M13 9l-3 1-1.5 3.5M13 12l-2 4M16 21l-2-5"></path></symbol>
+  <symbol id="i-train" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="13" rx="3.5"></rect><path d="M5 11h14"></path><path d="M9 19l-2 3M15 19l2 3"></path><circle cx="9" cy="13.4" r="1"></circle><circle cx="15" cy="13.4" r="1"></circle></symbol>
+  <symbol id="i-boat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16l-1.4 4.2a2 2 0 0 1-1.9 1.3H7.3a2 2 0 0 1-1.9-1.3L4 15Z"></path><path d="M12 3v12M12 6l6 3-6 2"></path></symbol>
+  <symbol id="i-bus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="13" rx="2.5"></rect><path d="M4 11h16M8 17v2.5M16 17v2.5"></path><circle cx="8" cy="14" r="1"></circle><circle cx="16" cy="14" r="1"></circle></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" stroke="none"><path d="m12 3 2.6 5.3 5.9.85-4.27 4.16 1 5.84L12 16.4 6.77 19.15l1-5.84L3.5 9.15l5.9-.85L12 3Z"></path></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7"></path></symbol>
+  <symbol id="i-nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 21 3l-8 18-2-7-7-3Z"></path></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2"></path><rect x="3" y="8" width="18" height="11" rx="3"></rect><circle cx="16.5" cy="13.5" r="1.4"></circle></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"></path></symbol>
+  <symbol id="i-translate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7M7.5 4v1.5c0 3.3-2 6.2-4.5 7.3"></path><path d="M5 9.2c.3 2 2.2 3.6 4.6 4.1"></path><path d="M12.5 20l3.8-8.5L20 20M14 17h4.6"></path></symbol>
+  <symbol id="i-flag-th" viewBox="0 0 20 14"><rect width="20" height="14" rx="2.5" fill="#F4F5F8"></rect><rect width="20" height="2.7" y="0" fill="#A51931"></rect><rect width="20" height="2.7" y="11.3" fill="#A51931"></rect><rect width="20" height="4.2" y="4.9" fill="#2D2A4A"></rect></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"></rect><path d="M3.5 9.5h17M8 3v4M16 3v4"></path></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 5h12l-2.2 3.2L17 11H5"></path></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5h5v5"></path><path d="M19 5l-8 8"></path><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 21h4"></path><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.2 1 2.5h6c0-1.3.3-1.8 1-2.5A6 6 0 0 0 12 3Z"></path></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 7.5h.01"></path></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.5"></circle><circle cx="18" cy="5" r="2.5"></circle><path d="M8.5 19H14a3 3 0 0 0 0-6H10a3 3 0 0 1 0-6h5.5"></path></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></symbol>
+  <symbol id="i-locate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.4"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="M3 13l9 5 9-5"></path></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"></path></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2.5"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></symbol>
+  <symbol id="i-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"></path><path d="M8.5 9.5 12 13l3.5-3.5"></path><path d="M5 16v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"></path></symbol>
+  <symbol id="i-transfer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3"></path><path d="M20 16H7l3 3"></path></symbol>
+  <symbol id="i-door" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17"></path><path d="M4 21h16"></path><path d="M13 12h.01"></path></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6l-7-3Z"></path><path d="M9.5 12 11 13.5 14.5 10"></path></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v8M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"></path></symbol>
+</defs></svg>
+
+<div class="ca-page" style="min-height:100vh;background:#E7E2DC;padding:26px 16px;font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.72;color:#2A211C;-webkit-font-smoothing:antialiased;">
+  <div class="ca-card" style="width:460px;max-width:100%;margin:0 auto;background:#FBFAF8;border:1px solid rgba(43,33,24,.08);box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 26px 54px -16px rgba(43,33,24,.34);border-radius:6px;">
+
+    <!-- ===================== OVERVIEW ===================== -->
+    <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Overview" style="animation:caSlideIn .34s cubic-bezier(.4,0,.2,1);">
+      <!-- masthead -->
+      <div data-zone="Top bar" style="display:flex;align-items:center;justify-content:space-between;padding:18px 26px;border-bottom:1px solid #ECE7E1;">
+        <span style="display:inline-flex;align-items:center;gap:10px;">
+          <span style="width:30px;height:30px;border-radius:9px;background:#2A211C;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 100 100" style="width:18px;height:18px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg>
+          </span>
+          <span style="font-size:14px;font-weight:700;letter-spacing:.06em;color:#2A211C;white-space:nowrap;">CallAway<span style="color:#FD6318;">s</span></span>
+        </span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#AA9F96;">Itinerary</span>
+      </div>
+
+      <!-- hero cover -->
+      <div data-zone="Hero / masthead" style="position:relative;height:256px;overflow:hidden;background:linear-gradient(160deg,#2A211C 0%,#3B302A 55%,#241C18 100%);">
+        {{ headerShapes }}
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,.34) 0%,rgba(42,33,28,.04) 40%,rgba(42,33,28,.80) 100%);"></div>
+        <button data-zone="Export PDF" onClick="{{ onExport }}" style="position:absolute;top:16px;right:16px;z-index:3;display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:11px;background:rgba(251,250,248,.16);border:1px solid rgba(255,255,255,.34);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;"><svg style="width:16px;height:16px;color:#fff;"><use href="#i-pdf"></use></svg>Export PDF</button>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:0 26px 24px;color:#fff;">
+          <div data-subzone="Eyebrow" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#FFCB9A;margin-bottom:10px;">7-Day Itinerary · Bangkok</div>
+          <h1 data-subzone="Title" style="font-size:33px;font-weight:700;letter-spacing:-.024em;line-height:1.08;margin:0;color:#fff;">Bangkok Slow Days</h1>
+          <div data-subzone="Meta + status" style="display:flex;align-items:center;gap:10px;margin-top:13px;font-size:13px;font-weight:600;color:rgba(255,255,255,.94);flex-wrap:wrap;">
+            <span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg style="width:14px;height:14px;color:rgba(255,255,255,.9);"><use href="#i-cal"></use></svg>Feb 10 – 16, 2026</span>
+            <span style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.55);"></span>
+            <span style="white-space:nowrap;">2 travelers</span>
+            <span style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.55);"></span>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);white-space:nowrap;"><svg style="width:12px;height:12px;color:#fff;"><use href="#i-check"></use></svg>Confirmed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- intro -->
+      <div style="padding:24px 26px 6px;">
+        <p style="font-size:16px;font-weight:400;line-height:1.72;color:#4B423B;margin:0;text-wrap:pretty;">Seven unhurried days along the Chao Phraya — temples and old-town lanes, river ferries, market mornings and rooftop sunsets. Each day is a short plan you can read and follow at your own pace.</p>
+        <div data-zone="Stats bar" style="display:flex;gap:0;margin-top:18px;border:1px solid #ECE7E1;border-radius:14px;overflow:hidden;background:#fff;">
+          <div style="flex:1;padding:13px 14px;border-right:1px solid #ECE7E1;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#AA9F96;">Days</div>
+            <div style="font-size:19px;font-weight:700;letter-spacing:-.02em;color:#2A211C;margin-top:3px;">7</div>
+          </div>
+          <div style="flex:1;padding:13px 14px;border-right:1px solid #ECE7E1;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#AA9F96;">Stops</div>
+            <div style="font-size:19px;font-weight:700;letter-spacing:-.02em;color:#2A211C;margin-top:3px;">24</div>
+          </div>
+          <div style="flex:1.3;padding:13px 14px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#AA9F96;">Budget</div>
+            <div style="font-size:19px;font-weight:700;letter-spacing:-.02em;color:#2A211C;margin-top:3px;">฿24,800</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- highlights carousel -->
+      <div data-zone="Highlights carousel" style="padding:26px 0 0;">
+        <div style="display:flex;align-items:center;gap:10px;margin:0 26px 13px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#FD6318;">Highlights</span>
+          <span style="flex:1;height:1px;background:#ECE7E1;"></span>
+        </div>
+        <div class="ca-scroll" ref="{{ carRef }}" onScroll="{{ onCarScroll }}" style="display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;overscroll-behavior:none;touch-action:pan-x;padding:2px 26px 0;scroll-snap-type:x mandatory;">
+          <sc-for list="{{ highlights }}" as="hl">
+            <div style="flex:0 0 200px;scroll-snap-align:center;border:1px solid #ECE7E1;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 1px 2px rgba(43,33,24,.05);">
+              <div style="{{ hl.coverStyle }}">
+                {{ hl.iconEl }}
+                <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,0) 36%,rgba(42,33,28,.76) 100%);"></div>
+                <span style="position:absolute;top:11px;left:11px;display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;background:rgba(251,250,248,.92);font-size:10px;font-weight:700;color:#2A211C;white-space:nowrap;">{{ hl.day }}</span>
+                <div style="position:absolute;left:13px;right:13px;bottom:11px;color:#fff;font-size:15px;font-weight:700;letter-spacing:-.012em;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.35);">{{ hl.name }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:15px;">
+          <sc-for list="{{ carDots }}" as="dot" hint-placeholder-count="4">
+            <button onClick="{{ dot.onClick }}" style="{{ dot.dotStyle }}"></button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- day list -->
+      <div data-zone="Day list" style="padding:26px 26px 8px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#FD6318;">The 7 days</span>
+          <span style="flex:1;height:1px;background:#ECE7E1;"></span>
+        </div>
+        <sc-for list="{{ overviewDays }}" as="day" hint-placeholder-count="7">
+          <div data-zone="Day card" style="{{ day.dividerStyle }}">
+            <button onClick="{{ day.onToggle }}" style="{{ day.rowStyle }}">
+              <div style="display:flex;flex-direction:column;align-items:flex-start;">
+                <span style="{{ day.numLabelStyle }}">Day</span>
+                <span style="{{ day.numStyle }}">{{ day.nn }}</span>
+              </div>
+              <div style="min-width:0;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;margin-bottom:4px;">{{ day.dateFull }}</div>
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                  <h3 style="flex:1;min-width:0;font-size:21px;font-weight:700;letter-spacing:-.022em;line-height:1.16;margin:0;color:#2A211C;">{{ day.title }}</h3>
+                  <svg style="{{ day.chevStyle }}"><use href="#i-chev"></use></svg>
+                </div>
+                <p style="font-size:14px;font-weight:400;line-height:1.6;color:#4B423B;margin:7px 0 0;text-wrap:pretty;">{{ day.summary }}</p>
+                <div style="display:flex;align-items:center;gap:9px;margin-top:12px;font-size:12px;font-weight:600;color:#8B7F76;flex-wrap:wrap;">
+                  <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:13px;height:13px;color:#AA9F96;"><use href="#i-flag"></use></svg>{{ day.stops }} stops</span>
+                  <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:13px;height:13px;color:#AA9F96;"><use href="#i-clock"></use></svg>{{ day.hours }}</span>
+                  <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:13px;height:13px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ day.budget }}</span>
+                </div>
+              </div>
+            </button>
+            <div style="{{ day.panelStyle }}">
+              <div style="overflow:hidden;">
+                <div class="ca-scroll" style="display:flex;align-items:center;gap:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior:none;touch-action:pan-x;padding:16px 0 4px;scroll-snap-type:x mandatory;">
+                  <sc-for list="{{ day.places }}" as="pl">
+                    <div style="display:flex;align-items:center;flex:0 0 auto;">
+                      <div onClick="{{ pl.onOpenPd }}" style="flex:0 0 200px;scroll-snap-align:center;border:1px solid #ECE7E1;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 1px 2px rgba(43,33,24,.05);cursor:pointer;">
+                        <div style="{{ pl.thumbStyle }}">
+                          {{ pl.iconEl }}
+                          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,0) 36%,rgba(42,33,28,.78) 100%);"></div>
+                          <div style="position:absolute;left:13px;right:13px;bottom:11px;color:#fff;font-size:14px;font-weight:700;letter-spacing:-.012em;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.4);">{{ pl.name }}</div>
+                        </div>
+                      </div>
+                      <sc-if value="{{ pl.notLast }}" hint-placeholder-val="{{ true }}">
+                        <span style="display:flex;align-items:center;justify-content:center;flex:0 0 32px;">
+                          <svg style="width:20px;height:20px;color:#FD6318;"><use href="#i-chev"></use></svg>
+                        </span>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ day.onView }}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:12px 0 4px;padding:12px;border:1.5px solid #2A211C;border-radius:13px;background:#fff;color:#2A211C;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;">
+                  View full day<svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-arrow"></use></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- footer -->
+      <div data-zone="Footer" style="display:flex;align-items:center;justify-content:space-between;padding:22px 26px;margin-top:14px;background:#2A211C;color:#fff;">
+        <span style="display:inline-flex;align-items:center;gap:9px;">
+          <span style="width:24px;height:24px;border-radius:7px;background:#000;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 100 100" style="width:14px;height:14px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>
+          <span style="font-size:12px;font-weight:700;letter-spacing:.06em;">CallAway<span style="color:#FD6318;">s</span></span>
+        </span>
+        <span style="font-size:11px;color:#8B7F76;">© 2026 CallAways · All rights reserved</span>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ===================== DAY ===================== -->
+    <sc-if value="{{ isDay }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Day detail" style="animation:caSlideIn .34s cubic-bezier(.4,0,.2,1);">
+      <!-- masthead w/ back -->
+      <div data-zone="Day top bar" style="position:sticky;top:0;z-index:30;border-bottom:1px solid #ECE7E1;background:rgba(251,250,248,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:12px 0 11px;">
+        <div style="display:flex;align-items:center;padding:0 18px 10px;">
+          <button onClick="{{ goOverview }}" data-subzone="Back" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;color:#2A211C;padding:0;white-space:nowrap;">
+            <svg style="width:18px;height:18px;color:#2A211C;flex:0 0 18px;"><use href="#i-back"></use></svg>All days
+          </button>
+        </div>
+        <div data-subzone="Date ruler" style="padding:0 12px;">
+          <div style="display:flex;align-items:flex-end;">
+            <sc-for list="{{ dayRuler }}" as="d">
+              <button onClick="{{ d.onClick }}" style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;font-family:inherit;">
+                <span style="{{ d.numStyle }}">{{ d.num }}</span>
+                <span style="{{ d.wdStyle }}">{{ d.wd }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="position:relative;display:flex;align-items:center;height:12px;margin-top:8px;">
+            <span style="position:absolute;left:8px;right:8px;top:50%;transform:translateY(-50%);height:2px;background:#ECE7E1;border-radius:2px;"></span>
+            <sc-for list="{{ dayRuler }}" as="d">
+              <span style="flex:1;display:flex;justify-content:center;"><span style="{{ d.tickStyle }}"></span></span>
+            </sc-for>
+            <span style="{{ rulerDotStyle }}"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- intro -->
+      <div data-zone="Day header" style="padding:26px 26px 0;">
+        <div data-subzone="Date" style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:9px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;">
+          <span style="font-weight:700;color:#FD6318;">Day {{ dayNum }}</span>
+          <span style="font-weight:500;color:#AA9F96;">{{ dayDateFmt }}</span>
+        </div>
+        <h1 data-subzone="Title" style="font-size:29px;font-weight:700;letter-spacing:-.022em;line-height:1.12;margin:0;color:#2A211C;">{{ dayTitle }}</h1>
+        <div style="height:3px;width:34px;background:#FD6318;border-radius:2px;margin:13px 0 14px;"></div>
+        <p data-subzone="Intro" style="font-size:16px;font-weight:400;line-height:1.72;color:#4B423B;margin:0;text-wrap:pretty;">{{ dayIntro }}</p>
+        <div data-subzone="Meta row" style="display:flex;align-items:center;gap:10px;margin-top:16px;font-size:12.5px;font-weight:600;color:#8B7F76;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:14px;height:14px;color:#AA9F96;"><use href="#i-flag"></use></svg>{{ dayStops }} stops</span>
+          <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+          <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:14px;height:14px;color:#AA9F96;"><use href="#i-clock"></use></svg>{{ dayHours }}</span>
+          <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+          <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:14px;height:14px;color:#AA9F96;"><use href="#i-walk"></use></svg>{{ dayWalk }} walk</span>
+          <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+          <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:14px;height:14px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ dayBudget }}</span>
+          <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+          <span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><svg style="width:14px;height:14px;color:#FD6318;"><use href="#i-bed"></use></svg>Base · Riva Surya</span>
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div data-zone="Map" ref="{{ mapRef }}" style="padding:22px 26px 0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8B7F76;">Route</span>
+          <span style="flex:1;height:1px;background:#ECE7E1;"></span>
+          <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#AA9F96;"><svg style="width:13px;height:13px;color:#FD6318;"><use href="#i-route"></use></svg>{{ dayStops }} checkpoints</span>
+        </div>
+        <div style="position:relative;border:1px solid #E0D8D0;border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(43,33,24,.05),0 10px 22px -14px rgba(43,33,24,.28);">
+          <div style="position:relative;height:264px;background:#EEE9E1;overflow:hidden;">
+            <!-- MapLibre GL map · CARTO Positron basemap (mapcn) · real route tracking -->
+            <div ref="{{ mapContainerRef }}" style="position:absolute;inset:0;background:#EEE9E1;"></div>
+
+            <!-- area label (top-left) -->
+            <div data-subzone="Area label" style="position:absolute;top:12px;left:12px;z-index:9;display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(251,250,248,.94);border:1px solid #E0D8D0;box-shadow:0 1px 2px rgba(43,33,24,.08);backdrop-filter:blur(4px);">
+              <svg style="width:13px;height:13px;color:#FD6318;"><use href="#i-pin"></use></svg>
+              <span style="font-size:11.5px;font-weight:700;color:#2A211C;white-space:nowrap;">Bangkok · Day {{ dayNum }}</span>
+            </div>
+
+            <!-- shadcn-style controls (top-right) -->
+            <div data-subzone="Map controls" style="position:absolute;top:12px;right:12px;z-index:9;display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+              <div style="display:flex;flex-direction:column;background:#fff;border:1px solid #E0D8D0;border-radius:11px;overflow:hidden;box-shadow:0 1px 2px rgba(43,33,24,.1);">
+                <button onClick="{{ onZoomIn }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-bottom:1px solid #ECE7E1;cursor:pointer;"><svg style="width:17px;height:17px;color:#2A211C;"><use href="#i-plus"></use></svg></button>
+                <button onClick="{{ onZoomOut }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;"><svg style="width:17px;height:17px;color:#2A211C;"><use href="#i-minus"></use></svg></button>
+              </div>
+              <button onClick="{{ onLocate }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid #E0D8D0;border-radius:11px;box-shadow:0 1px 2px rgba(43,33,24,.1);cursor:pointer;"><svg style="width:16px;height:16px;color:#2A211C;"><use href="#i-locate"></use></svg></button>
+            </div>
+
+            <!-- attribution -->
+            <div style="position:absolute;right:9px;bottom:54px;z-index:9;font-family:'IBM Plex Mono',monospace;font-size:8px;color:#9A8F86;background:rgba(251,250,248,.7);padding:1px 5px;border-radius:4px;">© OpenStreetMap · CARTO</div>
+
+            <!-- glass action bar (overlaid on map bottom): route-number nodes + open in maps -->
+            <div data-zone="Map actions" style="position:absolute;left:0;right:0;bottom:0;z-index:10;display:flex;align-items:center;gap:7px;padding:9px 10px;background:rgba(251,250,248,.42);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.45);">
+              <button onClick="{{ onMapHotel }}" title="Hotel" style="flex:0 0 auto;width:27px;height:27px;border-radius:8px;border:1.5px solid #FD6318;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(43,33,24,.25);"><svg style="width:14px;height:14px;color:#FD6318;"><use href="#i-bed"></use></svg></button>
+              <div class="ca-scroll" style="display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;flex:1;min-width:0;">
+                <sc-for list="{{ mapNodes }}" as="nd">
+                  <button onClick="{{ nd.onClick }}" style="{{ nd.style }}">{{ nd.num }}</button>
+                </sc-for>
+              </div>
+              <button data-subzone="Open in Maps" onClick="{{ onMaps }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;border:none;background:#2A211C;color:#fff;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;"><svg style="width:14px;height:14px;color:#fff;"><use href="#i-nav"></use></svg>Open in maps</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITINERARY DETAILS -->
+      <div data-zone="Itinerary" style="padding:26px 26px 6px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8B7F76;">Itinerary</span>
+          <span style="flex:1;height:1px;background:#ECE7E1;"></span>
+          <button onClick="{{ onOpenTips }}" style="display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1px solid #E0D8D0;background:#fff;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;color:#2A211C;white-space:nowrap;"><svg style="width:13px;height:13px;color:#FD6318;"><use href="#i-bulb"></use></svg>Good to know</button>
+        </div>
+
+        <!-- day starts at the hotel (skipped on day 1 — arrives from airport) -->
+        <sc-if value="{{ showHotelStart }}" hint-placeholder-val="{{ true }}">
+        <div data-zone="Hotel start" style="display:grid;grid-template-columns:34px 1fr;gap:14px;padding-top:18px;">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <span style="width:34px;height:34px;border-radius:11px;background:#FFF1E6;border:2px solid #FD6318;display:flex;align-items:center;justify-content:center;flex:0 0 34px;box-sizing:border-box;"><svg style="width:17px;height:17px;color:#FD6318;"><use href="#i-bed"></use></svg></span>
+            <span style="width:0;flex:1;min-height:18px;border-left:2px solid #ECE7E1;margin-top:6px;"></span>
+          </div>
+          <div style="padding:5px 0 4px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Start</div>
+            <div style="font-size:15px;font-weight:700;color:#2A211C;line-height:1.3;">Riva Surya · Your base</div>
+            <p data-subzone="Hotel detail" style="font-size:13.5px;line-height:1.6;color:#8B7F76;margin:6px 0 0;text-wrap:pretty;">Your riverside base on the Chao Phraya — drop your bags and head out. Check-in from 14:00, bag storage at the front desk.</p>
+          </div>
+        </div>
+
+        <!-- transport: hotel → first stop -->
+        <div data-zone="Transport · base→1" style="display:grid;grid-template-columns:34px 1fr;gap:14px;">
+          <div style="display:flex;justify-content:center;"><span style="width:0;border-left:2px dashed #FD6318;align-self:stretch;margin:2px 0;"></span></div>
+          <div style="position:relative;margin:12px 0 22px;">
+            <div data-zone="Transport options" style="position:relative;z-index:2;background:#fff;border:1px solid #ECE7E1;border-radius:16px;padding:13px 14px;box-shadow:0 1px 2px rgba(43,33,24,.05);">
+              <span style="position:absolute;left:-7px;top:24px;width:14px;height:14px;background:#fff;border-left:1px solid #ECE7E1;border-bottom:1px solid #ECE7E1;transform:rotate(45deg);z-index:3;"></span>
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px;">
+                <svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-route"></use></svg>
+                <span style="font-size:12.5px;font-weight:700;color:#2A211C;">Getting to {{ hotelStart.nextName }}</span>
+              </div>
+              <div style="{{ hotelStart.optionsWrap }}">
+                <sc-for list="{{ hotelStart.options }}" as="opt">
+                  <button onClick="{{ opt.onOpen }}" style="{{ opt.btnStyle }}">
+                    <span style="{{ opt.topStyle }}"><span style="{{ opt.iconWrap }}">{{ opt.iconEl }}</span><span style="{{ opt.modeStyle }}">{{ opt.mode }}</span><svg style="width:14px;height:14px;color:#CFC6BD;flex:0 0 14px;"><use href="#i-chev"></use></svg></span>
+                    <span style="{{ opt.metaStyle }}"><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#2A211C;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-clock"></use></svg>{{ opt.time }}</span><span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#2A211C;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ opt.cost }}</span></span>
+                    <sc-if value="{{ opt.isBest }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:9.5px;font-weight:700;line-height:1;background:#FD6318;color:#fff;white-space:nowrap;box-shadow:0 2px 6px -1px rgba(229,80,11,.45);"><svg style="width:10px;height:10px;color:#fff;"><use href="#i-check"></use></svg>Recommended</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-for list="{{ stops }}" as="stop">
+          <!-- stop -->
+          <div data-zone="Stop card" style="display:grid;grid-template-columns:34px 1fr;gap:14px;padding-top:18px;">
+            <div style="display:flex;flex-direction:column;align-items:center;">
+              <span style="width:34px;height:34px;border-radius:11px;background:#2A211C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex:0 0 34px;">{{ stop.num }}</span>
+              <sc-if value="{{ stop.hasConn }}" hint-placeholder-val="{{ true }}"><span style="width:0;flex:1;min-height:18px;border-left:2px solid #ECE7E1;margin-top:6px;"></span></sc-if>
+            </div>
+            <div style="padding-bottom:4px;">
+              <div data-subzone="Photo" style="{{ stop.coverStyle }}">
+                {{ stop.catIconEl }}
+              </div>
+              <div data-subzone="Meta row" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+                <span data-subzone="Time" style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;color:#FD6318;white-space:nowrap;">{{ stop.time }}</span>
+                <span style="font-size:11.5px;font-weight:600;color:#AA9F96;white-space:nowrap;">{{ stop.dur }}</span>
+                <span data-subzone="Category chip" onClick="{{ stop.onCat }}" style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700;line-height:1;background:#F2EDE7;color:#2A211C;cursor:pointer;">{{ stop.catChipEl }}{{ stop.cat }}<svg style="width:11px;height:11px;color:#AA9F96;margin-left:1px;"><use href="#i-info"></use></svg></span>
+                <sc-if value="{{ stop.showStatus }}" hint-placeholder-val="{{ true }}">
+                  <span data-subzone="Status" style="{{ stop.statusStyle }}">
+                    {{ stop.statusIconEl }}
+                    <sc-if value="{{ stop.statusDot }}" hint-placeholder-val="{{ true }}"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span></sc-if>
+                    {{ stop.statusLabel }}
+                  </span>
+                </sc-if>
+              </div>
+              <h3 data-subzone="Stop name" onClick="{{ stop.onName }}" style="display:inline-flex;align-items:center;gap:7px;font-size:18px;font-weight:700;letter-spacing:-.014em;line-height:1.26;margin:0;color:#2A211C;cursor:pointer;">{{ stop.name }}<svg style="width:15px;height:15px;color:#CFC6BD;flex:0 0 15px;"><use href="#i-chev"></use></svg></h3>
+              <div data-subzone="Hours / price" style="display:flex;align-items:center;gap:7px;margin-top:8px;flex-wrap:wrap;">
+                <sc-if value="{{ stop.hasHours }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;background:#F2EDE7;font-size:11px;font-weight:600;color:#4B423B;line-height:1;white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:4px;color:#2E8B57;font-weight:700;"><span style="width:6px;height:6px;border-radius:50%;background:#2E8B57;"></span>Open</span>{{ stop.hoursLabel }}</span></sc-if>
+                <sc-if value="{{ stop.hasPrice }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;background:#F2EDE7;font-size:11px;font-weight:700;color:#2A211C;line-height:1;white-space:nowrap;"><svg style="width:11px;height:11px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ stop.price }}</span></sc-if>
+              </div>
+              <p data-subzone="Description" style="font-size:14.5px;font-weight:400;line-height:1.7;color:#4B423B;margin:9px 0 0;text-wrap:pretty;">{{ stop.desc }}</p>
+            </div>
+          </div>
+
+          <!-- transit session -->
+          <sc-if value="{{ stop.hasTransit }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:34px 1fr;gap:14px;">
+              <div style="display:flex;justify-content:center;"><span style="width:0;border-left:2px dashed #FD6318;align-self:stretch;margin:2px 0;"></span></div>
+              <div style="position:relative;margin:12px 0 22px;">
+                <div data-zone="Transport options" style="position:relative;z-index:2;background:#fff;border:1px solid #ECE7E1;border-radius:16px;padding:13px 14px;box-shadow:0 1px 2px rgba(43,33,24,.05);">
+                  <span style="position:absolute;left:-7px;top:24px;width:14px;height:14px;background:#fff;border-left:1px solid #ECE7E1;border-bottom:1px solid #ECE7E1;transform:rotate(45deg);z-index:3;"></span>
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px;">
+                    <svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-route"></use></svg>
+                    <span style="font-size:12.5px;font-weight:700;color:#2A211C;">Getting to {{ stop.nextName }}</span>
+                  </div>
+                  <div style="{{ stop.optionsWrap }}">
+                    <sc-for list="{{ stop.options }}" as="opt">
+                      <button data-subzone="Option" onClick="{{ opt.onOpen }}" style="{{ opt.btnStyle }}">
+                        <span style="{{ opt.topStyle }}">
+                          <span style="{{ opt.iconWrap }}">{{ opt.iconEl }}</span>
+                          <span style="{{ opt.modeStyle }}">{{ opt.mode }}</span>
+                          <svg style="width:14px;height:14px;color:#CFC6BD;flex:0 0 14px;"><use href="#i-chev"></use></svg>
+                        </span>
+                        <span style="{{ opt.metaStyle }}">
+                          <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#2A211C;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-clock"></use></svg>{{ opt.time }}</span>
+                          <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+                          <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#2A211C;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ opt.cost }}</span>
+                        </span>
+                        <sc-if value="{{ opt.isBest }}" hint-placeholder-val="{{ true }}">
+                          <span style="position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:9.5px;font-weight:700;line-height:1;background:#FD6318;color:#fff;white-space:nowrap;box-shadow:0 2px 6px -1px rgba(229,80,11,.45);"><svg style="width:10px;height:10px;color:#fff;"><use href="#i-check"></use></svg>Recommended</span>
+                        </sc-if>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+
+        <!-- day ends back at the hotel (skipped on the last day — departs to airport) -->
+        <sc-if value="{{ showHotelEnd }}" hint-placeholder-val="{{ true }}">
+        <!-- transport: last stop → hotel -->
+        <div data-zone="Transport · last→base" style="display:grid;grid-template-columns:34px 1fr;gap:14px;">
+          <div style="display:flex;justify-content:center;"><span style="width:0;border-left:2px dashed #FD6318;align-self:stretch;margin:2px 0;"></span></div>
+          <div style="position:relative;margin:12px 0 16px;">
+            <div data-zone="Transport options" style="position:relative;z-index:2;background:#fff;border:1px solid #ECE7E1;border-radius:16px;padding:13px 14px;box-shadow:0 1px 2px rgba(43,33,24,.05);">
+              <span style="position:absolute;left:-7px;top:24px;width:14px;height:14px;background:#fff;border-left:1px solid #ECE7E1;border-bottom:1px solid #ECE7E1;transform:rotate(45deg);z-index:3;"></span>
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px;">
+                <svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-route"></use></svg>
+                <span style="font-size:12.5px;font-weight:700;color:#2A211C;">Getting back to Riva Surya</span>
+              </div>
+              <div style="{{ hotelEnd.optionsWrap }}">
+                <sc-for list="{{ hotelEnd.options }}" as="opt">
+                  <button onClick="{{ opt.onOpen }}" style="{{ opt.btnStyle }}">
+                    <span style="{{ opt.topStyle }}"><span style="{{ opt.iconWrap }}">{{ opt.iconEl }}</span><span style="{{ opt.modeStyle }}">{{ opt.mode }}</span><svg style="width:14px;height:14px;color:#CFC6BD;flex:0 0 14px;"><use href="#i-chev"></use></svg></span>
+                    <span style="{{ opt.metaStyle }}"><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#2A211C;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-clock"></use></svg>{{ opt.time }}</span><span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span><span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#2A211C;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ opt.cost }}</span></span>
+                    <sc-if value="{{ opt.isBest }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:9.5px;font-weight:700;line-height:1;background:#FD6318;color:#fff;white-space:nowrap;box-shadow:0 2px 6px -1px rgba(229,80,11,.45);"><svg style="width:10px;height:10px;color:#fff;"><use href="#i-check"></use></svg>Recommended</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- day ends back at the hotel -->
+        <div data-zone="Hotel end" style="display:grid;grid-template-columns:34px 1fr;gap:14px;">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <span style="width:0;height:16px;border-left:2px solid #ECE7E1;"></span>
+            <span style="width:34px;height:34px;border-radius:11px;background:#FFF1E6;border:2px solid #FD6318;display:flex;align-items:center;justify-content:center;flex:0 0 34px;box-sizing:border-box;margin-top:4px;"><svg style="width:17px;height:17px;color:#FD6318;"><use href="#i-bed"></use></svg></span>
+          </div>
+          <div style="padding:20px 0 4px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">End</div>
+            <div style="font-size:15px;font-weight:700;color:#2A211C;line-height:1.3;">Riva Surya · Back to base</div>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+
+      <!-- prev / next -->
+      <div data-zone="Day nav" style="display:flex;gap:10px;padding:14px 26px 24px;">
+        <button onClick="{{ onPrev }}" style="{{ prevStyle }}">
+          <svg style="width:16px;height:16px;color:#2A211C;transform:scaleX(-1);"><use href="#i-arrow"></use></svg>
+          <span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;">
+            <span style="font-size:10px;font-weight:600;color:#AA9F96;">Previous</span>
+            <span style="font-size:12.5px;font-weight:700;color:#2A211C;">{{ prevLabel }}</span>
+          </span>
+        </button>
+        <button onClick="{{ onNext }}" style="{{ nextStyle }}">
+          <span style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2;">
+            <span style="font-size:10px;font-weight:600;color:#AA9F96;">Next</span>
+            <span style="font-size:12.5px;font-weight:700;color:#2A211C;">{{ nextLabel }}</span>
+          </span>
+          <svg style="width:16px;height:16px;color:#2A211C;"><use href="#i-arrow"></use></svg>
+        </button>
+      </div>
+
+      <!-- footer -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 26px;background:#2A211C;color:#fff;">
+        <span style="display:inline-flex;align-items:center;gap:9px;">
+          <span style="width:24px;height:24px;border-radius:7px;background:#000;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 100 100" style="width:14px;height:14px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>
+          <span style="font-size:12px;font-weight:700;letter-spacing:.06em;">CallAway<span style="color:#FD6318;">s</span></span>
+        </span>
+        <span style="font-size:11px;color:#8B7F76;">© 2026 CallAways · All rights reserved</span>
+      </div>
+    </div>
+    </sc-if>
+
+  </div>
+
+  <!-- TOAST -->
+  <div style="{{ toastStyle }}">{{ toast }}</div>
+
+  <!-- TRANSPORT DRAWER -->
+  <div onClick="{{ onCloseDrawer }}" style="{{ scrimStyle }}"></div>
+  <div data-sheet="drawer" data-zone="Transport drawer" style="{{ sheetStyle }}">
+    <button onClick="{{ onCloseDrawer }}" style="position:absolute;top:14px;right:16px;z-index:6;width:34px;height:34px;border-radius:11px;border:1px solid #E0D8D0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(43,33,24,.12);"><svg style="width:18px;height:18px;color:#2A211C;"><use href="#i-close"></use></svg></button>
+    <div style="display:flex;justify-content:center;padding:10px 0 2px;"><span style="width:38px;height:4px;border-radius:999px;background:#E0D8D0;"></span></div>
+    <div class="ca-scroll" style="max-height:74vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:none;padding:10px 22px 26px;">
+      <div data-zone="Drawer header" style="display:flex;align-items:flex-start;gap:12px;padding-right:42px;">
+        <span style="width:46px;height:46px;border-radius:13px;background:#2A211C;display:flex;align-items:center;justify-content:center;flex:0 0 46px;">{{ drawerIconEl }}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Transport option</div>
+          <h3 style="font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.18;margin:2px 0 0;color:#2A211C;">{{ drawerMode }}</h3>
+        </div>
+      </div>
+      <!-- route timeline · From → legs → To (stops collapse / expand per leg) -->
+      <div data-zone="Route" style="margin-top:16px;">
+        <sc-for list="{{ drawerTimeline }}" as="row">
+          <div style="display:flex;gap:13px;">
+            <div style="position:relative;width:30px;flex:0 0 30px;">
+              <sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:13px;top:0;height:14px;width:2px;background:{{ row.lineColor }};"></span></sc-if>
+              <sc-if value="{{ row.down }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:13px;top:14px;bottom:0;width:2px;background:{{ row.lineColor }};"></span></sc-if>
+              <div style="position:absolute;left:0;top:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;z-index:2;">
+                <sc-if value="{{ row.isEnd }}" hint-placeholder-val="{{ true }}"><span data-subzone="{{ row.tag }}" style="{{ row.dotStyle }}"></span></sc-if>
+                <sc-if value="{{ row.isLeg }}" hint-placeholder-val="{{ true }}"><span style="{{ row.markerStyle }}">{{ row.legIconEl }}</span></sc-if>
+                <sc-if value="{{ row.isChange }}" hint-placeholder-val="{{ true }}"><span style="{{ row.changeMarkerStyle }}">{{ row.changeIconEl }}</span></sc-if>
+              </div>
+            </div>
+            <div style="flex:1;min-width:0;padding-bottom:18px;">
+              <sc-if value="{{ row.isEnd }}" hint-placeholder-val="{{ true }}">
+                <div style="position:relative;">
+                  <div style="display:flex;align-items:flex-start;gap:8px;">
+                    <div style="flex:1;min-width:0;">
+                      <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#AA9F96;">{{ row.tag }}</div>
+                      <div style="font-size:14.5px;font-weight:700;color:#2A211C;line-height:1.3;margin-top:1px;">{{ row.endLabel }}</div>
+                    </div>
+                    <sc-if value="{{ row.hasTh }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ row.onTh }}" style="{{ row.thBtnStyle }}"><svg style="{{ row.thIconStyle }}"><use href="#i-translate"></use></svg></button>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{ row.thOpen }}" hint-placeholder-val="{{ true }}">
+                    <div style="{{ row.thPopStyle }}">
+                      <svg style="width:20px;height:14px;border-radius:3px;flex:0 0 20px;box-shadow:0 0 0 1px rgba(43,33,24,.1);"><use href="#i-flag-th"></use></svg>
+                      <span style="flex:1;min-width:0;font-size:14px;font-weight:700;color:#2A211C;line-height:1.3;">{{ row.th }}</span>
+                      <button onClick="{{ row.onThCopy }}" style="flex:0 0 auto;width:30px;height:30px;border-radius:8px;border:1px solid #E0D8D0;background:#FBFAF8;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg style="width:15px;height:15px;color:#2A211C;"><use href="#i-copy"></use></svg></button>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+              <sc-if value="{{ row.isChange }}" hint-placeholder-val="{{ true }}">
+                <div style="display:inline-flex;align-items:center;min-height:28px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#B8860B;font-weight:700;">{{ row.changeLabel }}</div>
+              </sc-if>
+              <sc-if value="{{ row.isLeg }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ row.onToggle }}" style="display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;padding:3px 0 0;cursor:pointer;font-family:inherit;text-align:left;">
+                  <span style="{{ row.badgeStyle }}"><svg style="width:11px;height:11px;color:#fff;"><use href="#i-route"></use></svg>{{ row.badge }}</span>
+                  <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#8B7F76;white-space:nowrap;">{{ row.legMeta }}</span>
+                  <sc-if value="{{ row.hasToggle }}" hint-placeholder-val="{{ true }}"><svg style="{{ row.chevStyle }}"><use href="#i-chev"></use></svg></sc-if>
+                </button>
+                <div style="{{ row.stopsPanelStyle }}">
+                  <div style="display:flex;flex-direction:column;gap:8px;padding-top:10px;">
+                    <sc-for list="{{ row.stations }}" as="st">
+                      <div style="display:flex;gap:9px;">
+                        <div style="position:relative;width:13px;flex:0 0 13px;">
+                          <span style="{{ st.railStyle }}"></span>
+                          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span style="{{ st.dotStyle }}"></span></div>
+                        </div>
+                        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;min-height:20px;">
+                          <span style="font-size:12.5px;font-weight:600;color:#2A211C;">{{ st.label }}</span>
+                          <sc-if value="{{ st.hasSub }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;color:#AA9F96;white-space:nowrap;">· {{ st.sub }}</span></sc-if>
+                        </div>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ row.hasExit }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+                        <svg style="width:15px;height:15px;color:#FD6318;flex:0 0 15px;"><use href="#i-door"></use></svg>
+                        <span style="font-size:12px;font-weight:700;color:#2A211C;white-space:nowrap;">Get off at</span>
+                        <span style="font-size:11.5px;font-weight:700;color:#2A211C;background:#F2EDE7;border:1px solid #E6DFD7;padding:3px 9px;border-radius:8px;">{{ row.exit }}</span>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <!-- trip meta · time · cost · stops -->
+      <div data-zone="Trip meta" style="display:flex;align-items:center;gap:7px 14px;margin-top:15px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:13.5px;font-weight:600;color:#4B423B;flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-clock"></use></svg>{{ drawerTime }}</span>
+        <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+        <span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-wallet"></use></svg>{{ drawerCost }}</span>
+        <sc-if value="{{ drawerHasStops }}" hint-placeholder-val="{{ true }}">
+          <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+          <span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;"><svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-flag"></use></svg>{{ drawerStops }}</span>
+        </sc-if>
+      </div>
+      <sc-if value="{{ drawerBest }}" hint-placeholder-val="{{ true }}">
+        <div style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:6px 11px;border-radius:999px;background:#FFF1E6;color:#B83E07;font-size:11.5px;font-weight:700;"><svg style="width:13px;height:13px;color:#FD6318;"><use href="#i-check"></use></svg>Recommended option</div>
+      </sc-if>
+
+      <!-- transit route diagram -->
+      <!-- transport legs -->
+      <sc-for list="{{ drawerLegs }}" as="leg">
+        <sc-if value="{{ leg.showHeader }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:9px;margin:18px 0 4px;">
+            <span style="{{ leg.legBadgeStyle }}">{{ leg.legNo }}</span>
+            <span style="font-size:13px;font-weight:700;color:#2A211C;">{{ leg.legLabel }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ leg.hasSteps }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:7px;margin:14px 0 11px;">
+            <svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-route"></use></svg>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;">Step by step</span>
+          </div>
+          <sc-for list="{{ leg.steps }}" as="sp">
+            <div style="display:flex;gap:11px;padding:4px 0;">
+              <span style="width:21px;height:21px;border-radius:7px;background:none;color:#2A211C;border:1.5px solid #2A211C;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 21px;margin-top:1px;">{{ sp.n }}</span>
+              <span style="flex:1;min-width:0;font-size:14px;font-weight:400;line-height:1.55;color:#4B423B;">{{ sp.t }}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ leg.hasFare }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:7px;margin:14px 0 11px;">
+            <svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-coin"></use></svg>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;">How the fare works</span>
+          </div>
+          <sc-for list="{{ leg.fare }}" as="f">
+            <div style="display:flex;gap:11px;align-items:baseline;padding:7px 13px;border:1px solid #ECE7E1;border-radius:11px;background:#fff;margin-bottom:8px;">
+              <span style="font-size:12px;font-weight:700;color:#2A211C;flex:0 0 88px;white-space:nowrap;">{{ f.k }}</span>
+              <span style="flex:1;min-width:0;font-size:13px;font-weight:400;line-height:1.5;color:#4B423B;">{{ f.v }}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{ leg.hasScam }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:7px;margin:14px 0 10px;">
+            <svg style="width:15px;height:15px;color:#2E8B57;"><use href="#i-shield"></use></svg>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;">Don't get overcharged</span>
+          </div>
+          <sc-for list="{{ leg.scam }}" as="sc">
+            <div style="display:flex;gap:9px;padding:4px 0;">
+              <svg style="width:14px;height:14px;color:#2E8B57;flex:0 0 14px;margin-top:3px;"><use href="#i-check"></use></svg>
+              <span style="flex:1;min-width:0;font-size:13.5px;font-weight:400;line-height:1.55;color:#4B423B;">{{ sc }}</span>
+            </div>
+          </sc-for>
+        </sc-if>
+      </sc-for>
+
+      <!-- official network maps -->
+      <sc-if value="{{ drawerHasMaps }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:7px;margin:18px 0 11px;">
+          <svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-map"></use></svg>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;">Official route maps</span>
+        </div>
+        <sc-for list="{{ mapBtns }}" as="mb">
+          <button onClick="{{ mb.onClick }}" style="{{ mb.btnStyle }}">
+            <span style="{{ mb.swatchStyle }}"><svg style="width:14px;height:14px;color:#fff;"><use href="#i-route"></use></svg></span>
+            <span style="flex:1;min-width:0;font-size:13px;font-weight:700;color:#2A211C;text-align:left;">{{ mb.label }}</span>
+            <svg style="width:15px;height:15px;color:#CFC6BD;flex:0 0 15px;"><use href="#i-chev"></use></svg>
+          </button>
+        </sc-for>
+      </sc-if>
+
+      <!-- key note -->
+      <sc-if value="{{ drawerHasNote }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:9px;margin-top:16px;padding:12px 13px;border-radius:12px;background:#FFF8F2;border:1px solid #FFE4D2;">
+          <svg style="width:16px;height:16px;color:#C98A1A;flex:0 0 16px;margin-top:1px;"><use href="#i-bulb"></use></svg>
+          <span style="flex:1;min-width:0;font-size:13px;font-weight:500;line-height:1.55;color:#7A5A22;">{{ drawerNote }}</span>
+        </div>
+      </sc-if>
+
+      <!-- extra tips -->
+      <sc-if value="{{ drawerHasTips }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;align-items:center;gap:7px;margin:18px 0 10px;">
+        <svg style="width:15px;height:15px;color:#C98A1A;"><use href="#i-bulb"></use></svg>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;">Good to know</span>
+      </div>
+      <sc-for list="{{ drawerTips }}" as="tip">
+        <div style="display:flex;gap:10px;padding:5px 0;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#FD6318;margin-top:8px;flex:0 0 6px;"></span>
+          <span style="flex:1;min-width:0;font-size:14px;font-weight:400;line-height:1.6;color:#4B423B;">{{ tip }}</span>
+        </div>
+      </sc-for>
+      </sc-if>
+      <button onClick="{{ onAllTips }}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:18px;padding:13px;border:1.5px solid #E0D8D0;border-radius:14px;background:#fff;color:#2A211C;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;">View all transport tips<svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-arrow"></use></svg></button>
+    </div>
+  </div>
+
+  <!-- GENERAL TIPS MODAL -->
+  <div onClick="{{ onCloseGt }}" style="{{ gtScrimStyle }}"></div>
+  <div ref="{{ gtSheetRef }}" data-sheet="gt" data-zone="Good to know" style="{{ gtSheetStyle }}">
+    <div style="display:flex;justify-content:center;padding:10px 0 2px;"><span style="width:38px;height:4px;border-radius:999px;background:#E0D8D0;"></span></div>
+    <div class="ca-scroll" style="max-height:80vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:8px 22px 26px;">
+      <sc-if value="{{ gtIsSub }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ onGtBack }}" data-subzone="Back" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;color:#8B7F76;padding:2px 0 10px;"><svg style="width:16px;height:16px;color:#8B7F76;flex:0 0 16px;"><use href="#i-back"></use></svg>All topics</button>
+      </sc-if>
+      <div data-zone="Sheet header" style="display:flex;align-items:flex-start;gap:12px;">
+        <span style="width:46px;height:46px;border-radius:13px;background:#2A211C;display:flex;align-items:center;justify-content:center;flex:0 0 46px;">
+          <sc-if value="{{ gtIsIndex }}" hint-placeholder-val="{{ true }}"><svg style="width:23px;height:23px;color:#FD8E1C;"><use href="#i-bulb"></use></svg></sc-if>
+          {{ gtIconEl }}
+        </span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">{{ gtGroup }}</div>
+          <h3 style="font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.18;margin:2px 0 0;color:#2A211C;">{{ gtTitle }}</h3>
+        </div>
+        <button onClick="{{ onCloseGt }}" style="width:34px;height:34px;border-radius:11px;border:1px solid #E0D8D0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 34px;"><svg style="width:18px;height:18px;color:#2A211C;"><use href="#i-close"></use></svg></button>
+      </div>
+      <sc-if value="{{ gtIsIndex }}" hint-placeholder-val="{{ true }}">
+        <div data-zone="Tabs" style="{{ gtTabWrap }}">
+          <sc-for list="{{ gtTabs }}" as="tab">
+            <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
+          </sc-for>
+        </div>
+        <p style="font-size:13px;line-height:1.55;color:#8B7F76;margin:13px 0 14px;">{{ gtTabHint }}</p>
+        <sc-for list="{{ gtIndex }}" as="row">
+          <button onClick="{{ row.onClick }}" style="{{ row.rowStyle }}">
+            <span style="{{ row.iconWrap }}">{{ row.iconEl }}</span>
+            <span style="flex:1;min-width:0;font-size:14px;font-weight:700;color:#2A211C;">{{ row.label }}</span>
+            <svg style="width:16px;height:16px;color:#CFC6BD;flex:0 0 16px;"><use href="#i-chev"></use></svg>
+          </button>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ gtHasTips }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:16px;">
+          <sc-for list="{{ gtTips }}" as="t">
+            <div style="display:flex;gap:11px;padding:5px 0;">
+              <span style="width:6px;height:6px;border-radius:50%;background:#FD6318;margin-top:8px;flex:0 0 6px;"></span>
+              <span style="flex:1;min-width:0;font-size:14.5px;font-weight:400;line-height:1.6;color:#4B423B;">{{ t }}</span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ gtHasNote }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:9px;margin-top:14px;padding:12px 13px;border-radius:12px;background:#FFF8F2;border:1px solid #FFE4D2;">
+              <svg style="width:16px;height:16px;color:#C98A1A;flex:0 0 16px;margin-top:1px;"><use href="#i-bulb"></use></svg>
+              <span style="flex:1;min-width:0;font-size:13px;font-weight:500;line-height:1.55;color:#7A5A22;">{{ gtNote }}</span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- PLACE DETAIL DRAWER -->
+  <div onClick="{{ onClosePd }}" style="{{ pdScrimStyle }}"></div>
+  <div data-sheet="pd" data-zone="Place detail" style="{{ pdSheetStyle }}">
+    <button onClick="{{ onClosePd }}" style="position:absolute;top:13px;right:13px;z-index:6;width:34px;height:34px;border-radius:11px;border:none;background:rgba(251,250,248,.92);cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);box-shadow:0 1px 3px rgba(43,33,24,.18);"><svg style="width:18px;height:18px;color:#2A211C;"><use href="#i-close"></use></svg></button>
+    <div class="ca-scroll" style="max-height:90vh;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;">
+      <div data-zone="Cover photo" style="{{ pdCoverStyle }}">
+        {{ pdIconEl }}
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,0) 40%,rgba(42,33,28,.5) 100%);"></div>
+        <span style="position:absolute;left:16px;bottom:13px;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(251,250,248,.92);font-size:10.5px;font-weight:700;color:#2A211C;backdrop-filter:blur(4px);white-space:nowrap;">{{ pdChipEl }}{{ pdCat }}</span>
+      </div>
+      <div style="padding:18px 22px 26px;">
+        <h3 style="font-size:23px;font-weight:700;letter-spacing:-.02em;line-height:1.16;margin:0;color:#2A211C;">{{ pdName }}</h3>
+
+        <!-- thai search term + copy icon -->
+        <sc-if value="{{ pdHasTh }}" hint-placeholder-val="{{ true }}">
+          <div data-zone="Thai term + copy" style="display:flex;align-items:center;gap:9px;width:100%;margin-top:11px;padding:8px 10px 8px 11px;border:1px solid #ECE7E1;border-radius:11px;background:#fff;">
+            <span style="display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;">
+              <svg style="width:20px;height:14px;border-radius:3px;flex:0 0 20px;box-shadow:0 0 0 1px rgba(43,33,24,.1);"><use href="#i-flag-th"></use></svg>
+              <svg style="width:15px;height:15px;color:#AA9F96;flex:0 0 15px;"><use href="#i-translate"></use></svg>
+            </span>
+            <span style="flex:1;min-width:0;font-size:15.5px;font-weight:700;color:#2A211C;line-height:1.3;">{{ pdTh }}</span>
+            <span style="position:relative;flex:0 0 auto;">
+              <span style="{{ copiedBubbleStyle }}"><svg style="width:11px;height:11px;color:#FD8E1C;"><use href="#i-check"></use></svg>Copied</span>
+              <button onClick="{{ onCopyTh }}" style="width:34px;height:34px;border-radius:9px;border:1px solid #E0D8D0;background:#FBFAF8;cursor:pointer;display:flex;align-items:center;justify-content:center;"><svg style="width:16px;height:16px;color:#2A211C;"><use href="#i-copy"></use></svg></button>
+            </span>
+          </div>
+        </sc-if>
+
+        <!-- meta chips -->
+        <div style="display:flex;align-items:center;gap:7px;margin-top:13px;flex-wrap:wrap;">
+          <sc-if value="{{ pdHasHours }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;background:#F2EDE7;font-size:11.5px;font-weight:600;color:#4B423B;line-height:1;white-space:nowrap;"><span style="display:inline-flex;align-items:center;gap:4px;color:#2E8B57;font-weight:700;"><span style="width:6px;height:6px;border-radius:50%;background:#2E8B57;"></span>Open</span>{{ pdHours }}</span></sc-if>
+          <sc-if value="{{ pdHasPrice }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;background:#F2EDE7;font-size:11.5px;font-weight:700;color:#2A211C;line-height:1;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ pdPrice }}</span></sc-if>
+        </div>
+
+        <!-- map button -->
+        <button data-zone="Show on map" onClick="{{ onPdMap }}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:1.5px solid #2A211C;border-radius:14px;background:#fff;color:#2A211C;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;"><svg style="width:16px;height:16px;color:#FD6318;"><use href="#i-pin"></use></svg>Show on map</button>
+
+        <p style="font-size:14.5px;font-weight:400;line-height:1.7;color:#4B423B;margin:16px 0 0;text-wrap:pretty;">{{ pdDesc }}</p>
+
+        <!-- activities -->
+        <div data-zone="What to do" style="display:flex;align-items:center;gap:7px;margin:18px 0 9px;">
+          <svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-flag"></use></svg>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;">What to do</span>
+        </div>
+        <sc-for list="{{ pdActs }}" as="act" hint-placeholder-count="3">
+          <div style="display:flex;gap:10px;padding:4px 0;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#FD6318;margin-top:8px;flex:0 0 6px;"></span>
+            <span style="flex:1;min-width:0;font-size:14.5px;font-weight:400;line-height:1.55;color:#4B423B;">{{ act }}</span>
+          </div>
+        </sc-for>
+
+        <!-- do / don't -->
+        <div data-zone="Do / Don't" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;">
+          <div style="background:#fff;border:1px solid #E7F1EA;border-radius:14px;padding:13px 14px;">
+            <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#2E8B57;margin-bottom:9px;"><svg style="width:13px;height:13px;color:#2E8B57;"><use href="#i-check"></use></svg>Do</div>
+            <sc-for list="{{ pdDos }}" as="d" hint-placeholder-count="2">
+              <div style="display:flex;gap:7px;padding:3px 0;">
+                <span style="width:4px;height:4px;border-radius:50%;background:#2E8B57;margin-top:8px;flex:0 0 4px;"></span>
+                <span style="flex:1;min-width:0;font-size:12.5px;font-weight:500;line-height:1.5;color:#4B423B;">{{ d }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #F3E0DC;border-radius:14px;padding:13px 14px;">
+            <div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#C0492B;margin-bottom:9px;"><svg style="width:13px;height:13px;color:#C0492B;"><use href="#i-close"></use></svg>Don't</div>
+            <sc-for list="{{ pdDonts }}" as="d" hint-placeholder-count="2">
+              <div style="display:flex;gap:7px;padding:3px 0;">
+                <span style="width:4px;height:4px;border-radius:50%;background:#C0492B;margin-top:8px;flex:0 0 4px;"></span>
+                <span style="flex:1;min-width:0;font-size:12.5px;font-weight:500;line-height:1.5;color:#4B423B;">{{ d }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:520,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { view: 'overview', sel: 0, cp: 0, zoom: 1, carIdx: 0, openDay: 0, drawer: null, pd: null, pdCopied: false, gt: null, toast: '' };
+  carRef = React.createRef();
+  mapRef = React.createRef();
+  mapContainerRef = React.createRef();
+  gtSheetRef = React.createRef();
+
+  fullDate(wd,date){ const p=(date||'').split(' '); return p.length===2 ? (wd+' '+p[1]+' '+p[0]) : (wd+' '+date); }
+  copyTh(text){ try{ navigator.clipboard && navigator.clipboard.writeText(text); }catch(e){} this.setState({pdCopied:true}); clearTimeout(this._c); this._c=setTimeout(()=>this.setState({pdCopied:false}),1600); }
+
+  gmap(){ return {
+    temple:'linear-gradient(135deg,#E6DCCE,#C9A876)', cafe:'linear-gradient(135deg,#EAD9C2,#B98E63)',
+    food:'linear-gradient(135deg,#E9C9A8,#C77F49)', market:'linear-gradient(135deg,#E8C7C0,#B5556B)',
+    bar:'linear-gradient(135deg,#FFC78A,#E5500B)', hotel:'linear-gradient(135deg,#D9CEC2,#8C7A66)',
+    museum:'linear-gradient(135deg,#D8D2C8,#8A8174)', air:'linear-gradient(135deg,#CBD3D8,#6E7A82)',
+    view:'linear-gradient(135deg,#CFE0CE,#6E8C6A)'
+  }; }
+  hoursFor(cat){ const m={Temple:'08:00–18:30',Museum:'10:00–17:00',Cafe:'08:00–19:00',Restaurant:'11:00–22:00',Market:'07:00–18:00',Mall:'10:00–22:00','Rooftop bar':'17:00–01:00','Sky bar':'17:00–01:00',Viewpoint:'04:30–21:00',Attraction:'16:00–24:00',Hotel:'Front desk · 24h',Flight:'Terminal · 24h'}; return m[cat]||null; }
+  gtipPlaces(){ return {
+    Temple:{t:'Temples',icon:'#i-temple',tips:['Cover shoulders & knees — wraps rent at major temples','Remove shoes before entering halls','Lower your voice; ask before photographing monks'],note:'Women shouldn’t touch monks or hand things to them directly.'},
+    Restaurant:{t:'Restaurants & food',icon:'#i-food',tips:['Order a few dishes to share, with rice separately','At street stalls, point at what looks good','Drink bottled water, not tap'],note:'Tipping isn’t expected; rounding up the bill is a kind gesture.'},
+    Cafe:{t:'Cafés & desserts',icon:'#i-coffee',tips:['Popular spots fill up — go off-peak for a seat','Many close by 19:00','Carry cash for small cafés']},
+    Market:{t:'Markets',icon:'#i-market',tips:['Carry small notes; most stalls are cash-only','Bargain politely with a smile, then commit','Go early to beat the heat & crowds'],note:'A fair counter-offer is about 10–20% off the first price.'},
+    Mall:{t:'Malls',icon:'#i-market',tips:['Use the river shuttle boat','Keep receipts for a VAT refund','Allow time — they’re huge']},
+    Museum:{t:'Museums & galleries',icon:'#i-museum',tips:['Buy tickets at the entrance; check last entry','Use lockers for big bags','No flash; some rooms ban photos']},
+    'Rooftop bar':{t:'Rooftop & sky bars',icon:'#i-bar',tips:['Smart-casual: no shorts or sandals','Arrive before sunset for a seat','Drinks are pricey — it’s for the view']},
+    'Sky bar':{t:'Rooftop & sky bars',icon:'#i-bar',tips:['Smart dress code applies','Book a table near the edge','Arrive early for the skyline']},
+    Hotel:{t:'Hotels & stays',icon:'#i-bed',tips:['Check-in ~14:00, check-out ~12:00 — store bags otherwise','Keep your passport for check-in','Ask about the free shuttle boat'],note:'A small deposit may be held at check-in and refunded when you leave.'},
+    Viewpoint:{t:'Parks & viewpoints',icon:'#i-camera',tips:['Best light & cooler air late afternoon','Bring water and mosquito spray at dusk','Most are free — mind posted hours']},
+    Attraction:{t:'Riverfront & attractions',icon:'#i-camera',tips:['Come at dusk for the lights','Keep your ticket handy','Compare stall prices before buying']},
+    Flight:{t:'Airport & flights',icon:'#i-plane',tips:['Arrive at least 3 hours early','Keep documents accessible','No liquids in carry-on']}
+  }; }
+  gtipModes(){ return {
+    'BTS / MRT':{t:'BTS & MRT trains',icon:'#i-train',tips:['Buy a token or tap a stored-value card at the gate','Separate fares — tap out and buy again when you switch lines','Runs ~06:00–24:00, every few minutes','No eating or drinking onboard']},
+    'Airport Rail':{t:'Airport Rail Link',icon:'#i-train',tips:['City Line: Suvarnabhumi ↔ Phaya Thai in ~26 min','Tap a credit card or buy a token at level B','Transfer to BTS at Phaya Thai, MRT at Makkasan']},
+    'Grab / taxi':{t:'Grab & taxis',icon:'#i-bus',tips:['Grab shows a fixed fare up front — easiest for visitors','Metered taxi: insist on the meter (flag-fall ฿35)','Refuse flat ฿300+ quotes; flag a moving taxi','Keep small notes for change']},
+    'River boat':{t:'River boats',icon:'#i-boat',tips:['Orange flag = fast express, no flag = all stops, blue = tourist','Buy at the pier booth or pay onboard','Cross-river ferries are ฿4–5 and frequent']},
+    'Walk':{t:'On foot',icon:'#i-walk',tips:['Footpaths can be uneven — wear flat shoes','Cross at lights or skybridges','Carry water in the midday heat']},
+    'Day-trip van':{t:'Day-trip van',icon:'#i-bus',tips:['Meet the driver at the agreed time','Driver waits at the market exit','Nap on the long stretches']}
+  }; }
+  gtipResolve(key){ const p=this.gtipPlaces(), m=this.gtipModes(); if(p[key]) return {...p[key],group:'Place'}; if(m[key]) return {...m[key],group:'Getting around'}; for(const k in m){ if(key&&key.indexOf(k.split(' ')[0])>=0) return {...m[k],group:'Getting around'}; } return null; }
+  thumbFor(cat){ const g=this.gmap(); const m={Temple:g.temple,Museum:g.museum,Cafe:g.cafe,Restaurant:g.food,Market:g.market,Mall:g.market,'Rooftop bar':g.bar,'Sky bar':g.bar,Viewpoint:g.view,Attraction:g.view,Hotel:g.hotel,Flight:g.air}; return m[cat]||g.view; }
+  imgKw(name,cat){ const kw={
+    'Suvarnabhumi Airport':'airport,terminal','Riva Surya Bangkok':'bangkok,river,hotel','Err Urban Rustic Thai':'thai,food,restaurant',
+    'Grand Palace':'bangkok,grand,palace','Tha Maharaj Riverside':'bangkok,river,restaurant','Jim Thompson House':'teak,house,garden',
+    'Wat Pho':'wat,pho,temple','The Deck by Arun':'wat,arun,river','Supanniga Eating Room':'thai,food,curry','Pak Khlong Talat':'flower,market,bangkok',"Eagle's Nest Bar":'rooftop,bar,sunset',
+    'Chatuchak Weekend Market':'chatuchak,market','After You Dessert Cafe':'dessert,cafe','Lumphini Park':'lumphini,park,bangkok',
+    'MOCA Bangkok':'museum,art,gallery','Or Tor Kor Market':'thai,market,fruit','Sirocco Sky Bar':'skybar,bangkok,night',
+    'Damnoen Saduak':'floating,market,thailand','Maeklong Railway Market':'railway,market,thailand','Asiatique The Riverfront':'ferris,wheel,river,night',
+    'ICONSIAM':'bangkok,mall,river','Riva Surya · Checkout':'bangkok,river,hotel','Suvarnabhumi · Departure':'airport,airplane'
+  }; const fb={Temple:'temple,thailand',Museum:'museum,art',Cafe:'cafe,coffee',Restaurant:'thai,food',Market:'market,thailand',Mall:'mall,shopping','Rooftop bar':'rooftop,bar','Sky bar':'skybar,night',Viewpoint:'park,bangkok',Attraction:'bangkok,river',Hotel:'hotel,room',Flight:'airport,airplane'}; return kw[name]||fb[cat]||'bangkok,thailand'; }
+  imgUrl(name,cat){ let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%99991; return 'url("https://loremflickr.com/640/440/'+this.imgKw(name,cat)+'?lock='+h+'")'; }
+  cover(name,cat){ return this.imgUrl(name,cat)+', url("https://picsum.photos/seed/ca-'+encodeURIComponent(name)+'/640/440"), '+this.thumbFor(cat); }
+  icoEl(href,style){ return href?React.createElement('svg',{style},React.createElement('use',{href})):null; }
+  moveKind(mode){ if(/Walk/i.test(mode)) return 'walk'; if(/boat/i.test(mode)) return 'boat'; if(/Rail|BTS|MRT/i.test(mode)) return 'rail'; return 'road'; }
+  railMaps(mode){
+    const m=[];
+    if(/Airport/i.test(mode)){ m.push({type:'ARL',label:'Airport Rail Link map',color:'#D1232A'}); m.push({type:'BTS',label:'BTS Skytrain map',color:'#3AA935'}); }
+    else { if(/BTS/i.test(mode)) m.push({type:'BTS',label:'BTS Skytrain map',color:'#3AA935'}); if(/MRT/i.test(mode)) m.push({type:'MRT',label:'MRT Metro map',color:'#2A6FB0'}); if(!m.length) m.push({type:'BTS',label:'BTS Skytrain map',color:'#3AA935'}); }
+    return m;
+  }
+  legInfo(mode, from, to){
+    mode=mode||''; from=from||''; to=to||'';
+    const kind=this.moveKind(mode), icon=(kind==='walk'?'#i-walk':kind==='boat'?'#i-boat':kind==='rail'?'#i-train':'#i-bus');
+    if(kind==='rail'){
+      const air=/Airport/i.test(mode);
+      const both=/BTS/i.test(mode)&&/MRT/i.test(mode);
+      const color = air?'#D1232A':(/MRT/i.test(mode)&&!/BTS/i.test(mode)?'#2A6FB0':'#3AA935');
+      const lineName = air?'Airport Rail Link · City Line':(both?'BTS Sukhumvit → MRT Blue':mode);
+      let stations, steps, exit;
+      if(air){
+        stations=[{label:'Suvarnabhumi',sub:'Level B',type:'board'},{label:'Lat Krabang',type:'mid'},{label:'Makkasan',sub:'MRT link',type:'transfer'},{label:'Phaya Thai',sub:'→ BTS',type:'alight'}];
+        steps=['Tap a credit card or buy a token at the gate','Board the City Line on Platform 1 (Level B)','Ride ~26 min toward Phaya Thai','Transfer to BTS at Phaya Thai (~3 min walk)','Leave via Exit 2 for the riverside'];
+        exit='Exit 2 · riverside';
+      } else {
+        const b=from||'Board', a=to||'Alight';
+        stations = both
+          ? [{label:b,sub:'board',type:'board'},{label:'Interchange',sub:'change line',type:'transfer'},{label:a,sub:'alight',type:'alight'}]
+          : [{label:b,sub:'board',type:'board'},{label:'—',type:'mid'},{label:a,sub:'alight',type:'alight'}];
+        steps = both
+          ? ['Tap into the BTS gate at '+b,'Ride to the interchange station','Walk the link bridge to the MRT — tap in again','Alight at '+a+' and take the marked exit']
+          : ['Tap your stored-value card at the '+b+' gate','Board toward '+a,'Alight at '+a,'Take the marked exit to street level'];
+        exit='Marked exit · street level';
+      }
+      return {kind:'rail', mode, icon, lineName, lineColor:color, stations, steps, exit, maps:this.railMaps(mode),
+        note:'Operators are separate — tap out and buy/tap in again at each BTS ↔ MRT ↔ Airport Rail change.'};
+    }
+    if(kind==='boat'){
+      return {kind:'boat', mode, icon, lineName:'Chao Phraya Express · Orange flag', lineColor:'#E0822A',
+        stations:[{label:'Board',sub:(from.split(' ')[0]||'pier'),type:'board'},{label:'Express',sub:'skips minor',type:'mid'},{label:'Alight',sub:(to.split(' ')[0]||'pier'),type:'alight'}],
+        steps:['Buy a ticket at the pier booth or pay onboard','Take the ORANGE-flag boat (express)','Step on quickly — the boat barely stops','Listen for your pier; alight on the left'],
+        exit:'Pier ramp · follow the riverwalk', maps:[], note:'Flag colour = service: orange express, no-flag all-stops, blue tourist (pricier). Take orange.'};
+    }
+    if(kind==='walk'){
+      return {kind:'walk', mode, icon, maps:[], steps:['Head out along the lane toward '+(to||'the next stop'),'Follow the signposts','Flat and well lit most of the way'], note:'Short, easy walk — flat shoes are plenty.'};
+    }
+    const grab=/Grab/i.test(mode), van=/van/i.test(mode);
+    return {kind:'road', mode, icon, maps:[],
+      fare: van?[{k:'Included',v:'Covered by the day-trip package — no extra fare'}]:[{k:'Grab app',v:'Fixed price shown before you book — no haggling'},{k:'Metered taxi',v:'Flag-fall ฿35, then ≈ ฿6.5 / km + slow-traffic time'}],
+      scam: van?['Confirm the pickup time and meeting point with your driver','Keep small notes for snacks & toilets en route']
+        :['Insist on the meter — say “meter, please”','Skip anyone quoting a flat ฿300+ fare','Keep small notes (฿20/50/100) ready','Screenshot your Grab route & price first','Flag a moving taxi, not one parked at malls/hotels'],
+      note: grab?'Grab locks the fare up front, so traffic delays are the driver’s problem — usually safest for visitors.':'A running meter is your protection; politely refuse any “no meter” offer.'};
+  }
+  transitInfo(dr){
+    if(!dr) return null;
+    const specs = (dr.legs&&dr.legs.length)?dr.legs:[{mode:dr.mode,from:dr.from,to:dr.to}];
+    const legs = specs.map((sp,i)=> this.legInfo(sp.mode, sp.from||(i===0?dr.from:''), sp.to||(i===specs.length-1?dr.to:'')));
+    const maps=[]; legs.forEach(l=>(l.maps||[]).forEach(m=>{ if(!maps.some(x=>x.type===m.type)) maps.push(m); }));
+    const isCombo=legs.length>1;
+    const note = isCombo ? 'This is a multi-leg trip — buy a separate ticket for each operator (no single through-fare across BTS, MRT, boat & taxi).' : ((legs[0]&&legs[0].note)||'');
+    return {legs, maps, isCombo, note};
+  }
+  placeTh(name){ const m={
+    'Suvarnabhumi Airport':'สนามบินสุวรรณภูมิ','Riva Surya Bangkok':'โรงแรมริว่า สุริยา กรุงเทพ','Err Urban Rustic Thai':'ร้านเอิร์ธ',
+    'Grand Palace':'พระบรมมหาราชวัง','Tha Maharaj Riverside':'ท่ามหาราช','Jim Thompson House':'บ้านจิม ทอมป์สัน',
+    'Wat Pho':'วัดโพธิ์ (วัดพระเชตุพนฯ)','The Deck by Arun':'เดอะ เด็ค บาย อรุณ','Supanniga Eating Room':'สุพรรณิการ์ อีทติ้ง รูม','Pak Khlong Talat':'ปากคลองตลาด',"Eagle's Nest Bar":'อีเกิลส เนสต์ บาร์',
+    'Chatuchak Weekend Market':'ตลาดนัดจตุจักร','After You Dessert Cafe':'อาฟเตอร์ ยู','Lumphini Park':'สวนลุมพินี',
+    'MOCA Bangkok':'พิพิธภัณฑ์ศิลปะไทยร่วมสมัย (โมก้า)','Or Tor Kor Market':'ตลาด อ.ต.ก.','Sirocco Sky Bar':'ซิรอคโค สกาย บาร์',
+    'Damnoen Saduak':'ตลาดน้ำดำเนินสะดวก','Maeklong Railway Market':'ตลาดร่มหุบ แม่กลอง','Asiatique The Riverfront':'เอเชียทีค เดอะ ริเวอร์ฟร้อนท์',
+    'ICONSIAM':'ไอคอนสยาม','Riva Surya · Checkout':'โรงแรมริว่า สุริยา','Suvarnabhumi · Departure':'สนามบินสุวรรณภูมิ'
+  }; return m[name]||''; }
+  placeContent(name,cat){
+    const byCat={
+      Temple:{acts:['Walk the main halls and chapels','See the principal Buddha image','Make merit with incense & gold leaf'],dos:['Cover shoulders and knees','Remove shoes before entering halls','Keep your voice low'],donts:['Don\u2019t point your feet at Buddha images','Don\u2019t touch monks or sacred art','Don\u2019t climb on statues']},
+      Museum:{acts:['Follow the gallery route','Join a guided tour if timed right','Photograph permitted exhibits'],dos:['Buy tickets at the entrance','Check the last-entry time','Use lockers for big bags'],donts:['Don\u2019t use flash','Don\u2019t touch the artworks','Don\u2019t bring food inside']},
+      Cafe:{acts:['Grab a seat with the view','Order signature coffee & cake','Take photos from the top floor'],dos:['Come off-peak for a window seat','Try the house specialty'],donts:['Don\u2019t expect fast service when busy','Don\u2019t save seats for long']},
+      Restaurant:{acts:['Order the signature dishes','Share plates family-style'],dos:['Reserve ahead for dinner','Ask staff for spice level'],donts:['Don\u2019t over-order — portions are generous','Don\u2019t skip the regional specials']},
+      Market:{acts:['Wander the lanes & stalls','Sample street food','Hunt for local finds'],dos:['Carry small cash','Bargain politely with a smile','Go earlier to beat the heat'],donts:['Don\u2019t flash valuables','Don\u2019t block narrow aisles','Don\u2019t expect card payment everywhere']},
+      Mall:{acts:['Browse Thai craft & design floors','Grab riverside photos','Pick up gifts to take home'],dos:['Use the river shuttle boat','Keep your receipt for VAT refund'],donts:['Don\u2019t rush — it\u2019s huge','Don\u2019t miss the riverfront deck']},
+      'Rooftop bar':{acts:['Catch the sunset over the river','Order a signature cocktail','Find the rail-side view'],dos:['Arrive before sunset for a seat','Smart-casual dress'],donts:['Don\u2019t wear shorts or sandals','Don\u2019t be late for golden hour']},
+      'Sky bar':{acts:['Take in the skyline view','Toast with a signature drink'],dos:['Follow the smart dress code','Reserve a table near the edge'],donts:['Don\u2019t wear shorts or flip-flops','Don\u2019t bring large bags']},
+      Viewpoint:{acts:['Stroll the grounds','Rent a paddle boat','Relax at golden hour'],dos:['Bring water','Go late afternoon for cool air'],donts:['Don\u2019t litter','Don\u2019t feed the monitor lizards']},
+      Attraction:{acts:['Walk the riverfront','Shop and dine','Ride the Ferris wheel'],dos:['Come at dusk for lights','Keep your ticket handy'],donts:['Don\u2019t miss the last boat','Don\u2019t overpay — compare stalls']},
+      Hotel:{acts:['Check in / out at the desk','Store luggage if needed'],dos:['Keep your passport handy','Ask about the shuttle boat'],donts:['Don\u2019t lose your key card','Don\u2019t forget the deposit refund']},
+      Flight:{acts:['Check in & clear security','Head to the rail link / gate'],dos:['Arrive 3 hours early','Keep documents accessible'],donts:['Don\u2019t pack liquids in carry-on','Don\u2019t cut the buffer time short']}
+    };
+    const over={
+      'Damnoen Saduak':{acts:['Ride a longtail through the market','Buy snacks from boat vendors','Photograph the canal life'],dos:['Go early before the crowds','Agree the boat price first'],donts:['Don\u2019t overpay for the boat','Don\u2019t lean out too far']},
+      'Maeklong Railway Market':{acts:['Watch the awnings fold for the train','Browse the trackside stalls'],dos:['Check the train timetable','Stand well clear of the tracks'],donts:['Don\u2019t stand on the rails','Don\u2019t block the train\u2019s path']},
+      'Pak Khlong Talat':{acts:['Wander the flower stalls','Photograph the garland makers'],dos:['Visit late afternoon for color','Carry small cash'],donts:['Don\u2019t block the loading carts','Don\u2019t touch the arranged flowers']}
+    };
+    const base=over[name]||byCat[cat]||{acts:['Explore at your own pace'],dos:['Plan your timing'],donts:['Don\u2019t rush']};
+    return base;
+  }
+  highlights(){ const g=this.gmap(); return [
+    {name:'Riva Surya · Your base',day:'Stay',g:g.hotel,icon:'#i-bed',cat:'Hotel'},
+    {name:'Grand Palace',day:'Day 2',g:g.temple,icon:'#i-temple',cat:'Temple'},
+    {name:'Wat Pho',day:'Day 3',g:g.temple,icon:'#i-temple',cat:'Temple'},
+    {name:'Wat Arun View',day:'Day 3',g:g.cafe,icon:'#i-coffee',cat:'Cafe'},
+    {name:"Eagle's Nest Bar",day:'Day 3',g:g.bar,icon:'#i-bar',cat:'Rooftop bar'},
+    {name:'Chatuchak Market',day:'Day 4',g:g.market,icon:'#i-market',cat:'Market'},
+    {name:'MOCA Bangkok',day:'Day 5',g:g.museum,icon:'#i-museum',cat:'Museum'},
+    {name:'Damnoen Saduak',day:'Day 6',g:g.market,icon:'#i-boat',cat:'Market'},
+    {name:'ICONSIAM',day:'Day 7',g:g.market,icon:'#i-market',cat:'Mall'}
+  ]; }
+  buildHeader(){ if(this._hdr) return this._hdr; const pal=['#FD6318','#FD8E1C','#FFA86F','#FFC890','#E5500B','#FFB892']; const R=(a,b)=>a+Math.random()*(b-a); const ch=[]; for(let i=0;i<18;i++){ const f=pal[Math.floor(Math.random()*pal.length)]; const o=R(0.08,0.30); const t=Math.random(); if(t<0.5){ const cx=R(-5,105),cy=R(-8,82),s=R(9,30),rot=R(0,360); ch.push(React.createElement('polygon',{key:i,points:cx+','+(cy-s)+' '+(cx-s*0.92)+','+(cy+s*0.72)+' '+(cx+s*0.92)+','+(cy+s*0.72),fill:f,opacity:o,transform:'rotate('+rot+' '+cx+' '+cy+')'})); } else if(t<0.8){ ch.push(React.createElement('circle',{key:i,cx:R(0,100),cy:R(-8,74),r:R(5,19),fill:f,opacity:o})); } else { const x=R(-6,96),y=R(-8,72),w=R(12,34),h=R(8,20),rot=R(0,360); ch.push(React.createElement('rect',{key:i,x:x,y:y,width:w,height:h,rx:3,fill:f,opacity:o,transform:'rotate('+rot+' '+(x+w/2)+' '+(y+h/2)+')'})); } } this._hdr=React.createElement('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'xMidYMid slice',style:{position:'absolute',inset:0,width:'100%',height:'100%'}},ch); return this._hdr; }
+
+  tripDays() {
+    const T='#i-temple',CF='#i-coffee',FO='#i-food',MK='#i-market',CA='#i-camera',BR='#i-bar',BD='#i-bed',MU='#i-museum',PL='#i-plane',WK='#i-walk',TR='#i-train',BO='#i-boat',BU='#i-bus';
+    const opt=(mode,icon,time,cost,tips)=>({mode,icon,time,cost,tips});
+    const walk=(m,tips)=>opt('Walk',WK,m+' min','Free',tips);
+    const grab=(m,c,tips)=>opt('Grab / taxi',BU,m+' min','฿'+c,tips);
+    const boat=(m,c,tips)=>opt('River boat',BO,m+' min','฿'+c,tips);
+    const bts=(m,c,tips)=>opt('BTS / MRT',TR,m+' min','฿'+c,tips);
+    const rail=(m,c,tips)=>opt('Airport Rail',TR,m+' min','฿'+c,tips);
+    const van=(m,tips)=>opt('Day-trip van',BU,m+' min','Included',tips);
+    const combo=(mode,time,cost,legs,tips)=>({mode,icon:TR,time:time+' min',cost:(typeof cost==='number'?'฿'+cost:cost),legs,tips});
+    return [
+      { wd:'Tue', date:'Feb 10', title:'Arrival & Riverside Welcome',
+        summary:'Land, settle into the riverside hotel, and an easy first dinner.',
+        intro:'A gentle start. Land in the early afternoon, ride into the city, check into a Chao Phraya riverside hotel, then ease in with a rustic Thai dinner in the old town.',
+        sum:{h:'5 hrs',w:'0.3 km',b:'฿3,720'}, stops:[
+        { t:'14:00', dur:'Arrival', cat:'Flight', icon:PL, name:'Suvarnabhumi Airport', desc:'Land, clear immigration and collect bags. The Airport Rail Link from the basement is the smoothest way into town.', rating:'', price:'', status:null, move:[ rail(26,'45',['Runs every 10–15 min from level B','No traffic — the fastest way into the city','Transfer to BTS at Phaya Thai']), grab(45,'400',['Door to door but slow in rush hour','Use the Grab app for a fixed fare']) ] },
+        { t:'16:00', dur:'Check-in', cat:'Hotel', icon:BD, name:'Riva Surya Bangkok', desc:'Check into a river-view room and unwind. Watch the express boats go by before heading out for dinner.', rating:'4.6', price:'฿3,200', status:'confirmed', move:[ walk(5,['Quiet lane along the river','Well lit in the evening']), grab(8,'60',['Handy if it rains']) ] },
+        { t:'19:00', dur:'1.5 hrs', cat:'Restaurant', icon:FO, name:'Err Urban Rustic Thai', desc:'A beloved old-town spot near Tha Tien. The crispy pork and chili dips are the move. Table is booked.', rating:'4.6', price:'฿520', status:'booked', move:null }
+      ]},
+      { wd:'Wed', date:'Feb 11', title:'Old Town & Royal Bangkok',
+        summary:'The royal old town, a riverside lunch, and Thai silk history.',
+        intro:'Open the day at the Grand Palace, wander the river wall north for lunch, then close the afternoon in the teak calm of the Jim Thompson House.',
+        sum:{h:'6 hrs',w:'1.1 km',b:'฿1,080'}, stops:[
+        { t:'09:00', dur:'2 hrs', cat:'Temple', icon:T, name:'Grand Palace', desc:'The Emerald Buddha and Thai royal architecture. Dress modestly — shoulders and knees covered (wraps for rent at the gate).', rating:'4.7', price:'฿500', status:'confirmed', move:[ walk(10,['Follow the river wall north','Street vendors the whole way']), grab(7,'60',['Short hop, light traffic here']) ] },
+        { t:'12:00', dur:'1.5 hrs', cat:'Restaurant', icon:FO, name:'Tha Maharaj Riverside', desc:'An airy riverside complex with several restaurants — pick a table by the water for the breeze.', rating:'4.4', price:'฿380', status:'booked', move:[ boat(8,'16',['Chao Phraya Express from Tha Maharaj','Orange-flag line is fastest','Pay onboard']), grab(20,'120',['Slower in midday traffic']) ] },
+        { t:'15:00', dur:'1.5 hrs', cat:'Museum', icon:MU, name:'Jim Thompson House', desc:'A cluster of teak houses and a Thai silk collection. Guided tours run on a loop — last entry is mid-afternoon.', rating:'4.6', price:'฿200', status:null, move:null }
+      ]},
+      { wd:'Thu', date:'Feb 12', title:'Riverside Temples & Sunset',
+        summary:'Temples, a river cafe, classic Thai food, and a rooftop sunset.',
+        intro:'The highlight day. Start early at Wat Pho, cross the river for coffee with a Wat Arun view, a classic Thai lunch, the flower market, then a rooftop sunset over the river.',
+        sum:{h:'10 hrs',w:'1.2 km',b:'฿1,480'}, stops:[
+        { t:'08:30', dur:'2 hrs', cat:'Temple', icon:T, name:'Wat Pho', desc:'The giant Reclining Buddha and the home of traditional Thai massage. Come early to beat the crowds and the heat.', rating:'4.8', price:'฿200', status:'confirmed', move:[ walk(8,['Walk to the pier — the cafe is riverside','Shady in the morning']), boat(5,'16',['Cross-river ferry to the Wat Arun side']) ] },
+        { t:'10:30', dur:'1 hr', cat:'Cafe', icon:CF, name:'The Deck by Arun', desc:'Coffee with a full-frontal Wat Arun view across the water. The top floor has the best photo angle.', rating:'4.5', price:'฿180', status:null, move:[ boat(5,'16',['Cross-river ferry back to Tha Tien','Runs every few minutes']), walk(15,['Longer loop via the bridge']) ] },
+        { t:'12:30', dur:'1.5 hrs', cat:'Restaurant', icon:FO, name:'Supanniga Eating Room', desc:'Bold heirloom recipes from Trat — the moo chamuang and crab omelette are essential. Table is booked.', rating:'4.7', price:'฿650', status:'booked', move:[ walk(6,['Straight down the riverside road']), grab(8,'60',['Cooler option at midday']) ] },
+        { t:'15:00', dur:'1.5 hrs', cat:'Market', icon:MK, name:'Pak Khlong Talat', desc:'Bangkok\u2019s largest fresh-flower market — a riot of color, lovely to wander and photograph.', rating:'4.4', price:'Free', status:null, move:[ grab(18,'90',['Book a Grab to beat the 4–7pm jam','Aim to arrive before 6pm for sunset']), boat(20,'30',['Scenic but slower']) ] },
+        { t:'18:30', dur:'2 hrs', cat:'Rooftop bar', icon:BR, name:"Eagle's Nest Bar", desc:'Close the day on a rooftop with the sun setting behind Wat Arun. Arrive before 18:00 for a rail seat.', rating:'4.6', price:'฿450', status:'pending', move:null }
+      ]},
+      { wd:'Fri', date:'Feb 13', title:'Markets & Green Spaces',
+        summary:'The legendary weekend market and a green afternoon downtown.',
+        intro:'A relaxed pace through Chatuchak\u2019s endless stalls, a famous dessert stop, then unwind in the city\u2019s central park as the afternoon cools.',
+        sum:{h:'7 hrs',w:'0.9 km',b:'฿250'}, stops:[
+        { t:'09:30', dur:'3 hrs', cat:'Market', icon:MK, name:'Chatuchak Weekend Market', desc:'The vast weekend market — everything from street food to homeware. Wear comfortable shoes and pace yourself.', rating:'4.5', price:'Free', status:null, move:[ walk(4,['Inside the market zone','Head for the Section 2 exit']), grab(7,'60',[]) ] },
+        { t:'13:00', dur:'1 hr', cat:'Cafe', icon:CF, name:'After You Dessert Cafe', desc:'A dessert break — the Shibuya toast and shaved ice that made the chain famous.', rating:'4.5', price:'฿250', status:null, move:[ combo('BTS + MRT',22,88,[{mode:'BTS',from:'Mo Chit',to:'Asok'},{mode:'MRT',from:'Sukhumvit',to:'Si Lom'}],['BTS Sukhumvit Line from Mo Chit to Asok','Walk the link bridge to MRT Sukhumvit','MRT Blue Line down to Si Lom — buy a separate MRT token']), bts(20,'59',['MRT from Chatuchak Park to Si Lom','Then a 5-min walk to the park']), grab(25,'150',['Slower in the afternoon']) ] },
+        { t:'16:00', dur:'1.5 hrs', cat:'Viewpoint', icon:CA, name:'Lumphini Park', desc:'Stroll or paddle a swan boat in the city\u2019s green heart. The light is lovely in the late afternoon.', rating:'4.6', price:'Free', status:null, move:null }
+      ]},
+      { wd:'Sat', date:'Feb 14', title:'Art & Skyline',
+        summary:'Contemporary art, a gourmet market lunch, and a sky bar.',
+        intro:'A day for art and good eating — five floors of Thai contemporary art, a gourmet market lunch, then a legendary sky bar over the river at night.',
+        sum:{h:'9 hrs',w:'0.7 km',b:'฿1,180'}, stops:[
+        { t:'10:00', dur:'2.5 hrs', cat:'Museum', icon:MU, name:'MOCA Bangkok', desc:'Five floors of Thai contemporary art in a light-filled building — a favorite for art lovers and photographers.', rating:'4.7', price:'฿280', status:null, move:[ combo('MRT + Grab',38,210,[{mode:'MRT',from:'Si Lom',to:'Phahon Yothin'},{mode:'Grab / taxi',from:'MRT exit',to:'MOCA'}],['Ride the MRT Blue Line to Phahon Yothin, then Grab the last leg','Cheaper than Grab all the way, faster than the bus','Tap out of the MRT before booking the Grab']), grab(25,'150',['Book a Grab — MOCA is far from transit','Allow a buffer for traffic']), bts(35,'59',['Bus + MRT combo, the budget option']) ] },
+        { t:'13:30', dur:'1.5 hrs', cat:'Restaurant', icon:FO, name:'Or Tor Kor Market', desc:'A premium fresh market — a feast of curries, grills, sweets and famously good fruit.', rating:'4.6', price:'฿300', status:null, move:[ walk(6,['Walk to the MRT, then ride down']), grab(30,'200',['Long ride across town in evening traffic','Dress code: smart, no shorts']) ] },
+        { t:'19:00', dur:'2 hrs', cat:'Sky bar', icon:BR, name:'Sirocco Sky Bar', desc:'A legendary open-air sky bar high above the Chao Phraya. There is a smart dress code.', rating:'4.5', price:'฿600', status:'pending', move:null }
+      ]},
+      { wd:'Sun', date:'Feb 15', title:'Floating Markets Day Trip',
+        summary:'A full day trip to the floating and railway markets.',
+        intro:'Out of the city for the day. An early start to the floating market, the famous umbrella-pulldown railway market, then back along the river for a relaxed evening at Asiatique.',
+        sum:{h:'11 hrs',w:'1.4 km',b:'฿700'}, stops:[
+        { t:'08:00', dur:'2 hrs', cat:'Market', icon:MK, name:'Damnoen Saduak', desc:'The classic floating market — ride a longtail past vendors selling from their boats. Earlier is calmer.', rating:'4.4', price:'฿700', status:'confirmed', move:[ van(40,['Included in the day-trip van','Driver waits at the market exit']), grab(45,'500',['Only if travelling independently']) ] },
+        { t:'13:00', dur:'1 hr', cat:'Market', icon:MK, name:'Maeklong Railway Market', desc:'A market built across live train tracks — watch the awnings fold away as the train rolls through. Check the train schedule.', rating:'4.3', price:'Free', status:null, move:[ van(90,['The long ride back to the city — nap on the way']), grab(100,'1200',['Expensive solo']) ] },
+        { t:'18:00', dur:'2 hrs', cat:'Attraction', icon:CA, name:'Asiatique The Riverfront', desc:'A riverside night market — shop, eat, and ride the Ferris wheel for a skyline view.', rating:'4.4', price:'Free', status:null, move:null }
+      ]},
+      { wd:'Mon', date:'Feb 16', title:'Last Bites & Farewell',
+        summary:'Last souvenirs by the river, then check out and fly home.',
+        intro:'A calm final morning. Pick up gifts at ICONSIAM, check out, and make for the airport with plenty of buffer.',
+        sum:{h:'5 hrs',w:'0.5 km',b:'—'}, stops:[
+        { t:'10:00', dur:'2 hrs', cat:'Mall', icon:MK, name:'ICONSIAM', desc:'A riverside mall — the SOOKSIAM floor gathers the best of regional Thai crafts and snacks for gifts.', rating:'4.7', price:'Shopping', status:null, move:[ walk(8,['Riverside walkway back to Riva Surya']), boat(6,'16',['Free ICONSIAM shuttle boat to Si Phraya']) ] },
+        { t:'13:00', dur:'Checkout', cat:'Hotel', icon:BD, name:'Riva Surya · Checkout', desc:'Pack up and check out. The lobby can hold bags if your flight is later in the day.', rating:'', price:'', status:null, move:[ rail(30,'45',['Taxi to Phaya Thai, then Airport Rail','Allow 3 hours before the flight']), grab(45,'400',['Door to door, mind the rush hour']) ] },
+        { t:'15:30', dur:'Departure', cat:'Flight', icon:PL, name:'Suvarnabhumi · Departure', desc:'Arrive at least three hours before departure for check-in and security.', rating:'', price:'', status:null, move:null }
+      ]}
+    ];
+  }
+
+  // Real coordinates [lng, lat] for every place in the plan. Admin-entered; the
+  // map only stores locations for stops that appear in the itinerary.
+  geo(){ return {
+    'Suvarnabhumi Airport':[100.7470,13.6900], 'Riva Surya Bangkok':[100.4955,13.7596], 'Err Urban Rustic Thai':[100.4915,13.7436],
+    'Grand Palace':[100.4914,13.7500], 'Tha Maharaj Riverside':[100.4903,13.7565], 'Jim Thompson House':[100.5285,13.7492],
+    'Wat Pho':[100.4931,13.7465], 'The Deck by Arun':[100.4889,13.7436], 'Supanniga Eating Room':[100.4906,13.7431], 'Pak Khlong Talat':[100.4972,13.7407], "Eagle's Nest Bar":[100.4894,13.7438],
+    'Chatuchak Weekend Market':[100.5505,13.7999], 'After You Dessert Cafe':[100.5520,13.7995], 'Lumphini Park':[100.5417,13.7305],
+    'MOCA Bangkok':[100.5530,13.8470], 'Or Tor Kor Market':[100.5497,13.8044], 'Sirocco Sky Bar':[100.5163,13.7220],
+    'Damnoen Saduak':[99.9550,13.5210], 'Maeklong Railway Market':[99.9990,13.4072], 'Asiatique The Riverfront':[100.5030,13.7045],
+    'ICONSIAM':[100.5100,13.7265], 'Riva Surya · Checkout':[100.4955,13.7596], 'Suvarnabhumi · Departure':[100.7470,13.6900]
+  }; }
+
+  // Coordinates for the stops of a given day, in order: [{name,time,ll}]
+  dayGeo(day){ const G=this.geo(); return day.stops.map(s=>({name:s.name,time:s.t,ll:G[s.name]})).filter(p=>Array.isArray(p.ll)); }
+
+  ping(t){ this.setState({toast:t}); clearTimeout(this._t); this._t=setTimeout(()=>this.setState({toast:''}),1900); }
+  componentDidMount(){ this._pv=this.state.view; this._flushAnim(); this._syncMap(); }
+  componentDidUpdate(){ if(this._pv!==this.state.view){ this._pv=this.state.view; this._flushAnim(); } this._syncMap(); this._animSheet(); }
+
+  // Good-to-know sheet height changes (tab switch / sub-topic) animate smoothly:
+  // height:auto can't transition on content reflow, so measure px and FLIP it.
+  // Smoothly animate the good-to-know sheet's height when its content changes
+  // (tab switch / open a topic / back). height:auto can't be transitioned on a
+  // content reflow, so we measure px and drive it with the Web Animations API —
+  // reliable and independent of CSS-transition / rAF timing. Gated by a content
+  // signature so it runs exactly once per real change (no jitter).
+  _animSheet(){
+    const el=this.gtSheetRef&&this.gtSheetRef.current; if(!el) return;
+    if(!this.state.gt){ this._gtSig=null; this._gtH=null; el.style.height=''; if(this._gtAnim){try{this._gtAnim.cancel();}catch(e){} this._gtAnim=null;} return; }
+    const sig=String(this.state.gt)+'|'+String(this.state.gtTab||'');
+    if(sig===this._gtSig) return;
+    const firstOpen=(this._gtSig==null);
+    this._gtSig=sig;
+    const prev=this._gtH;
+    el.style.height='auto';                 // measure new natural height
+    const target=el.scrollHeight;
+    el.style.height='';
+    this._gtH=target;
+    if(firstOpen || prev==null || Math.abs(prev-target)<2) return; // first open just slides up
+    if(this._gtAnim){ try{this._gtAnim.cancel();}catch(e){} }
+    try{
+      this._gtAnim=el.animate([{height:prev+'px'},{height:target+'px'}],{duration:300,easing:'cubic-bezier(.4,0,.2,1)'});
+    }catch(e){}
+  }
+  _flushAnim(){ clearTimeout(this._fa); this._fa=setTimeout(()=>{ try{ (document.getAnimations&&document.getAnimations()||[]).forEach(a=>{ if(a.animationName==='caSlideIn' && a.playState!=='finished') a.finish(); }); }catch(e){} }, 420); }
+  componentWillUnmount(){ clearTimeout(this._t); clearTimeout(this._fa); clearTimeout(this._c); clearTimeout(this._mlTimer); if(this._gtAnim){try{this._gtAnim.cancel();}catch(e){}} this._destroyMap(); }
+
+  // ===================== Map engine — CARTO basemap + node/route =====================
+  // CARTO Positron basemap (free, no API key). Nodes sit at their real geo
+  // coordinates; the route is a thin dashed polyline through them. Selecting a node
+  // draws a solid segment to the next node; clicking empty map deselects.
+  basemapStyle(){ return 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'; }
+
+  _ensureMaplibre(cb){
+    if(window.maplibregl){ cb(); return; }
+    clearTimeout(this._mlTimer);
+    this._mlTimer=setTimeout(()=>this._ensureMaplibre(cb),140);
+  }
+
+  // Create / update / tear down the map to track view + selected day + selected stop.
+  _syncMap(){
+    const st=this.state;
+    if(st.view!=='day'){ this._destroyMap(); return; }
+    const el=this.mapContainerRef.current;
+    if(!el) return;
+    this._ensureMaplibre(()=>{
+      if(this._map && this._mapEl!==el) this._destroyMap();   // sc-if remounted a fresh node
+      if(!this._map){ this._initMap(el); return; }            // _initMap renders the day on load
+      if(this._mapDay!==st.sel) this._renderDay();
+      else if(this._mapCp!==st.cp) this._applySelection(st.cp,true);
+    });
+  }
+
+  _initMap(el){
+    if(this._map) return;
+    const ml=window.maplibregl;
+    this._mapEl=el; this._markers=[];
+    this._map=new ml.Map({ container:el, style:this.basemapStyle(),
+      center:[100.499,13.752], zoom:12, minZoom:5.2, maxBounds:[[96.0,4.8],[107.5,21.2]],
+      attributionControl:false, dragRotate:false, pitchWithRotate:false });
+    try{ this._map.touchZoomRotate.disableRotation(); }catch(e){}
+    // click on empty canvas = deselect the node
+    this._map.on('click',()=>{ this.setState({cp:-1}); });
+    this._map.on('load',()=>{ this._mapReady=true; this._renderDay(); setTimeout(()=>{ try{this._map.resize();}catch(e){} },60); });
+    // Keep the canvas size in sync with the container — otherwise markers drift from
+    // their points as you zoom out (canvas/container size mismatch).
+    try{ if(window.ResizeObserver){ this._ro=new ResizeObserver(()=>{ try{ this._map&&this._map.resize(); }catch(e){} }); this._ro.observe(el); } }catch(e){}
+  }
+
+  _destroyMap(){
+    if(this._ro){ try{this._ro.disconnect();}catch(e){} this._ro=null; }
+    if(this._markers){ this._markers.forEach(m=>{ try{m.remove();}catch(e){} }); }
+    this._markers=[];
+    if(this._baseMarker){ try{this._baseMarker.remove();}catch(e){} this._baseMarker=null; }
+    if(this._popup){ try{this._popup.remove();}catch(e){} this._popup=null; }
+    if(this._map){ try{this._map.remove();}catch(e){} }
+    this._map=null; this._mapEl=null; this._mapReady=false; this._mapDay=null; this._mapCp=null;
+  }
+
+  // Build markers + route for the current day and frame it.
+  _renderDay(){
+    if(!this._map||!this._mapReady) return;
+    const map=this._map, ml=window.maplibregl;
+    const days=this.tripDays(); const day=days[this.state.sel]||days[0];
+    const pts=this.dayGeo(day);
+    // Loop through the hotel — but day 1 arrives from the airport (no leading hotel)
+    // and the last day departs to the airport (no trailing hotel).
+    const hotel = this.geo()['Riva Surya Bangkok'];
+    const lastIdx = days.length-1;
+    const addStart = !!hotel && this.state.sel!==0;
+    const addEnd   = !!hotel && this.state.sel!==lastIdx;
+    let routePts = pts.slice();
+    if(addStart) routePts = [{name:'Base',ll:hotel}].concat(routePts);
+    if(addEnd)   routePts = routePts.concat([{name:'Base',ll:hotel}]);
+    this._addStart=addStart; this._addEnd=addEnd;
+    this._mapDay=this.state.sel; this._mapCp=null; this._pts=pts; this._routePts=routePts; this._routeOffset=addStart?1:0;
+    this._markers.forEach(m=>{ try{m.remove();}catch(e){} }); this._markers=[];
+    pts.forEach((p,i)=>{
+      const elp=document.createElement('div'); elp.className='ca-pin';
+      const dot=document.createElement('span'); dot.className='ca-dot'; dot.textContent=String(i+1); elp.appendChild(dot);
+      elp.addEventListener('click',(ev)=>{ ev.stopPropagation(); this.setState({cp:i}); });
+      this._markers.push(new ml.Marker({element:elp,anchor:'center'}).setLngLat(p.ll).addTo(map));
+    });
+    if(this._baseMarker){ try{this._baseMarker.remove();}catch(e){} this._baseMarker=null; }
+    if((addStart||addEnd) && hotel){
+      const be=document.createElement('div');
+      be.style.cssText='width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid #FD6318;box-shadow:0 2px 6px -1px rgba(43,33,24,.4);display:flex;align-items:center;justify-content:center;box-sizing:border-box;';
+      be.innerHTML='<svg style="width:14px;height:14px;color:#FD6318" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8v11M3 13h18v6M21 19v-5.5a3 3 0 0 0-3-3h-7V13"></path><circle cx="7" cy="11.4" r="1.5"></circle></svg>';
+      be.style.cursor='pointer';
+      be.addEventListener('click',(ev)=>{ ev.stopPropagation(); this.setState({cp:-2}); }); // base → line to stop 1
+      this._baseMarker=new ml.Marker({element:be,anchor:'center'}).setLngLat(hotel).addTo(map);
+    }
+    this._drawRoute(routePts);
+    this._fitDay(routePts);
+    this._applySelection(this.state.cp, false);
+  }
+
+  // Dashed road-following route through every node + an (initially empty) solid segment layer.
+  _drawRoute(pts){
+    const map=this._map; if(!map) return;
+    const empty={type:'FeatureCollection',features:[]};
+    const segs=this._currentSegs(pts);
+    const full = segs.length ? {type:'Feature',properties:{},geometry:{type:'MultiLineString',coordinates:segs}} : empty;
+    if(map.getSource('ca-route')){ map.getSource('ca-route').setData(full); }
+    else {
+      map.addSource('ca-route',{type:'geojson',data:full});
+      map.addLayer({id:'ca-route-line',type:'line',source:'ca-route',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#7C6F65','line-width':2,'line-dasharray':[1.4,1.8]}});
+    }
+    if(map.getSource('ca-seg')){ map.getSource('ca-seg').setData(empty); }
+    else {
+      map.addSource('ca-seg',{type:'geojson',data:empty});
+      map.addLayer({id:'ca-seg-casing',type:'line',source:'ca-seg',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#FFFFFF','line-width':6.5,'line-opacity':0.95}});
+      map.addLayer({id:'ca-seg-line',type:'line',source:'ca-seg',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#FD6318','line-width':3.6}});
+    }
+    this._loadOsrm(pts, this.state.sel);
+  }
+
+  // Straight fallback segments, used until OSRM road geometry arrives.
+  _straightSegs(pts){ const s=[]; for(let i=0;i<pts.length-1;i++) s.push([pts[i].ll,pts[i+1].ll]); return s; }
+
+  // Per-segment geometry for the current day: cached road-following if ready, else straight.
+  _currentSegs(pts){
+    pts=pts||this._pts||[];
+    const c=this._routeCache && this._routeCache[this.state.sel];
+    if(c && c.segs && c.segs.length===pts.length-1) return c.segs;
+    return this._straightSegs(pts);
+  }
+
+  // Fetch road geometry per consecutive pair (driving) from OSRM, cache, then redraw.
+  _loadOsrm(pts, key){
+    this._routeCache=this._routeCache||{};
+    if(pts.length<2 || (this._routeCache[key] && this._routeCache[key].segs)) return;
+    const reqs=[];
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i].ll, b=pts[i+1].ll;
+      reqs.push(fetch('https://router.project-osrm.org/route/v1/driving/'+a[0]+','+a[1]+';'+b[0]+','+b[1]+'?overview=full&geometries=geojson')
+        .then(r=>r.json())
+        .then(j=>{ const g=j&&j.routes&&j.routes[0]&&j.routes[0].geometry&&j.routes[0].geometry.coordinates; return (g&&g.length)?[a].concat(g).concat([b]):[a,b]; })
+        .catch(()=>[a,b]));
+    }
+    Promise.all(reqs).then(segs=>{
+      this._routeCache[key]={segs:segs};
+      if(this._map && this._mapDay===key){
+        if(this._map.getSource('ca-route')) this._map.getSource('ca-route').setData({type:'Feature',properties:{},geometry:{type:'MultiLineString',coordinates:segs}});
+        this._setSegment(this._mapCp);
+      }
+    });
+  }
+
+  // Solid segment from the selected stop to the next point (road geometry if available).
+  // Route points may be offset by 1 when the day loops through the hotel (base).
+  _setSegment(i){
+    const map=this._map; if(!map||!map.getSource('ca-seg')) return;
+    const rp=this._routePts||this._pts||[]; const off=this._routeOffset||0;
+    let data={type:'FeatureCollection',features:[]};
+    const segs=this._currentSegs(rp);
+    // base selected (-2): highlight the hotel leg — first segment if the day starts
+    // at the hotel, else the last segment (day that only returns to the hotel).
+    let k;
+    if(i===-2) k = this._addStart ? 0 : (this._addEnd ? segs.length-1 : null);
+    else k = (i>=0) ? i+off : null;
+    if(k!=null && segs[k]) data={type:'Feature',properties:{},geometry:{type:'LineString',coordinates:segs[k]}};
+    map.getSource('ca-seg').setData(data);
+  }
+
+  _bounds(pts){ const ml=window.maplibregl; const b=new ml.LngLatBounds(); pts.forEach(p=>b.extend(p.ll)); return b; }
+  _fitDay(pts){
+    if(!this._map||!pts.length) return;
+    if(pts.length===1){ this._map.easeTo({center:pts[0].ll,zoom:15,duration:600}); return; }
+    this._map.fitBounds(this._bounds(pts),{padding:{top:70,bottom:50,left:50,right:50},maxZoom:15,duration:600});
+  }
+
+  // i<0 (or null) = no selection: dashed route only, no solid segment, no popup.
+  _applySelection(i,fly){
+    if(!this._map||!this._mapReady) return;
+    const pts=this._pts||[];
+    if(i==null) i=-1;
+    if(i>=0) i=Math.min(i,pts.length-1);
+    this._mapCp=i;
+    const isBase=(i===-2);
+    this._markers.forEach((m,k)=>{ const e=m.getElement(); if(e) e.className='ca-pin'+(k===i?' on':''); });
+    if(this._baseMarker){ const be=this._baseMarker.getElement(); if(be) be.style.boxShadow = isBase?'0 0 0 4px rgba(253,99,24,.22),0 2px 6px -1px rgba(43,33,24,.4)':'0 2px 6px -1px rgba(43,33,24,.4)'; }
+    this._setSegment(i);
+    if(this._popup){ try{this._popup.remove();}catch(e){} this._popup=null; }
+    const ml=window.maplibregl;
+    if(isBase){
+      const h=this.geo()['Riva Surya Bangkok'];
+      if(h){ this._popup=new ml.Popup({className:'ca-pop',closeButton:false,closeOnClick:false,offset:20,anchor:'bottom'}).setLngLat(h).setHTML('<div class="ca-pop-name">Riva Surya</div><div class="ca-pop-time">Your base</div>').addTo(this._map);
+        if(fly){ var zb=(this._pendingZoom!=null)?this._pendingZoom:this._map.getZoom(); this._pendingZoom=null; this._map.easeTo({center:h,zoom:zb,duration:600}); } }
+    } else if(i>=0 && pts[i]){
+      const p=pts[i];
+      this._popup=new ml.Popup({className:'ca-pop',closeButton:false,closeOnClick:false,offset:22,anchor:'bottom'})
+        .setLngLat(p.ll)
+        .setHTML('<div class="ca-pop-name">'+this._esc(p.name)+'</div><div class="ca-pop-time">'+this._esc(p.time||'')+'</div>')
+        .addTo(this._map);
+      if(fly){ var z=(this._pendingZoom!=null)?this._pendingZoom:this._map.getZoom(); this._pendingZoom=null; this._map.easeTo({center:p.ll,zoom:z,duration:600}); }
+    }
+  }
+
+  _esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  _openInMaps(){
+    const days=this.tripDays(); const day=days[this.state.sel]||days[0];
+    const pts=this.dayGeo(day); if(!pts.length){ this.ping('No locations for this day'); return; }
+    const ll=p=>p.ll[1]+','+p.ll[0]; let url;
+    if(pts.length===1){ url='https://www.google.com/maps/search/?api=1&query='+ll(pts[0]); }
+    else {
+      const way=pts.slice(1,-1).map(ll).join('|');
+      url='https://www.google.com/maps/dir/?api=1&origin='+ll(pts[0])+'&destination='+ll(pts[pts.length-1])+(way?'&waypoints='+encodeURIComponent(way):'')+'&travelmode=driving';
+    }
+    try{ window.open(url,'_blank','noopener'); this.ping('Opening route in Google Maps'); }catch(e){}
+  }
+  top(){ try{ window.scrollTo(0,0); }catch(e){} }
+
+  renderVals(){
+    const ORANGE='#FD6318', DARK='#2A211C';
+    const days=this.tripDays();
+    const view=this.state.view;
+    const sel=this.state.sel;
+
+    const openDay=this.state.openDay;
+    const overviewDays = days.map((d,i)=>{
+      const open=i===openDay;
+      const places=d.stops.map((s,si)=>({
+        name:s.name, icon:s.icon,
+        iconEl:this.icoEl(s.icon,{position:'absolute',right:'-10px',bottom:'-12px',width:'70px',height:'70px',color:'rgba(255,255,255,.28)'}),
+        thumbStyle:{position:'relative',height:'150px',backgroundImage:this.cover(s.name,s.cat),backgroundSize:'cover',backgroundPosition:'center',cursor:'pointer'},
+        notLast: si!==d.stops.length-1,
+        onOpenPd: ()=>{ const info=this.placeContent(s.name,s.cat); this.setState({pd:{name:s.name, th:this.placeTh(s.name), cat:s.cat, icon:s.icon, hours:this.hoursFor(s.cat), price:s.price, desc:s.desc, acts:info.acts, dos:info.dos, donts:info.donts, idx:si}}); }
+      }));
+      return {
+        n:i+1, nn:String(i+1).padStart(2,'0'), wd:d.wd, date:d.date, dateFull:this.fullDate(d.wd,d.date),
+        title:d.title, summary:d.summary, stops:d.stops.length, hours:d.sum.h, budget:d.sum.b,
+        open, places,
+        rowStyle:{display:'grid',gridTemplateColumns:'52px 1fr',gap:'15px',alignItems:'start',width:'100%',textAlign:'left',background:'none',border:'none',padding:'0',cursor:'pointer',fontFamily:'inherit'},
+        numLabelStyle:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'10px',fontWeight:600,letterSpacing:'.14em',textTransform:'uppercase',color:'#2A211C',lineHeight:1},
+        numStyle:{fontSize:'34px',fontWeight:700,letterSpacing:'-.04em',lineHeight:.92,color:'#FD6318',marginTop:'2px'},
+        chevStyle:{width:'18px',height:'18px',color:'#AA9F96',transform:open?'rotate(90deg)':'rotate(0deg)',transition:'transform .24s ease',flex:'0 0 18px'},
+        panelStyle:{maxHeight:open?'280px':'0px',overflow:'hidden',transition:'max-height .34s cubic-bezier(.4,0,.2,1)'},
+        dividerStyle:{borderBottom:'1px solid #ECE7E1',paddingTop:'22px',paddingBottom:'22px'},
+        onToggle: ()=>this.setState(p=>({openDay:p.openDay===i?null:i})),
+        onView: ()=>{ this.setState({view:'day',sel:i,cp:-1,zoom:1}); this.top(); }
+      };
+    });
+
+    const day=days[sel];
+    const badgeBase={display:'inline-flex',alignItems:'center',gap:'5px',padding:'3px 9px',borderRadius:'999px',fontSize:'10px',fontWeight:700,lineHeight:1};
+    // Day 1 arrives from the airport (no hotel start); the last day departs (no hotel end).
+    const showHotelStart = sel!==0;
+    const showHotelEnd = sel!==days.length-1;
+
+    const stops=day.stops.map((s,i)=>{
+      const last=i===day.stops.length-1;
+      const nextName= last? '' : day.stops[i+1].name;
+      let st=null;
+      if(s.status==='booked') st={style:{background:'#2E8B57',color:'#fff'},label:'Booked',icon:'#i-check',hasIcon:true,dot:false};
+      else if(s.status==='confirmed') st={style:{background:'#E7F1EA',color:'#2E8B57'},label:'Confirmed',icon:'#i-check',hasIcon:true,dot:false};
+      else if(s.status==='pending') st={style:{background:'#FAF1DE',color:'#C98A1A'},label:'Pending',icon:null,hasIcon:false,dot:true};
+
+      const opts=s.move||[];
+      const cols=Math.max(1,opts.length);
+      const options=opts.map((o,oi)=>{
+        const best=oi===0;
+        return {
+          mode:o.mode, time:o.time, cost:o.cost, icon:o.icon, best, isBest:best,
+          iconEl:this.icoEl(o.icon,{width:'15px',height:'15px',color:'#2A211C'}),
+          onOpen: ()=>this.setState({drawer:{...o,from:s.name,to:nextName,best,kind:this.moveKind(o.mode)},dlegs:{},thpop:null}),
+          btnStyle:{position:'relative',display:'flex',flexDirection:'column',alignItems:'stretch',gap:'8px',width:'100%',height:'100%',padding:'10px 11px',borderRadius:'12px',cursor:'pointer',fontFamily:'inherit',background:best?'#FFF8F2':'#fff',border:best?'1.5px dashed #FD6318':'1.5px solid #E0D8D0',textAlign:'left'},
+          topStyle:{display:'flex',alignItems:'center',gap:'7px'},
+          iconWrap:{width:'26px',height:'26px',borderRadius:'8px',background:best?'#FFE4D2':'#F2EDE7',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 26px'},
+          modeStyle:{flex:1,minWidth:0,fontSize:'12px',fontWeight:700,letterSpacing:'-.01em',color:'#2A211C',lineHeight:1.2},
+          metaStyle:{display:'flex',alignItems:'center',gap:'6px',flexWrap:'wrap'}
+        };
+      });
+      const hours=this.hoursFor(s.cat);
+      const info=this.placeContent(s.name,s.cat);
+      return {
+        num:i+1, time:s.t, dur:s.dur, cat:s.cat, catIcon:s.icon, name:s.name, desc:s.desc,
+        catIconEl:this.icoEl(s.icon,{position:'absolute',right:'-8px',bottom:'-12px',width:'70px',height:'70px',color:'rgba(255,255,255,.32)'}),
+        catChipEl:this.icoEl(s.icon,{width:'11px',height:'11px',color:'#2A211C'}),
+        onCat: ()=>this.setState({gt:s.cat}),
+        statusIconEl: (st&&st.hasIcon)?this.icoEl(st.icon,{width:'11px',height:'11px'}):null,
+        price:s.price, hasPrice:!!s.price, hasHours:!!hours, hoursLabel:hours,
+        onName: ()=>this.setState({pd:{name:s.name, th:this.placeTh(s.name), cat:s.cat, icon:s.icon, hours:hours, price:s.price, desc:s.desc, acts:info.acts, dos:info.dos, donts:info.donts, idx:i}}),
+        coverStyle:{position:'relative',height:'152px',borderRadius:'14px',overflow:'hidden',backgroundImage:this.cover(s.name,s.cat),backgroundSize:'cover',backgroundPosition:'center',marginBottom:'13px',border:'1px solid rgba(43,33,24,.06)'},
+        showStatus:!!st, statusStyle: st?{...badgeBase,...st.style}:badgeBase,
+        statusLabel: st?st.label:'', statusIcon: st?st.icon:null, statusHasIcon: st?st.hasIcon:false, statusDot: st?st.dot:false,
+        hasConn: !last || showHotelEnd,
+        hasTransit: !last && opts.length>0,
+        nextName, options,
+        optionsWrap:{display:'grid',gridTemplateColumns:'repeat('+cols+',minmax(0,1fr))',gap:'8px',marginBottom:'16px'}
+      };
+    });
+
+    // Hotel ↔ first/last stop transport (synthesised — every day leaves & returns to base).
+    const mkOpts=(fromName,toName,moveOpts)=> moveOpts.map((o,oi)=>{ const best=oi===0; return {
+      mode:o.mode, time:o.time, cost:o.cost, best, isBest:best,
+      iconEl:this.icoEl(o.icon,{width:'15px',height:'15px',color:'#2A211C'}),
+      onOpen: ()=>this.setState({drawer:{...o,from:fromName,to:toName,best,kind:this.moveKind(o.mode)},dlegs:{},thpop:null}),
+      btnStyle:{position:'relative',display:'flex',flexDirection:'column',alignItems:'stretch',gap:'8px',width:'100%',height:'100%',padding:'10px 11px',borderRadius:'12px',cursor:'pointer',fontFamily:'inherit',background:best?'#FFF8F2':'#fff',border:best?'1.5px dashed #FD6318':'1.5px solid #E0D8D0',textAlign:'left'},
+      topStyle:{display:'flex',alignItems:'center',gap:'7px'},
+      iconWrap:{width:'26px',height:'26px',borderRadius:'8px',background:best?'#FFE4D2':'#F2EDE7',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 26px'},
+      modeStyle:{flex:1,minWidth:0,fontSize:'12px',fontWeight:700,letterSpacing:'-.01em',color:'#2A211C',lineHeight:1.2},
+      metaStyle:{display:'flex',alignItems:'center',gap:'6px',flexWrap:'wrap'} }; });
+    const wrapFor=(n)=>({display:'grid',gridTemplateColumns:'repeat('+Math.max(1,n)+',minmax(0,1fr))',gap:'8px',marginBottom:'16px'});
+    const hotelOpts=[{mode:'Grab / taxi',icon:'#i-bus',time:'15 min',cost:'฿90',tips:['Door to door from the hotel lobby','Fixed fare shown in the Grab app']},{mode:'Walk',icon:'#i-walk',time:'12 min',cost:'Free',tips:['Quiet riverside lane from Riva Surya','Flat and shaded most of the way']}];
+    const firstStop=day.stops[0]||{}, lastStop=day.stops[day.stops.length-1]||{};
+    const hotelStart={ nextName:firstStop.name||'', options:mkOpts('Riva Surya Bangkok',firstStop.name||'',hotelOpts), optionsWrap:wrapFor(hotelOpts.length) };
+    const hotelEnd={ options:mkOpts(lastStop.name||'','Riva Surya Bangkok',hotelOpts), optionsWrap:wrapFor(hotelOpts.length) };
+
+    // The interactive map (markers, route, popup, zoom) is driven imperatively by
+    // the MapLibre engine in _syncMap()/_renderDay() — see the map engine section.
+
+    const prevI=(sel+days.length-1)%days.length;
+    const nextI=(sel+1)%days.length;
+    const navBtn={display:'flex',alignItems:'center',gap:'10px',flex:1,padding:'12px 14px',borderRadius:'13px',background:'#fff',border:'1px solid #ECE7E1',cursor:'pointer',fontFamily:'inherit',boxShadow:'0 1px 2px rgba(43,33,24,.05)'};
+
+    // Date ruler for the day top bar — tap a date to switch days. One orange dot
+    // slides along the ruler; the date text fades to orange (color transition).
+    const dayRuler = days.map((d,i)=>{ const on=i===sel; const num=(d.date.split(' ')[1]||d.date);
+      return { num, wd:(d.wd||'').toUpperCase(), on,
+        onClick: ()=>{ this.setState({sel:i,cp:-1,zoom:1}); this.top(); },
+        numStyle:{fontSize:'18px',fontWeight:700,letterSpacing:'-.01em',color:on?'#FD6318':'#2A211C',lineHeight:1,transition:'color .28s ease'},
+        wdStyle:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'9px',fontWeight:600,letterSpacing:'.08em',color:on?'#FD6318':'#AA9F96',lineHeight:1,transition:'color .28s ease'},
+        tickStyle:{width:'2px',height:'8px',borderRadius:'1px',background:'#D9CFC7'} };
+    });
+    const rulerDotStyle={position:'absolute',top:'50%',left:(((sel+0.5)/days.length)*100)+'%',transform:'translate(-50%,-50%)',width:'11px',height:'11px',borderRadius:'50%',background:'#FD6318',zIndex:3,boxShadow:'0 0 0 3px rgba(253,99,24,.15)',transition:'left .34s cubic-bezier(.4,0,.2,1)'};
+
+    // highlights carousel
+    const carIdx=this.state.carIdx||0;
+    const highlights=this.highlights().map((h)=>({
+      name:h.name, day:h.day, icon:h.icon,
+      iconEl:this.icoEl(h.icon,{position:'absolute',right:'-10px',bottom:'-12px',width:'78px',height:'78px',color:'rgba(255,255,255,.34)'}),
+      coverStyle:{position:'relative',height:'152px',backgroundImage:this.cover(h.name,h.cat),backgroundColor:'#E8E1D8',backgroundSize:'cover',backgroundPosition:'center'}
+    }));
+    const carDots=highlights.map((h,i)=>({
+      onClick: ()=>{ const el=this.carRef.current; if(el&&el.children[i]){ el.scrollTo({left:el.children[i].offsetLeft-26,behavior:'smooth'}); } },
+      dotStyle:{width:i===carIdx?'18px':'6px',height:'6px',borderRadius:'999px',background:i===carIdx?'#FD6318':'#D9CFC7',transition:'all .22s ease',cursor:'pointer',border:'none',padding:0}
+    }));
+    const onCarScroll=(e)=>{ const el=e.currentTarget; const c=el.children[0]; const w=c?c.offsetWidth+12:212; const idx=Math.round(el.scrollLeft/w); if(idx!==this.state.carIdx) this.setState({carIdx:idx}); };
+
+    // transport drawer
+    const dr=this.state.drawer;
+    const drawerOpen=!!dr;
+    const scrimStyle={position:'fixed',inset:0,background:'rgba(42,33,28,.5)',zIndex:80,opacity:drawerOpen?1:0,pointerEvents:drawerOpen?'auto':'none',transition:'opacity .26s ease'};
+    const sheetStyle={position:'fixed',left:'50%',bottom:0,width:'460px',maxWidth:'100%',height:'auto',transform:'translateX(-50%) translateY('+(drawerOpen?'0':'104%')+')',zIndex:81,background:'#FBFAF8',borderTopLeftRadius:'24px',borderTopRightRadius:'24px',boxShadow:'0 -12px 44px -12px rgba(43,33,24,.5)',transition:'transform .32s cubic-bezier(.4,0,.2,1), height .3s ease',overflow:'hidden'};
+
+    // place drawer
+    const pd=this.state.pd;
+    const pdOpen=!!pd;
+    const pdScrimStyle={position:'fixed',inset:0,background:'rgba(42,33,28,.5)',zIndex:82,opacity:pdOpen?1:0,pointerEvents:pdOpen?'auto':'none',transition:'opacity .26s ease'};
+    const pdSheetStyle={position:'fixed',left:'50%',bottom:0,width:'460px',maxWidth:'100%',height:'auto',transform:'translateX(-50%) translateY('+(pdOpen?'0':'104%')+')',zIndex:83,background:'#FBFAF8',borderTopLeftRadius:'24px',borderTopRightRadius:'24px',boxShadow:'0 -12px 44px -12px rgba(43,33,24,.5)',transition:'transform .32s cubic-bezier(.4,0,.2,1), height .3s ease',overflow:'hidden'};
+    const pdCoverStyle={position:'relative',height:'196px',backgroundImage:pd?this.cover(pd.name,pd.cat):'none',backgroundColor:'#E8E1D8',backgroundSize:'cover',backgroundPosition:'center'};
+    const pdCopied=this.state.pdCopied;
+    // general tips modal
+    const gtKey=this.state.gt;
+    const gtOpen=!!gtKey;
+    const gtIsIndex= gtKey==='__idx';
+    const gtIsSub= !!gtKey && !gtIsIndex;  // viewing a single topic (show a back button)
+    const gtR = (gtKey && !gtIsIndex) ? this.gtipResolve(gtKey) : null;
+    const gtTitle = gtIsIndex ? 'Good to know' : (gtR?gtR.t:'');
+    const gtGroup = gtIsIndex ? 'General tips for this trip' : (gtR?gtR.group:'');
+    const gtIconEl = gtR ? this.icoEl(gtR.icon,{width:'22px',height:'22px',color:'#FD8E1C'}) : null;
+    const gtTips = gtR ? gtR.tips : [];
+    const gtNote = gtR ? (gtR.note||'') : '';
+    const gtHasNote = !!gtNote;
+    const idxBtn=(key,e)=>({ label:e.t, group:(this.gtipModes()[key]?'Getting around':'At a place'),
+      onClick: ()=>this.setState({gt:key}),
+      rowStyle:{display:'flex',alignItems:'center',gap:'11px',width:'100%',padding:'11px 13px',border:'1px solid #ECE7E1',borderRadius:'12px',background:'#fff',cursor:'pointer',fontFamily:'inherit',textAlign:'left',marginBottom:'8px'},
+      iconWrap:{width:'30px',height:'30px',borderRadius:'9px',background:'#F2EDE7',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 30px'},
+      iconEl:this.icoEl(e.icon,{width:'15px',height:'15px',color:'#2A211C'}) });
+    const gtIndex=[];
+    if(gtIsIndex){ const mm=this.gtipModes(); for(const k in mm) gtIndex.push(idxBtn(k,mm[k])); const pp=this.gtipPlaces(); const seen={}; for(const k in pp){ if(seen[pp[k].t]) continue; seen[pp[k].t]=1; gtIndex.push(idxBtn(k,pp[k])); } }
+    // Good-to-know index is split into two tabs: Getting around vs At a place.
+    const gtTab = this.state.gtTab || 'transport';
+    const gtIndexF = gtIndex.filter(r => gtTab==='transport' ? r.group==='Getting around' : r.group==='At a place');
+    const segTab=(on)=>({flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'9px 10px',borderRadius:'9px',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'12.5px',fontWeight:700,background:on?'#fff':'transparent',color:on?'#2A211C':'#8B7F76',boxShadow:on?'0 1px 2px rgba(43,33,24,.12)':'none',whiteSpace:'nowrap'});
+    const gtTabs=[
+      {label:'Getting around', style:segTab(gtTab==='transport'), onClick:()=>this.setState({gtTab:'transport'})},
+      {label:'At a place', style:segTab(gtTab==='place'), onClick:()=>this.setState({gtTab:'place'})}
+    ];
+    const gtTabWrap={display:'flex',gap:'3px',background:'#F1ECE5',border:'1px solid #ECE7E1',borderRadius:'12px',padding:'3px',marginTop:'16px'};
+    const gtTabHint = gtTab==='transport' ? 'How the trains, taxis and boats work — tap a topic.' : 'Etiquette and tips for each kind of place — tap a topic.';
+    const gtScrimStyle={position:'fixed',inset:0,background:'rgba(42,33,28,.5)',zIndex:84,opacity:gtOpen?1:0,pointerEvents:gtOpen?'auto':'none',transition:'opacity .26s ease'};
+    const gtSheetStyle={position:'fixed',left:'50%',bottom:0,width:'460px',maxWidth:'100%',height:'auto',transform:'translateX(-50%) translateY('+(gtOpen?'0':'104%')+')',zIndex:85,background:'#FBFAF8',borderTopLeftRadius:'24px',borderTopRightRadius:'24px',boxShadow:'0 -12px 44px -12px rgba(43,33,24,.5)',transition:'transform .32s cubic-bezier(.4,0,.2,1)',overflow:'hidden'};
+    const copiedBubbleStyle={position:'absolute',right:'0',top:'-30px',display:'inline-flex',alignItems:'center',gap:'5px',padding:'5px 10px',borderRadius:'8px',background:'#2A211C',color:'#fff',fontSize:'11px',fontWeight:700,whiteSpace:'nowrap',boxShadow:'0 4px 12px -3px rgba(43,33,24,.5)',opacity:pdCopied?1:0,transform:pdCopied?'translateY(0)':'translateY(4px)',transition:'opacity .18s ease, transform .18s ease',pointerEvents:'none',zIndex:5};
+
+    const toast=this.state.toast;
+    // transport drawer detail (multi-leg)
+    const ti=this.transitInfo(dr);
+    const stationCells=(stations,lineColor)=> stations.map(st=>{
+      const t=st.type, big=t==='board'||t==='alight';
+      const dotStyle = t==='transfer'
+        ? {width:'16px',height:'16px',borderRadius:'50%',background:'#fff',border:'3px solid '+lineColor,boxSizing:'border-box'}
+        : {width: big?'16px':'10px',height: big?'16px':'10px',borderRadius:'50%',background:lineColor,border: big?'3px solid #fff':'none',boxShadow: big?'0 0 0 2px '+lineColor:'none',boxSizing:'border-box'};
+      return {label:st.label, sub:st.sub||'', hasSub:!!st.sub, dotStyle,
+        cellStyle:{flex:1,minWidth:0,display:'flex',flexDirection:'column',alignItems:'center',gap:'7px'},
+        labelStyle:{fontSize:'10.5px',fontWeight:700,color:'#2A211C',textAlign:'center',lineHeight:1.15,whiteSpace:'nowrap'},
+        subStyle:{fontSize:'9px',fontWeight:600,color:'#AA9F96',textAlign:'center',whiteSpace:'nowrap'}};
+    });
+    const drawerLegs=(ti?ti.legs:[]).map((l,idx)=>{
+      const lineColor=l.lineColor||'#FD6318';
+      const isTransit=l.kind==='rail'||l.kind==='boat';
+      const stationCount=(l.stations||[]).length;
+      return {
+        stops: isTransit?stationCount:0, stopText: stationCount+' stops', hasStops: isTransit&&stationCount>0,
+        showHeader: ti.isCombo, legNo: idx+1, legLabel: l.mode,
+        legIconEl: this.icoEl(l.icon,{width:'14px',height:'14px',color:'#fff'}),
+        legBadgeStyle:{display:'inline-flex',alignItems:'center',justifyContent:'center',width:'22px',height:'22px',borderRadius:'7px',background:'#2A211C',color:'#fff',fontSize:'11px',fontWeight:700,flex:'0 0 22px'},
+        isTransit, isRoad: l.kind==='road',
+        lineName:l.lineName||'', lineChipStyle:{display:'inline-flex',alignItems:'center',gap:'6px',padding:'4px 11px',borderRadius:'999px',background:lineColor,color:'#fff',fontSize:'10.5px',fontWeight:700,whiteSpace:'nowrap'},
+        stations: stationCells(l.stations||[], lineColor),
+        lineBarStyle:{position:'absolute',left:'13%',right:'13%',top:'7.5px',height:'3px',borderRadius:'2px',background:lineColor,opacity:.45,zIndex:1},
+        steps:(l.steps||[]).map((t,i)=>({n:i+1,t})), hasSteps:!!(l.steps&&l.steps.length),
+        exit:l.exit||'', hasExit:!!l.exit,
+        fare:l.fare||[], hasFare:!!(l.fare&&l.fare.length),
+        scam:l.scam||[], hasScam:!!(l.scam&&l.scam.length)
+      };
+    });
+    const totalStops = drawerLegs.reduce((n,l)=> n + (l.isTransit ? l.stops : 0), 0);
+    const drawerStops = totalStops ? (totalStops+' stops') : '';
+    const drawerHasStops = totalStops>0;
+    const drawerLegCount = (ti?ti.legs:[]).length;
+    const drawerLegSummary = drawerLegCount>1 ? (drawerLegCount+' transport · '+(totalStops||0)+' stops') : (totalStops?(totalStops+' stops'):'Direct');
+
+    // Continuous From → legs → To timeline; each transit leg's stops collapse/expand.
+    const dlegs = this.state.dlegs || {};
+    const _legs = ti ? ti.legs : [];
+    const RAIL='#D9CFC7';
+    const thpop=this.state.thpop;
+    const fromName=dr?dr.from:'', toName=dr?dr.to:'';
+    const thPopStyle={position:'absolute',top:'36px',right:'0',zIndex:20,minWidth:'180px',maxWidth:'300px',display:'flex',alignItems:'center',gap:'9px',padding:'8px 9px 8px 11px',background:'#fff',border:'1px solid #E0D8D0',borderRadius:'12px',boxShadow:'0 10px 30px -10px rgba(43,33,24,.45)',transformOrigin:'top right',animation:'caPopIn .17s cubic-bezier(.4,0,.2,1)'};
+    const mkTh=(role,name)=>{ const th=this.placeTh(name)||''; const on=(thpop===role); return { th:th, hasTh:!!th, thOpen:on,
+      thBtnStyle:{flex:'0 0 auto',width:'30px',height:'30px',borderRadius:'9px',border:'1px solid '+(on?'#FD6318':'#E0D8D0'),background:on?'#FFF1E6':'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'},
+      thIconStyle:{width:'16px',height:'16px',color:(on?'#FD6318':'#8B7F76')}, thPopStyle:thPopStyle,
+      onTh: ()=>this.setState(p=>({thpop:p.thpop===role?null:role})),
+      onThCopy: ()=>{ if(th) this.copyTh(th); this.setState({thpop:null}); this.ping('Copied · '+th); } }; };
+    const tl=[];
+    tl.push(Object.assign({ kind:'end', role:'from', tag:'From', endLabel:fromName, up:false, down:true, lineColor:RAIL,
+      dotStyle:{width:'14px',height:'14px',borderRadius:'50%',border:'3px solid #2A211C',background:'#fff',boxSizing:'border-box'} }, mkTh('from',fromName)));
+    _legs.forEach((l,i)=>{
+      const isTransit=l.kind==='rail'||l.kind==='boat';
+      const color=l.lineColor||(l.kind==='walk'?'#AA9F96':'#7C6F65');
+      const sc=(l.stations||[]).length;
+      const open = dlegs[i]!==false;
+      tl.push({ kind:'leg', i, isTransit, lineColor:color, up:true, down:true,
+        legIconEl:this.icoEl(l.icon,{width:'14px',height:'14px',color:'#fff'}),
+        markerStyle:{display:'flex',alignItems:'center',justifyContent:'center',width:'26px',height:'26px',borderRadius:'8px',background:color,boxSizing:'border-box'},
+        badge:l.lineName||l.mode,
+        badgeStyle:{display:'inline-flex',alignItems:'center',gap:'6px',padding:'4px 11px',borderRadius:'999px',background:color,color:'#fff',fontSize:'10.5px',fontWeight:700,whiteSpace:'nowrap'},
+        legMeta: isTransit?(sc+' stops'):(l.kind==='walk'?'Walk':'Ride'),
+        hasToggle: isTransit && sc>0, open,
+        onToggle: ()=>this.setState(p=>{ const m=Object.assign({},p.dlegs||{}); const cur=m[i]!==false; m[i]=!cur; return {dlegs:m}; }),
+        chevStyle:{width:'16px',height:'16px',color:'#AA9F96',flex:'0 0 16px',transform:open?'rotate(90deg)':'rotate(0deg)',transition:'transform .24s ease'},
+        stopsPanelStyle: open
+          ? {maxHeight:'340px',opacity:1,overflow:'hidden',transition:'max-height .3s ease, opacity .24s ease .02s'}
+          : {maxHeight:'0px',opacity:0,overflow:'hidden',transition:'max-height .26s ease, opacity .15s ease'},
+        exit:l.exit||'', hasExit:!!l.exit,
+        stations:(l.stations||[]).map(function(st,si,arr){ return {label:st.label, sub:st.sub||'', hasSub:!!st.sub,
+          dotStyle:{width:'9px',height:'9px',borderRadius:'50%',background:'#fff',border:'2px solid '+color,boxSizing:'border-box',position:'relative',zIndex:2},
+          railStyle:{position:'absolute',left:'6px',width:'1.5px',top:(si>0?'0':'50%'),bottom:(si<arr.length-1?'0':'50%'),backgroundImage:'linear-gradient('+color+' 55%, transparent 45%)',backgroundSize:'1.5px 5px',backgroundRepeat:'repeat-y'} }; }) });
+      if(i<_legs.length-1){
+        tl.push({ kind:'change', up:true, down:true, lineColor:RAIL, changeLabel:'Change · '+_legs[i+1].mode,
+          changeMarkerStyle:{display:'flex',alignItems:'center',justifyContent:'center',width:'26px',height:'26px',borderRadius:'50%',background:'#fff',border:'1.5px solid #E0D8D0',boxSizing:'border-box'},
+          changeIconEl:this.icoEl('#i-route',{width:'13px',height:'13px',color:'#FD6318'}) });
+      }
+    });
+    tl.push(Object.assign({ kind:'end', role:'to', tag:'To', endLabel:toName, up:true, down:false, lineColor:RAIL,
+      dotStyle:{width:'14px',height:'14px',borderRadius:'50%',background:'#FD6318',border:'3px solid #FFE0CC',boxSizing:'border-box'} }, mkTh('to',toName)));
+    tl.forEach(r=>{ r.isEnd=r.kind==='end'; r.isLeg=r.kind==='leg'; r.isChange=r.kind==='change'; });
+    const drawerTimeline=tl;
+
+    const mapBtns=(ti?ti.maps:[]).map(m=>({
+      label:m.label,
+      onClick: ()=>this.ping(m.label+' — official map coming soon'),
+      btnStyle:{display:'flex',alignItems:'center',gap:'9px',width:'100%',padding:'11px 13px',border:'1.5px solid '+m.color,borderRadius:'12px',background:'#fff',cursor:'pointer',fontFamily:'inherit',marginBottom:'8px'},
+      swatchStyle:{width:'24px',height:'24px',borderRadius:'7px',background:m.color,display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 24px'}
+    }));
+    const drawerIsCombo = !!(ti&&ti.isCombo);
+    const drawerNote = ti?ti.note:'';
+    const toastStyle={position:'fixed',left:'50%',bottom:'26px',marginLeft:'-150px',width:'300px',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:'#2A211C',color:'#fff',padding:'11px 16px',borderRadius:'12px',fontSize:'13px',fontWeight:600,lineHeight:1.3,textAlign:'center',boxShadow:'0 2px 4px -1px rgba(43,33,24,.2),0 18px 28px -12px rgba(43,33,24,.4)',pointerEvents:'none',zIndex:90,opacity:toast?1:0,transform:toast?'translateY(0)':'translateY(8px)',transition:'opacity .2s ease, transform .2s ease'};
+
+    return {
+      isOverview: view==='overview', isDay: view==='day',
+      overviewDays, headerShapes:this.buildHeader(),
+      highlights, carDots, onCarScroll, carRef:this.carRef,
+      drawerOpen, scrimStyle, sheetStyle,
+      drawerMode: dr?dr.mode:'', drawerIcon: dr?dr.icon:'#i-route', drawerIconEl: this.icoEl(dr?dr.icon:null,{width:'23px',height:'23px',color:'#FD8E1C'}), drawerTime: dr?dr.time:'', drawerCost: dr?dr.cost:'',
+      drawerFrom: dr?dr.from:'', drawerTo: dr?dr.to:'', drawerBest: dr?dr.best:false, drawerTips: dr&&dr.tips?dr.tips:[], drawerHasTips: !!(dr&&dr.tips&&dr.tips.length),
+      drawerLegs, mapBtns, drawerIsCombo, drawerNote, drawerHasNote: !!drawerNote, drawerHasMaps: mapBtns.length>0, drawerStops, drawerHasStops,
+      drawerTimeline, drawerLegSummary, drawerLegCount,
+      onExport: ()=>{ try{ window.print(); }catch(e){} },
+      onCloseDrawer: ()=>this.setState({drawer:null}),
+      onAllTips: ()=>this.setState({drawer:null,gt:'__idx',gtTab:'transport'}),
+      mapRef:this.mapRef,
+      pdOpen, pdScrimStyle, pdSheetStyle, pdCoverStyle, copiedBubbleStyle,
+      pdName: pd?pd.name:'', pdTh: pd?pd.th:'', pdHasTh: !!(pd&&pd.th), pdIcon: pd?pd.icon:'#i-pin',
+      pdIconEl: this.icoEl(pd?pd.icon:null,{position:'absolute',right:'-6px',bottom:'-12px',width:'88px',height:'88px',color:'rgba(255,255,255,.34)'}),
+      pdChipEl: this.icoEl(pd?pd.icon:null,{width:'12px',height:'12px',color:'#2A211C'}),
+      pdHours: pd?pd.hours:'', pdHasHours: !!(pd&&pd.hours), pdPrice: pd?pd.price:'', pdHasPrice: !!(pd&&pd.price),
+      pdCat: pd?pd.cat:'', pdDesc: pd?pd.desc:'', pdActs: pd?pd.acts:[], pdDos: pd?pd.dos:[], pdDonts: pd?pd.donts:[],
+      onClosePd: ()=>this.setState({pd:null}),
+      onCopyTh: ()=>{ if(pd&&pd.th) this.copyTh(pd.th); },
+      gtOpen, gtScrimStyle, gtSheetStyle, gtSheetRef:this.gtSheetRef, gtIsIndex, gtIsSub, gtTitle, gtGroup, gtIconEl, gtTips, gtHasTips: gtTips.length>0, gtNote, gtHasNote,
+      onGtBack: ()=>this.setState({gt:'__idx'}),
+      gtIndex: gtIndexF, gtTabs, gtTabWrap, gtTabHint,
+      onOpenTips: ()=>this.setState({gt:'__idx',gtTab:'transport'}),
+      onCloseGt: ()=>this.setState({gt:null}),
+      onPdMap: ()=>{ const idx=pd?pd.idx:0; this.setState({pd:null,cp:idx}); setTimeout(()=>{ const el=this.mapRef.current; if(el) window.scrollTo({top:el.offsetTop-12,behavior:'smooth'}); },80); },
+      dayNum:sel+1, dayDate:day.date, dayDateFull:this.fullDate(day.wd,day.date), dayWd:day.wd, dayTitle:day.title, dayIntro:day.intro, dayRuler, rulerDotStyle, hotelStart, hotelEnd, showHotelStart, showHotelEnd,
+      dayDateFmt: day.wd+', '+day.date+', 2026',
+      dayStops:day.stops.length, dayHours:day.sum.h, dayWalk:day.sum.w, dayBudget:day.sum.b,
+      stops,
+      mapContainerRef:this.mapContainerRef,
+      mapNodes: this.dayGeo(day).map((p,i)=>({ num:i+1, on:(i===this.state.cp),
+        onClick: ()=>{ this._pendingZoom=16; this.setState({cp:i}); },
+        style:{flex:'0 0 auto',width:'27px',height:'27px',borderRadius:'8px',border:'none',cursor:'pointer',fontFamily:'inherit',fontSize:'12px',fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',background:(i===this.state.cp?'#FD6318':'#2A211C'),color:'#fff',boxShadow:'0 1px 3px rgba(43,33,24,.3)',transition:'background .2s ease'} })),
+      onMapHotel: ()=>{ this._pendingZoom=15; this.setState({cp:-2}); },
+      onZoomIn: ()=>{ if(this._map) this._map.zoomIn(); },
+      onZoomOut: ()=>{ if(this._map) this._map.zoomOut(); },
+      onLocate: ()=>{ const dd=this.tripDays(); this._fitDay(this.dayGeo(dd[this.state.sel]||dd[0])); this.ping('Centered on the route'); },
+      prevLabel:'Day '+(prevI+1), nextLabel:'Day '+(nextI+1),
+      prevStyle:navBtn, nextStyle:{...navBtn,justifyContent:'flex-end'},
+      onPrev: ()=>{ this.setState({sel:prevI,cp:-1,zoom:1}); this.top(); },
+      onNext: ()=>{ this.setState({sel:nextI,cp:-1,zoom:1}); this.top(); },
+      goOverview: ()=>{ this.setState({view:'overview'}); this.top(); },
+      onMaps: ()=>this._openInMaps(),
+      toast, toastStyle
+    };
+  }
+}
+</script>
+</body>
+</html>

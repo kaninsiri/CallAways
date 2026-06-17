@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CallAways · Bangkok Slow Days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#2A211C;--ink-3:#8B7F76;--ink-4:#AA9F96;--orange:#FD6318;--line:#ECE7E1;--paper:#FBFAF8;--page:#E7E2DC;--wash:#F2EDE7;--sans:'IBM Plex Sans',-apple-system,sans-serif;--mono:'IBM Plex Mono',monospace;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--page);font-family:var(--sans);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:520px;margin:0 auto;min-height:100dvh;padding:40px 22px 56px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-4);}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:30px;}
+  .brand .box{width:34px;height:34px;border-radius:10px;background:var(--ink);display:flex;align-items:center;justify-content:center;}
+  .brand .nm{font-size:16px;font-weight:700;letter-spacing:.06em;}
+  h1{font-size:34px;font-weight:700;letter-spacing:-.035em;margin:6px 0 6px;}
+  .lede{color:var(--ink-3);margin:0 0 28px;font-size:14.5px;}
+  a.tile{display:flex;align-items:center;gap:15px;text-decoration:none;color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:13px;transition:transform .15s ease,box-shadow .15s ease;}
+  a.tile:active{transform:scale(.99);}
+  a.tile .ic{flex:0 0 46px;height:46px;border-radius:13px;background:var(--wash);display:flex;align-items:center;justify-content:center;}
+  a.tile .ic svg{width:23px;height:23px;color:var(--orange);}
+  a.tile .t{flex:1;}
+  a.tile .t b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em;}
+  a.tile .t span{font-size:12.5px;color:var(--ink-3);}
+  a.tile .arr{width:18px;height:18px;color:var(--ink-4);flex:0 0 18px;}
+  .foot{margin-top:24px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-4);text-align:center;}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"></path><path d="M9 4v14M15 6v14"></path></symbol>
+  <symbol id="i-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"></path><path d="M8.5 9.5 12 13l3.5-3.5"></path><path d="M5 16v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"></path></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></symbol>
+  <symbol id="i-layout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"></rect><path d="M3 9h18M9 9v12"></path></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <div class="brand">
+    <span class="box"><svg viewBox="0 0 100 100" style="width:20px;height:20px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>
+    <span class="nm">CallAway<span style="color:var(--orange);">s</span></span>
+  </div>
+
+  <div class="eyebrow">7-Day Itinerary · Bangkok</div>
+  <h1>Bangkok Slow Days</h1>
+  <p class="lede">Seven unhurried days along the Chao Phraya. Open the interactive plan below.</p>
+
+  <a class="tile" href="./Trip%20Plan%20Doc.dc.html">
+    <span class="ic"><svg><use href="#i-map"></use></svg></span>
+    <span class="t"><b>Interactive Doc</b><span>The full plan · live map · day by day</span></span>
+    <svg class="arr"><use href="#i-chev"></use></svg>
+  </a>
+
+  <a class="tile" href="./Trip%20Plan%20PDF.dc.html">
+    <span class="ic"><svg><use href="#i-pdf"></use></svg></span>
+    <span class="t"><b>PDF layout</b><span>Print-style version</span></span>
+    <svg class="arr"><use href="#i-chev"></use></svg>
+  </a>
+
+  <a class="tile" href="./Design%20System.dc.html">
+    <span class="ic"><svg><use href="#i-grid"></use></svg></span>
+    <span class="t"><b>Design system</b><span>Colors · type · components</span></span>
+    <svg class="arr"><use href="#i-chev"></use></svg>
+  </a>
+
+  <a class="tile" href="./layouts.html">
+    <span class="ic"><svg><use href="#i-layout"></use></svg></span>
+    <span class="t"><b>Layouts viewer</b><span>Wireframes &amp; zones (backend)</span></span>
+    <svg class="arr"><use href="#i-chev"></use></svg>
+  </a>
+
+  <div class="foot">CallAways · Feb 2026</div>
+</div>
+</body>
+</html>

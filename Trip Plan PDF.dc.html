@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html{background:#E7E2DC;}
+  body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  @media print{
+    html,body{background:#fff;}
+    .pdf-bar{display:none !important;}
+    .page{box-shadow:none !important;border-radius:0 !important;margin:0 !important;width:210mm !important;min-height:273mm !important;height:auto !important;overflow:visible !important;break-after:page;page-break-after:always;}
+    .page:last-child{break-after:auto;page-break-after:auto;}
+    .avoid{break-inside:avoid;page-break-inside:avoid;}
+  }
+  @page{ size:A4 portrait; margin:12mm 0; }
+</style>
+</helmet>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="p-temple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7h16L12 3Z"></path><path d="M5 7v11M9 7v11M15 7v11M19 7v11M3 21h18"></path></symbol>
+  <symbol id="p-food" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v6a2 2 0 0 0 4 0V3M7 11v10"></path><path d="M16 3c-1.7 1.2-2.6 3.4-2.6 6 0 2 .9 3 2.6 3v9"></path></symbol>
+  <symbol id="p-coffee" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9Z"></path><path d="M16 10h1.6a2.6 2.6 0 0 1 0 5.2H16"></path><path d="M8 3v2M11 3v2"></path></symbol>
+  <symbol id="p-market" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8Z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></symbol>
+  <symbol id="p-museum" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 12 4l8 5M3 9h18M5 9v9M9 9v9M15 9v9M19 9v9M3 21h18"></path></symbol>
+  <symbol id="p-bar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16l-8 9-8-9Z"></path><path d="M12 13v7M8 20h8"></path></symbol>
+  <symbol id="p-bed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8v11M3 13h18v6M21 19v-5.5a3 3 0 0 0-3-3h-7V13"></path><circle cx="7" cy="11.4" r="1.5"></circle></symbol>
+  <symbol id="p-plane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4 3 10l6 2.5L11.5 19 14 13l7-9Z"></path></symbol>
+  <symbol id="p-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.4-2h7.2L17 8h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"></path><circle cx="12" cy="13" r="3.1"></circle></symbol>
+  <symbol id="p-train" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="13" rx="3.5"></rect><path d="M5 11h14"></path><path d="M9 19l-2 3M15 19l2 3"></path><circle cx="9" cy="13.4" r="1"></circle><circle cx="15" cy="13.4" r="1"></circle></symbol>
+  <symbol id="p-bus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="13" rx="2.5"></rect><path d="M4 11h16M8 17v2.5M16 17v2.5"></path><circle cx="8" cy="14" r="1"></circle><circle cx="16" cy="14" r="1"></circle></symbol>
+  <symbol id="p-boat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15h16l-1.4 4.2a2 2 0 0 1-1.9 1.3H7.3a2 2 0 0 1-1.9-1.3L4 15Z"></path><path d="M12 3v12M12 6l6 3-6 2"></path></symbol>
+  <symbol id="p-walk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.2" r="1.6"></circle><path d="M13 7v5l3 2M13 9l-3 1-1.5 3.5M13 12l-2 4M16 21l-2-5"></path></symbol>
+  <symbol id="p-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7"></path></symbol>
+  <symbol id="p-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"></path></symbol>
+  <symbol id="p-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5V12l3 2"></path></symbol>
+  <symbol id="p-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2"></path><rect x="3" y="8" width="18" height="11" rx="3"></rect><circle cx="16.5" cy="13.5" r="1.4"></circle></symbol>
+  <symbol id="p-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.5"></circle><circle cx="18" cy="5" r="2.5"></circle><path d="M8.5 19H14a3 3 0 0 0 0-6H10a3 3 0 0 1 0-6h5.5"></path></symbol>
+  <symbol id="p-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v10"></path><path d="M8.5 9.5 12 13l3.5-3.5"></path><path d="M5 16v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"></path></symbol>
+  <symbol id="p-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"></path><path d="M5 5h12l-2.2 3.2L17 11H5"></path></symbol>
+  <symbol id="p-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="3"></rect><path d="M3.5 9.5h17M8 3v4M16 3v4"></path></symbol>
+  <symbol id="p-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></symbol>
+  <symbol id="p-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v8M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"></path></symbol>
+  <symbol id="p-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6l-7-3Z"></path><path d="M9.5 12 11 13.5 14.5 10"></path></symbol>
+  <symbol id="p-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z"></path><path d="M9 4v14M15 6v14"></path></symbol>
+  <symbol id="p-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 21h4"></path><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.2 1 2.5h6c0-1.3.3-1.8 1-2.5A6 6 0 0 0 12 3Z"></path></symbol>
+</defs></svg>
+
+<div style="min-height:100vh;background:#E7E2DC;padding:30px 16px 60px;font-family:'IBM Plex Sans','IBM Plex Sans Thai',-apple-system,sans-serif;color:#2A211C;line-height:1.6;-webkit-font-smoothing:antialiased;">
+
+  <div class="pdf-bar" style="position:fixed;top:18px;right:22px;z-index:50;">
+    <button onClick="{{ onPrint }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:none;border-radius:12px;background:#2A211C;color:#fff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px -8px rgba(43,33,24,.5);"><svg style="width:17px;height:17px;color:#FD8E1C;"><use href="#p-pdf"></use></svg>Save as PDF</button>
+  </div>
+
+  <!-- ===== COVER ===== -->
+  <div class="page" data-screen-label="PDF Cover" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;">
+    <div data-zone="Hero" style="position:relative;height:360px;overflow:hidden;background:linear-gradient(160deg,#2A211C 0%,#3B302A 55%,#241C18 100%);color:#fff;flex:0 0 auto;">
+      {{ headerShapes }}
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,.34) 0%,rgba(42,33,28,.04) 45%,rgba(42,33,28,.7) 100%);"></div>
+      <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:42px 60px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="width:38px;height:38px;border-radius:11px;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 100 100" style="width:22px;height:22px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>
+          <span style="font-size:17px;font-weight:700;letter-spacing:.07em;">CallAway<span style="color:#FFC890;">s</span></span>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:#FFD0A1;margin-bottom:14px;">7-Day Itinerary · Offline copy</div>
+        <h1 style="font-size:62px;font-weight:700;letter-spacing:-.03em;line-height:.98;margin:0;">Bangkok<br>Slow Days</h1>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:22px;font-size:15px;font-weight:600;">
+          <span style="display:inline-flex;align-items:center;gap:8px;"><svg style="width:17px;height:17px;color:#FFC890;"><use href="#p-cal"></use></svg>Feb 10 – 16, 2026</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.6);"></span><span>2 travelers</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.6);"></span><span>Bangkok, Thailand</span>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;padding:46px 60px 40px;display:flex;flex-direction:column;">
+      <p style="font-size:17px;line-height:1.7;color:#4B423B;margin:0 0 30px;max-width:560px;text-wrap:pretty;">Seven unhurried days along the Chao Phraya. Each day spells out every stop and exactly how to get between them. At the back, a short general guide covers how the trains, taxis and each kind of place work — handy the first time you try them.</p>
+      <div data-zone="Stats bar" style="display:flex;gap:0;border:1px solid #ECE7E1;border-radius:16px;overflow:hidden;margin-bottom:34px;">
+        <div style="flex:1;padding:18px 22px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Days</div><div style="font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:4px;">7</div></div>
+        <div style="flex:1;padding:18px 22px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Stops</div><div style="font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:4px;">24</div></div>
+        <div style="flex:1;padding:18px 22px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Budget</div><div style="font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:4px;">฿24,800</div></div>
+        <div style="flex:1;padding:18px 22px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Status</div><div style="font-size:18px;font-weight:700;margin-top:8px;color:#2E8B57;display:inline-flex;align-items:center;gap:6px;"><svg style="width:16px;height:16px;color:#2E8B57;"><use href="#p-check"></use></svg>Confirmed</div></div>
+      </div>
+      <div data-zone="Itinerary index" style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#FD6318;margin-bottom:6px;">Itinerary index</div>
+      <sc-for list="{{ indexRows }}" as="row" hint-placeholder-count="7">
+        <div style="display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid #ECE7E1;">
+          <span style="font-size:15px;font-weight:700;width:54px;flex:0 0 54px;white-space:nowrap;"><span style="color:#2A211C;">Day </span><span style="color:#FD6318;">{{ row.n }}</span></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#AA9F96;width:108px;flex:0 0 108px;white-space:nowrap;">{{ row.date }}</span>
+          <span style="flex:1;min-width:0;font-size:16px;font-weight:600;color:#2A211C;">{{ row.title }}</span>
+          <span style="font-size:13px;font-weight:600;color:#8B7F76;white-space:nowrap;text-align:right;">{{ row.stops }} stops · {{ row.hours }}<br><span style="color:#2A211C;font-weight:700;">{{ row.budget }}</span></span>
+        </div>
+      </sc-for>
+      <div style="display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid #ECE7E1;">
+        <span style="font-size:15px;font-weight:700;color:#2A211C;width:54px;flex:0 0 54px;">Guide</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#AA9F96;width:108px;flex:0 0 108px;white-space:nowrap;">Appendix</span>
+        <span style="flex:1;min-width:0;font-size:16px;font-weight:600;color:#2A211C;">Getting around · Know before you go</span>
+        <span style="font-size:13px;font-weight:600;color:#8B7F76;white-space:nowrap;">general tips</span>
+      </div>
+      <div style="flex:1;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;font-size:12px;color:#AA9F96;">
+        <span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">callaways.com</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DAY PAGES (full detail inline) ===== -->
+  <sc-for list="{{ days }}" as="day" hint-placeholder-count="7">
+    <div class="page" data-screen-label="PDF Day" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+      <div data-zone="Page header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #2A211C;margin-bottom:24px;">
+        <span style="display:inline-flex;align-items:center;gap:9px;">
+          <span style="width:24px;height:24px;border-radius:7px;background:#2A211C;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 100 100" style="width:14px;height:14px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>
+          <span style="font-size:12px;font-weight:700;letter-spacing:.06em;">CallAway<span style="color:#FD6318;">s</span></span>
+        </span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#AA9F96;">Itinerary · Day {{ day.n }} / 7</span>
+      </div>
+      <div data-zone="Day header" style="display:flex;align-items:flex-start;gap:22px;margin-bottom:26px;">
+        <div style="flex:0 0 auto;text-align:center;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#2A211C;">Day</div>
+          <div style="font-size:54px;font-weight:700;letter-spacing:-.04em;line-height:.9;color:#FD6318;">{{ day.nn }}</div>
+        </div>
+        <div style="flex:1;min-width:0;padding-top:2px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#FD6318;margin-bottom:6px;">{{ day.dateFull }}</div>
+          <h2 style="font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.12;margin:0;">{{ day.title }}</h2>
+          <p style="font-size:15px;line-height:1.6;color:#4B423B;margin:9px 0 0;text-wrap:pretty;">{{ day.intro }}</p>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:13px;font-size:13px;font-weight:600;color:#8B7F76;flex-wrap:wrap;">
+            <span style="display:inline-flex;align-items:center;gap:6px;"><svg style="width:14px;height:14px;color:#FD6318;"><use href="#p-flag"></use></svg>{{ day.stopsN }} stops</span>
+            <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+            <span style="display:inline-flex;align-items:center;gap:6px;"><svg style="width:14px;height:14px;color:#FD6318;"><use href="#p-clock"></use></svg>{{ day.hours }}</span>
+            <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+            <span style="display:inline-flex;align-items:center;gap:6px;"><svg style="width:14px;height:14px;color:#FD6318;"><use href="#p-wallet"></use></svg>{{ day.budget }}</span>
+            <span style="width:3px;height:3px;border-radius:50%;background:#D9CFC7;"></span>
+            <span style="display:inline-flex;align-items:center;gap:6px;"><svg style="width:14px;height:14px;color:#FD6318;"><use href="#p-bed"></use></svg>Base · Riva Surya</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- day overview map -->
+      <div data-zone="Route map" style="position:relative;height:200px;border:1px solid #E0D8D0;border-radius:14px;overflow:hidden;margin-bottom:22px;background:#EEE9E1;break-inside:avoid;">
+        <svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;">
+          <rect x="0" y="0" width="100" height="60" fill="#F1ECE4"></rect>
+          <rect x="2" y="40" width="22" height="16" rx="3" fill="#DBE6CD"></rect>
+          <rect x="74" y="3" width="22" height="13" rx="3" fill="#DBE6CD"></rect>
+          <path d="M90 -4 C 76 12, 98 22, 80 34 S 54 54, 70 66" fill="none" stroke="#C4D8DE" stroke-width="11" stroke-linecap="round"></path>
+          <path d="M90 -4 C 76 12, 98 22, 80 34 S 54 54, 70 66" fill="none" stroke="#D7E5E9" stroke-width="4" stroke-linecap="round"></path>
+          <g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity=".85"><path d="M-2 26 H 104"></path><path d="M30 -2 V 64"></path><path d="M56 -2 V 64"></path></g>
+          <path d="{{ day.mapPath }}" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity=".9"></path>
+          <path d="{{ day.mapPath }}" fill="none" stroke="#2A211C" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0.4 3"></path>
+        </svg>
+        <sc-for list="{{ day.pins }}" as="pin">
+          <div style="{{ pin.pinStyle }}"><span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#2A211C;color:#fff;font-size:11px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 5px -1px rgba(43,33,24,.45);">{{ pin.num }}</span></div>
+        </sc-for>
+        <span style="position:absolute;top:11px;left:12px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:rgba(251,250,248,.94);border:1px solid #E0D8D0;font-size:11px;font-weight:700;color:#2A211C;"><svg style="width:13px;height:13px;color:#FD6318;"><use href="#p-map"></use></svg>Today’s route</span>
+      </div>
+
+      <div>
+        <sc-for list="{{ day.items }}" as="it">
+          <!-- STOP -->
+          <sc-if value="{{ it.isStop }}" hint-placeholder-val="{{ true }}">
+            <div data-zone="Stop row" style="display:grid;grid-template-columns:30px 1fr;gap:16px;">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <span style="width:30px;height:30px;border-radius:9px;background:#2A211C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:0 0 30px;">{{ it.num }}</span>
+                <span style="width:0;flex:1;min-height:20px;border-left:2px solid #ECE7E1;margin-top:6px;"></span>
+              </div>
+              <div style="padding-bottom:22px;break-inside:avoid;">
+                <div style="display:flex;gap:15px;">
+                  <div style="{{ it.thumbStyle }}">{{ it.iconBig }}</div>
+                  <div style="flex:1;min-width:0;">
+                    <div data-subzone="Meta row" style="display:flex;align-items:center;gap:8px;margin-bottom:2px;flex-wrap:wrap;">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:500;color:#FD6318;">{{ it.time }}</span>
+                      <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:6px;font-size:9.5px;font-weight:700;background:#F2EDE7;color:#2A211C;line-height:1;">{{ it.iconEl }}{{ it.cat }}</span>
+                      <sc-if value="{{ it.hasHours }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#2E8B57;"><span style="width:5px;height:5px;border-radius:50%;background:#2E8B57;"></span>Open {{ it.hours }}</span></sc-if>
+                      <sc-if value="{{ it.hasPrice }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;font-weight:700;color:#2A211C;">{{ it.price }}</span></sc-if>
+                      <span style="flex:1;"></span>
+                      <sc-if value="{{ it.hasPref }}" hint-placeholder-val="{{ true }}"><a data-subzone="Jump tag" href="{{ it.phref }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:#fff;background:#FD6318;padding:2px 7px;border-radius:6px;text-decoration:none;white-space:nowrap;">{{ it.pref }} ↗</a></sc-if>
+                    </div>
+                    <h3 data-subzone="Name" style="font-size:19px;font-weight:700;letter-spacing:-.012em;line-height:1.18;margin:0;">{{ it.name }}</h3>
+                    <sc-if value="{{ it.hasTh }}" hint-placeholder-val="{{ true }}"><span style="font-size:12.5px;color:#8B7F76;">{{ it.th }}</span></sc-if>
+                    <p style="font-size:13.5px;line-height:1.55;color:#4B423B;margin:6px 0 0;text-wrap:pretty;">{{ it.desc }}</p>
+                  </div>
+                </div>
+                <div data-subzone="Activities / Do / Don't" style="display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:12px;margin-top:11px;">
+                  <div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;margin-bottom:5px;">What to do</div>
+                    <sc-for list="{{ it.acts }}" as="a"><div style="display:flex;gap:7px;padding:1px 0;"><span style="width:4px;height:4px;border-radius:50%;background:#FD6318;margin-top:7px;flex:0 0 4px;"></span><span style="flex:1;min-width:0;font-size:12px;line-height:1.45;color:#4B423B;">{{ a }}</span></div></sc-for>
+                  </div>
+                  <div style="border:1px solid #E7F1EA;border-radius:10px;padding:8px 10px;">
+                    <div style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#2E8B57;margin-bottom:4px;"><svg style="width:11px;height:11px;color:#2E8B57;"><use href="#p-check"></use></svg>Do</div>
+                    <sc-for list="{{ it.dos }}" as="d"><div style="font-size:11px;line-height:1.4;color:#4B423B;padding:1px 0;">· {{ d }}</div></sc-for>
+                  </div>
+                  <div style="border:1px solid #F3E0DC;border-radius:10px;padding:8px 10px;">
+                    <div style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#C0492B;margin-bottom:4px;"><svg style="width:11px;height:11px;color:#C0492B;"><use href="#p-x"></use></svg>Don't</div>
+                    <sc-for list="{{ it.donts }}" as="d"><div style="font-size:11px;line-height:1.4;color:#4B423B;padding:1px 0;">· {{ d }}</div></sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <!-- TRANSIT (full inline) -->
+          <sc-if value="{{ it.isTransit }}" hint-placeholder-val="{{ true }}">
+            <div data-zone="Transit row" style="display:grid;grid-template-columns:30px 1fr;gap:16px;">
+              <div style="display:flex;justify-content:center;"><span style="width:0;border-left:2px dashed #FD6318;align-self:stretch;"></span></div>
+              <div style="margin:2px 0 14px;background:#F7F3EE;border:1px solid #ECE7E1;border-radius:12px;padding:13px 15px;break-inside:avoid;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <svg style="width:15px;height:15px;color:#FD6318;"><use href="#p-route"></use></svg>
+                  <span style="font-size:12.5px;font-weight:700;color:#2A211C;">Getting to {{ it.toName }}</span>
+                  <span style="flex:1;"></span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:700;color:#2A211C;background:#fff;border:1px solid #E0D8D0;padding:3px 9px;border-radius:7px;white-space:nowrap;"><svg style="width:12px;height:12px;color:#FD6318;"><use href="#p-clock"></use></svg>{{ it.recMeta }}</span>
+                  <a href="{{ it.thref }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;color:#fff;background:#2A211C;padding:2px 7px;border-radius:6px;text-decoration:none;white-space:nowrap;">{{ it.tref }} ↗</a>
+                </div>
+                <div data-subzone="Mode chips" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:11px;">
+                  <sc-for list="{{ it.opts }}" as="o"><span style="{{ o.chipStyle }}"><sc-if value="{{ o.best }}" hint-placeholder-val="{{ true }}"><svg style="width:11px;height:11px;color:#FD6318;"><use href="#p-check"></use></svg></sc-if>{{ o.label }}</span></sc-for>
+                </div>
+                <sc-if value="{{ it.hasSteps }}" hint-placeholder-val="{{ true }}">
+                  <div data-subzone="Steps" style="display:flex;flex-wrap:wrap;gap:5px 18px;margin-bottom:9px;">
+                    <sc-for list="{{ it.steps }}" as="sp"><div style="display:flex;gap:8px;width:46%;min-width:210px;"><span style="width:17px;height:17px;border-radius:6px;background:#2A211C;color:#fff;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 17px;margin-top:1px;">{{ sp.n }}</span><span style="flex:1;min-width:0;font-size:12px;line-height:1.4;color:#4B423B;">{{ sp.t }}</span></div></sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ it.hasFare }}" hint-placeholder-val="{{ true }}">
+                  <div data-subzone="Fare & safety" style="display:flex;gap:10px;margin-bottom:9px;">
+                    <div style="flex:1;border:1px solid #ECE7E1;border-radius:9px;padding:8px 10px;background:#fff;">
+                      <div style="display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;color:#2A211C;margin-bottom:4px;"><svg style="width:11px;height:11px;color:#FD6318;"><use href="#p-coin"></use></svg>FARE</div>
+                      <sc-for list="{{ it.fare }}" as="f"><div style="font-size:11px;line-height:1.4;color:#4B423B;padding:1px 0;">· {{ f }}</div></sc-for>
+                    </div>
+                    <div style="flex:1;border:1px solid #ECE7E1;border-radius:9px;padding:8px 10px;background:#fff;">
+                      <div style="display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;color:#2E8B57;margin-bottom:4px;"><svg style="width:11px;height:11px;color:#2E8B57;"><use href="#p-shield"></use></svg>NO OVERCHARGE</div>
+                      <sc-for list="{{ it.scam }}" as="s"><div style="font-size:11px;line-height:1.4;color:#4B423B;padding:1px 0;">· {{ s }}</div></sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ it.hasMaps }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px;">
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;color:#8B7F76;"><svg style="width:12px;height:12px;color:#FD6318;"><use href="#p-map"></use></svg>LINES</span>
+                    <sc-for list="{{ it.maps }}" as="m"><span style="{{ m.chipStyle }}">{{ m.label }}</span></sc-for>
+                  </div>
+                </sc-if>
+                <div data-subzone="Tip" style="display:flex;gap:8px;padding:8px 11px;border-radius:9px;background:#FFF8F2;border:1px solid #FFE4D2;">
+                  <svg style="width:13px;height:13px;color:#C98A1A;flex:0 0 13px;margin-top:1px;"><use href="#p-bulb"></use></svg>
+                  <span style="flex:1;min-width:0;font-size:12px;line-height:1.45;color:#7A5A22;"><strong>Tip ·</strong> {{ it.note }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </sc-for>
+      </div>
+
+      <div style="flex:1;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;">
+        <span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Day {{ day.n }} / 7</span>
+      </div>
+    </div>
+  </sc-for>
+
+  <!-- ===== GETTING AROUND — overview ===== -->
+  <div class="page" data-screen-label="PDF Transit Overview" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+    <div data-zone="Page header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #2A211C;margin-bottom:8px;">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.06em;">CallAway<span style="color:#FD6318;">s</span></span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#AA9F96;">Guide · Getting around</span>
+    </div>
+    <div data-zone="Section title" style="display:flex;align-items:center;gap:13px;margin:24px 0 4px;">
+      <span style="width:42px;height:42px;border-radius:12px;background:#FD6318;display:flex;align-items:center;justify-content:center;flex:0 0 42px;"><svg style="width:22px;height:22px;color:#fff;"><use href="#p-route"></use></svg></span>
+      <h2 style="font-size:30px;font-weight:700;letter-spacing:-.02em;margin:0;">Getting around Bangkok</h2>
+    </div>
+    <p style="font-size:15px;line-height:1.65;color:#4B423B;margin:10px 0 22px;max-width:560px;text-wrap:pretty;">Six ways to move around the city. Each has its own page over the next few sheets — tap a <strong>G-</strong> tag on any day to jump straight to it.</p>
+    <sc-for list="{{ transitOverview }}" as="g" hint-placeholder-count="6">
+      <a data-subzone="Mode row" href="{{ g.href }}" style="{{ g.rowStyle }}">
+        <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
+        <span style="flex:1;min-width:0;">
+          <span style="display:block;font-size:16px;font-weight:700;color:#2A211C;">{{ g.name }}</span>
+          <span style="display:block;font-size:12.5px;color:#8B7F76;line-height:1.4;margin-top:1px;">{{ g.summary }}</span>
+        </span>
+        <span style="{{ g.refStyle }}">{{ g.ref }}</span>
+      </a>
+    </sc-for>
+    <div style="flex:1;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · Getting around</span></div>
+  </div>
+
+  <!-- ===== per transport mode ===== -->
+  <sc-for list="{{ transitPages }}" as="g" hint-placeholder-count="6">
+    <div class="page" id="{{ g.slug }}" data-screen-label="PDF Transit" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;break-before:page;">
+      <div data-zone="Page header" style="{{ g.headStyle }}">
+        <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;">Getting around · {{ g.ref }}</div>
+          <h2 style="font-size:28px;font-weight:700;letter-spacing:-.02em;margin:2px 0 0;">{{ g.name }}</h2>
+        </div>
+        <span style="{{ g.refBadge }}">{{ g.ref }}</span>
+      </div>
+      <div style="flex:1;padding:30px 50px 40px;display:flex;flex-direction:column;">
+        <p style="font-size:16px;line-height:1.7;color:#4B423B;margin:0 0 20px;text-wrap:pretty;">{{ g.summary }}</p>
+        <div style="{{ g.coverStyle }}"></div>
+        <sc-if value="{{ g.hasLine }}" hint-placeholder-val="{{ true }}">
+          <div data-zone="Route diagram" style="margin-top:20px;border:1px solid #ECE7E1;border-radius:14px;background:#fff;padding:16px 18px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;margin-bottom:14px;">Typical route</div>
+            <div style="position:relative;display:flex;align-items:flex-start;">
+              <span style="{{ g.lineBarStyle }}"></span>
+              <sc-for list="{{ g.lineCells }}" as="c">
+                <div style="{{ c.cellStyle }}">
+                  <span style="height:18px;display:flex;align-items:center;justify-content:center;"><span style="{{ c.dotStyle }}"></span></span>
+                  <span style="{{ c.labelStyle }}">{{ c.l }}</span>
+                  <sc-if value="{{ c.hasS }}" hint-placeholder-val="{{ true }}"><span style="{{ c.subStyle }}">{{ c.s }}</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <div data-zone="Hours & fare" style="display:flex;gap:12px;margin-top:18px;">
+          <div style="flex:1;border:1px solid #ECE7E1;border-radius:12px;padding:12px 14px;background:#fff;"><div style="display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#AA9F96;"><svg style="width:13px;height:13px;color:#FD6318;"><use href="#p-clock"></use></svg>Hours</div><div style="font-size:14px;font-weight:600;color:#2A211C;margin-top:5px;">{{ g.hours }}</div></div>
+          <div style="flex:1.4;border:1px solid #ECE7E1;border-radius:12px;padding:12px 14px;background:#fff;"><div style="display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#AA9F96;"><svg style="width:13px;height:13px;color:#FD6318;"><use href="#p-coin"></use></svg>Fare</div><div style="font-size:14px;font-weight:600;color:#2A211C;margin-top:5px;">{{ g.fare }}</div></div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;margin:22px 0 10px;">Good to know</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;">
+          <sc-for list="{{ g.tips }}" as="t"><div style="display:flex;gap:9px;"><span style="width:6px;height:6px;border-radius:50%;background:#FD6318;margin-top:7px;flex:0 0 6px;"></span><span style="flex:1;min-width:0;font-size:13.5px;line-height:1.5;color:#4B423B;">{{ t }}</span></div></sc-for>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="margin-top:18px;padding:11px 14px;border-radius:11px;background:#F7F3EE;border:1px dashed #D9CFC7;font-size:11.5px;color:#8B7F76;font-style:italic;">Official network map to be inserted here.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · {{ g.ref }} {{ g.name }}</span></div>
+      </div>
+    </div>
+  </sc-for>
+
+  <!-- ===== KNOW BEFORE YOU GO — overview ===== -->
+  <div class="page" data-screen-label="PDF Place Overview" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+    <div data-zone="Page header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #2A211C;margin-bottom:8px;">
+      <span style="font-size:12px;font-weight:700;letter-spacing:.06em;">CallAway<span style="color:#FD6318;">s</span></span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#AA9F96;">Guide · Know before you go</span>
+    </div>
+    <div data-zone="Section title" style="display:flex;align-items:center;gap:13px;margin:24px 0 4px;">
+      <span style="width:42px;height:42px;border-radius:12px;background:#FD6318;display:flex;align-items:center;justify-content:center;flex:0 0 42px;"><svg style="width:22px;height:22px;color:#fff;"><use href="#p-flag"></use></svg></span>
+      <h2 style="font-size:30px;font-weight:700;letter-spacing:-.02em;margin:0;">Know before you go</h2>
+    </div>
+    <p style="font-size:15px;line-height:1.65;color:#4B423B;margin:10px 0 22px;max-width:560px;text-wrap:pretty;">A few habits for each kind of place. Each has its own page — tap a <strong>K-</strong> tag on any day to jump there.</p>
+    <sc-for list="{{ placeOverview }}" as="g" hint-placeholder-count="8">
+      <a data-subzone="Place row" href="{{ g.href }}" style="{{ g.rowStyle }}">
+        <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
+        <span style="flex:1;min-width:0;">
+          <span style="display:block;font-size:16px;font-weight:700;color:#2A211C;">{{ g.name }}</span>
+          <span style="display:block;font-size:12.5px;color:#8B7F76;line-height:1.4;margin-top:1px;">{{ g.summary }}</span>
+        </span>
+        <span style="{{ g.refStyle }}">{{ g.ref }}</span>
+      </a>
+    </sc-for>
+    <div style="flex:1;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · Know before you go</span></div>
+  </div>
+
+  <!-- ===== per place category ===== -->
+  <sc-for list="{{ placePages }}" as="g" hint-placeholder-count="8">
+    <div class="page" id="{{ g.slug }}" data-screen-label="PDF Place" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+      <div data-zone="Page header" style="{{ g.headStyle }}">
+        <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;">Know before you go · {{ g.ref }}</div>
+          <h2 style="font-size:28px;font-weight:700;letter-spacing:-.02em;margin:2px 0 0;">{{ g.name }}</h2>
+        </div>
+        <span style="{{ g.refBadge }}">{{ g.ref }}</span>
+      </div>
+      <div style="font-size:14px;color:#8B7F76;margin:18px 0 0;">{{ g.summary }}</div>
+      <div data-zone="Photo" style="margin-top:18px;{{ g.coverStyle }}"></div>
+      <div data-zone="Tips" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;margin:22px 0 10px;">Good to know</div>
+      <sc-for list="{{ g.tips }}" as="t"><div style="display:flex;gap:10px;padding:4px 0;"><span style="width:6px;height:6px;border-radius:50%;background:#FD6318;margin-top:8px;flex:0 0 6px;"></span><span style="flex:1;min-width:0;font-size:15px;line-height:1.6;color:#4B423B;">{{ t }}</span></div></sc-for>
+      <sc-if value="{{ g.hasNote }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:9px;margin-top:14px;padding:13px 15px;border-radius:12px;background:#FFF8F2;border:1px solid #FFE4D2;">
+          <svg style="width:16px;height:16px;color:#C98A1A;flex:0 0 16px;margin-top:1px;"><use href="#p-bulb"></use></svg>
+          <span style="flex:1;min-width:0;font-size:13.5px;line-height:1.55;color:#7A5A22;">{{ g.note }}</span>
+        </div>
+      </sc-if>
+      <div style="flex:1;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · {{ g.ref }} {{ g.name }}</span></div>
+    </div>
+  </sc-for>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:854,&quot;height&quot;:1180}}">
+class Component extends DCLogic {
+  fullDate(wd,date){ const p=(date||'').split(' '); return p.length===2 ? (wd+' '+p[1]+' '+p[0]) : (wd+' '+date); }
+  buildHeader(){ if(this._hdr) return this._hdr; const pal=['#FD6318','#FD8E1C','#FFA86F','#FFC890','#E5500B','#FFB892']; const R=(a,b)=>a+Math.random()*(b-a); const ch=[]; for(let i=0;i<20;i++){ const f=pal[Math.floor(Math.random()*pal.length)]; const o=R(0.08,0.30); const t=Math.random(); if(t<0.5){ const cx=R(-5,105),cy=R(-8,86),s=R(10,34),rot=R(0,360); ch.push(React.createElement('polygon',{key:i,points:cx+','+(cy-s)+' '+(cx-s*0.92)+','+(cy+s*0.72)+' '+(cx+s*0.92)+','+(cy+s*0.72),fill:f,opacity:o,transform:'rotate('+rot+' '+cx+' '+cy+')'})); } else if(t<0.8){ ch.push(React.createElement('circle',{key:i,cx:R(0,100),cy:R(-8,80),r:R(6,22),fill:f,opacity:o})); } else { const x=R(-6,96),y=R(-8,78),w=R(14,40),h=R(9,22),rot=R(0,360); ch.push(React.createElement('rect',{key:i,x:x,y:y,width:w,height:h,rx:3,fill:f,opacity:o,transform:'rotate('+rot+' '+(x+w/2)+' '+(y+h/2)+')'})); } } this._hdr=React.createElement('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'xMidYMid slice',style:{position:'absolute',inset:0,width:'100%',height:'100%'}},ch); return this._hdr; }
+  dayMapPts(n){ const pool=[[20,68],[40,48],[28,30],[58,24],[78,40],[88,66]]; const out=[]; for(let i=0;i<n;i++) out.push({x:pool[i%pool.length][0], y:pool[i%pool.length][1]}); return out; }
+  icoEl(href,style){ return href?React.createElement('svg',{style},React.createElement('use',{href})):null; }
+  hoursFor(cat){ const m={Temple:'08:00–18:30',Museum:'10:00–17:00',Cafe:'08:00–19:00',Restaurant:'11:00–22:00',Market:'07:00–18:00',Mall:'10:00–22:00','Rooftop bar':'17:00–01:00','Sky bar':'17:00–01:00',Viewpoint:'04:30–21:00',Attraction:'16:00–24:00',Hotel:'24h front desk',Flight:'Terminal 24h'}; return m[cat]||null; }
+  iconFor(cat){ const m={Temple:'#p-temple',Museum:'#p-museum',Cafe:'#p-coffee',Restaurant:'#p-food',Market:'#p-market',Mall:'#p-market','Rooftop bar':'#p-bar','Sky bar':'#p-bar',Viewpoint:'#p-camera',Attraction:'#p-camera',Hotel:'#p-bed',Flight:'#p-plane'}; return m[cat]||'#p-flag'; }
+  gmap(cat){ const m={Temple:'linear-gradient(135deg,#E6DCCE,#C9A876)',Cafe:'linear-gradient(135deg,#EAD9C2,#B98E63)',Restaurant:'linear-gradient(135deg,#E9C9A8,#C77F49)',Market:'linear-gradient(135deg,#E8C7C0,#B5556B)',Mall:'linear-gradient(135deg,#E8C7C0,#B5556B)','Rooftop bar':'linear-gradient(135deg,#FFC78A,#E5500B)','Sky bar':'linear-gradient(135deg,#FFC78A,#E5500B)',Museum:'linear-gradient(135deg,#D8D2C8,#8A8174)',Hotel:'linear-gradient(135deg,#D9CEC2,#8C7A66)',Flight:'linear-gradient(135deg,#CBD3D8,#6E7A82)',Viewpoint:'linear-gradient(135deg,#CFE0CE,#6E8C6A)',Attraction:'linear-gradient(135deg,#CFE0CE,#6E8C6A)'}; return m[cat]||'linear-gradient(135deg,#CFE0CE,#6E8C6A)'; }
+  imgKw(name,cat){ const kw={'Suvarnabhumi Airport':'airport,terminal','Riva Surya Bangkok':'bangkok,river,hotel','Err Urban Rustic Thai':'thai,food','Grand Palace':'bangkok,grand,palace','Tha Maharaj Riverside':'bangkok,river,restaurant','Jim Thompson House':'teak,house,garden','Wat Pho':'wat,pho,temple','The Deck by Arun':'wat,arun,river','Supanniga Eating Room':'thai,food,curry','Pak Khlong Talat':'flower,market','Eagle’s Nest Bar':'rooftop,bar,sunset','Chatuchak Weekend Market':'chatuchak,market','After You Dessert Cafe':'dessert,cafe','Lumphini Park':'lumphini,park','MOCA Bangkok':'museum,art','Or Tor Kor Market':'thai,market,fruit','Sirocco Sky Bar':'skybar,night','Damnoen Saduak':'floating,market','Maeklong Railway Market':'railway,market','Asiatique The Riverfront':'ferris,wheel,river','ICONSIAM':'bangkok,mall,river','Riva Surya · Checkout':'bangkok,river,hotel','Suvarnabhumi · Departure':'airport,airplane'}; const fb={Temple:'temple,thailand',Museum:'museum,art',Cafe:'cafe,coffee',Restaurant:'thai,food',Market:'market,thailand',Mall:'mall,shopping','Rooftop bar':'rooftop,bar','Sky bar':'skybar,night',Viewpoint:'park,bangkok',Attraction:'bangkok,river',Hotel:'hotel,room',Flight:'airport,airplane'}; return kw[name]||fb[cat]||'bangkok,thailand'; }
+  cover(name,cat){ let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%99991; return 'url("https://loremflickr.com/360/280/'+this.imgKw(name,cat)+'?lock='+h+'"), url("https://picsum.photos/seed/ca-'+encodeURIComponent(name)+'/360/280"), '+this.gmap(cat); }
+  content(name,cat){
+    const byCat={
+      Temple:{a:['Walk the main halls','See the principal Buddha','Make merit with incense'],d:['Cover shoulders & knees','Remove shoes in halls'],x:['Feet at Buddha','Touching monks']},
+      Museum:{a:['Follow the gallery route','Join a timed tour','Photograph permitted works'],d:['Buy tickets at entry','Check last-entry time'],x:['Flash photos','Touching art']},
+      Cafe:{a:['Take the view seat','Order the signature drink','Photos from the top floor'],d:['Come off-peak','Try the specialty'],x:['Rushing staff','Saving seats long']},
+      Restaurant:{a:['Order the signature dishes','Share family-style'],d:['Reserve for dinner','Ask the spice level'],x:['Over-ordering','Skipping local plates']},
+      Market:{a:['Wander the lanes','Sample street food','Hunt for local finds'],d:['Carry small cash','Bargain with a smile'],x:['Flashing valuables','Blocking aisles']},
+      Mall:{a:['Browse the Thai-craft floor','Riverside photos','Pick up gifts'],d:['Take the shuttle boat','Keep VAT receipts'],x:['Rushing — it’s huge','Missing the deck']},
+      'Rooftop bar':{a:['Catch the river sunset','Order a signature cocktail'],d:['Arrive before sunset','Smart-casual dress'],x:['Shorts or sandals','Being late']},
+      'Sky bar':{a:['Take in the skyline','Toast with a signature drink'],d:['Smart dress code','Book an edge table'],x:['Shorts/flip-flops','Large bags']},
+      Viewpoint:{a:['Stroll the grounds','Rent a paddle boat','Relax at golden hour'],d:['Bring water','Go late afternoon'],x:['Littering','Feeding lizards']},
+      Attraction:{a:['Walk the riverfront','Shop & dine','Ride the Ferris wheel'],d:['Come at dusk','Keep your ticket'],x:['Missing the last boat','Overpaying stalls']},
+      Hotel:{a:['Check in / out at the desk','Store luggage if needed'],d:['Keep your passport handy','Ask about the boat'],x:['Losing the key card','Forgetting the deposit']},
+      Flight:{a:['Check in & clear security','Head to rail / gate'],d:['Arrive 3 hours early','Keep documents ready'],x:['Liquids in carry-on','Cutting the buffer']}
+    };
+    const over={'Damnoen Saduak':{a:['Ride a longtail boat','Buy from boat vendors','Photograph canal life'],d:['Go early','Agree the boat price first'],x:['Overpaying the boat','Leaning out far']},'Maeklong Railway Market':{a:['Watch the awnings fold','Browse trackside stalls'],d:['Check the train time','Stand clear of tracks'],x:['Standing on rails','Blocking the train']}};
+    return over[name]||byCat[cat]||{a:['Explore at your pace'],d:['Plan your timing'],x:['Rushing']};
+  }
+  guideFor(recLabel){
+    const L=recLabel||'';
+    if(/Rail|BTS|MRT/.test(L)){ const lines=[]; if(/Airport/.test(L)) lines.push({label:'Airport Rail Link',color:'#D1232A'}); if(/BTS/.test(L)) lines.push({label:'BTS Skytrain',color:'#3AA935'}); if(/MRT/.test(L)) lines.push({label:'MRT Metro',color:'#2A6FB0'}); if(!lines.length) lines.push({label:'BTS Skytrain',color:'#3AA935'});
+      return {steps:['Buy a token or tap a card at the gate','Check the platform direction','Tap out & buy again at each operator change','Follow the signed exit to street level'], maps:lines, fare:null, scam:null}; }
+    if(/Grab|taxi/.test(L)) return {steps:null,maps:null,fare:['Grab app — fixed price up front','Meter — flag-fall ฿35, ≈฿6.5/km'],scam:['Insist on the meter','Refuse flat ฿300+ quotes','Have small notes ready']};
+    if(/boat/.test(L)) return {steps:['Buy at the pier or pay onboard','Take the ORANGE-flag express','Alight on the left at your pier'],maps:null,fare:null,scam:null};
+    if(/Walk/.test(L)) return {steps:['Follow the signposted lane','Flat & well lit most of the way'],maps:null,fare:null,scam:null};
+    if(/van/.test(L)) return {steps:['Meet the driver at the set time','Driver waits at the exit','Nap on the long stretches'],maps:null,fare:null,scam:null};
+    return {steps:null,maps:null,fare:null,scam:null};
+  }
+
+  transitGuideData(){
+    return [
+      {slug:'g-train',ref:'G1',name:'BTS & MRT trains', color:'#3AA935', icon:'#p-train', img:'bangkok,skytrain', summary:'The fastest way across the modern city — clean, frequent and above the traffic.', hours:'~06:00–24:00', fare:'Token ฿17–62 by distance, or tap a Rabbit / credit card', line:[{l:'Buy / tap',s:'at the gate'},{l:'Platform',s:'check direction'},{l:'Interchange',s:'change line',t:true},{l:'Alight',s:'your station'},{l:'Exit',s:'street level'}], tips:['BTS and MRT are separate systems — tap out and buy again when you switch','No eating or drinking on trains or platforms','Let people off first; stand on the right of escalators','Trains every 3–6 min; busiest 07:00–09:00 & 17:00–19:00']},
+      {slug:'g-arl',ref:'G2',name:'Airport Rail Link', color:'#D1232A', icon:'#p-train', img:'train,station,bangkok', summary:'A straight shot between Suvarnabhumi and the city in about 26 minutes.', hours:'~05:30–24:00', fare:'฿15–45 by distance; tap a card or buy a token', line:[{l:'Suvarnabhumi',s:'Level B'},{l:'Lat Krabang',s:''},{l:'Makkasan',s:'MRT link',t:true},{l:'Phaya Thai',s:'→ BTS'}], tips:['The platform is on level B (basement) of the airport','Transfer to BTS at Phaya Thai or MRT at Makkasan','Far faster than a taxi during rush hour','Keep your token — tap out at the exit gate']},
+      {slug:'g-taxi',ref:'G3',name:'Grab & taxis', color:'#1A9E5B', icon:'#p-bus', img:'taxi,bangkok,street', summary:'Door to door — easiest with the Grab app, which fixes the fare up front.', hours:'24 hours', fare:'Grab: fixed in-app · metered taxi: flag-fall ฿35, then ≈฿6.5/km + time', line:null, tips:['Grab shows the price before you book — no haggling','In a street taxi insist on the meter: “meter, please”','Refuse anyone quoting a flat ฿300+ fare','Flag a moving taxi, not one parked at malls/hotels','Keep small notes (฿20/50/100) for change']},
+      {slug:'g-boat',ref:'G4',name:'River boats', color:'#E0822A', icon:'#p-boat', img:'chao,phraya,boat', summary:'The breezy, traffic-free way up and down the Chao Phraya.', hours:'~06:00–19:00 (express)', fare:'฿16 flat (express) · cross-river ferry ฿4–5', line:[{l:'Pier booth',s:'buy ticket'},{l:'Orange flag',s:'express',t:true},{l:'Your pier',s:'alight left'}], tips:['Flag colour = service: orange express, no flag = all stops, blue = tourist','Buy at the pier booth or pay the conductor onboard','Board quickly — boats barely stop','Cross-river ferries run constantly between main piers']},
+      {slug:'g-walk',ref:'G5',name:'On foot', color:'#8B7F76', icon:'#p-walk', img:'bangkok,street,walk', summary:'Old-town lanes and the riverside are best explored on foot.', hours:'—', fare:'Free', line:null, tips:['Footpaths can be uneven — wear flat shoes','Cross at lights or skybridges; traffic is busy','Use covered walkways in the midday heat','Carry water — it gets hot fast']},
+      {slug:'g-van',ref:'G6',name:'Day-trip van', color:'#6E7A82', icon:'#p-bus', img:'van,road,thailand', summary:'A booked van for the out-of-town floating-market day.', hours:'By booking', fare:'Included in the day-trip package', line:null, tips:['Meet the driver at the agreed time and spot','The driver waits at the market exit','Nap on the long stretches between stops']}
+    ];
+  }
+  placeGuideData(){
+    return [
+      {slug:'k-temple',ref:'K1',name:'Temples', icon:'#p-temple', img:'temple,bangkok', summary:'Sacred spaces — a little etiquette goes a long way.', tips:['Dress modestly — shoulders and knees covered (wraps rent at major temples)','Remove shoes before entering halls','Lower your voice; ask before photographing monks','Step over the threshold, don’t on it'], note:'Women should not touch monks or hand things to them directly.'},
+      {slug:'k-food',ref:'K2',name:'Restaurants & food', icon:'#p-food', img:'thai,street,food', summary:'How to order and eat like a local.', tips:['Order several dishes to share, with rice separately','At street stalls, point at what looks good','Drink bottled water — tap water isn’t for drinking','A fork pushes food onto the spoon — the spoon does the eating'], note:'Tipping isn’t expected; rounding up the bill is a kind gesture.'},
+      {slug:'k-cafe',ref:'K3',name:'Cafés & desserts', icon:'#p-coffee', img:'cafe,coffee,bangkok', summary:'Bangkok’s café scene is serious — and photogenic.', tips:['Popular spots fill up — go off-peak for a window seat','Many close by 19:00','Card is fine at chains; carry cash for small cafés']},
+      {slug:'k-market',ref:'K4',name:'Markets', icon:'#p-market', img:'bangkok,market', summary:'Bargaining is normal — keep it friendly.', tips:['Carry small notes; most stalls are cash-only','Bargain politely with a smile, then commit','Go early to beat the heat and crowds','Keep valuables zipped and close'], note:'A fair counter-offer is ~10–20% off the first price — don’t push too hard.'},
+      {slug:'k-museum',ref:'K5',name:'Museums & galleries', icon:'#p-museum', img:'museum,gallery', summary:'Quiet, cool and great for the hottest hours.', tips:['Buy tickets at the entrance and check last-entry time','Use the lockers for large bags','No flash; some rooms ban photos entirely']},
+      {slug:'k-bar',ref:'K6',name:'Rooftop & sky bars', icon:'#p-bar', img:'rooftop,bar,bangkok', summary:'Sunset views with a dress code.', tips:['Smart-casual: no shorts, vests or sandals','Arrive before sunset for the best seats','Drinks are pricey — you’re paying for the view']},
+      {slug:'k-hotel',ref:'K7',name:'Hotels & stays', icon:'#p-bed', img:'hotel,room,bangkok', summary:'Checking in and out, the easy way.', tips:['Check-in ~14:00, check-out ~12:00 — store bags at the desk otherwise','Keep your passport for check-in','Ask about the free shuttle boat or tuk-tuk'], note:'A small deposit may be held at check-in and refunded when you leave.'},
+      {slug:'k-park',ref:'K8',name:'Parks & riverfront', icon:'#p-camera', img:'lumphini,park', summary:'Green breaks and golden-hour walks.', tips:['Best light and cooler air in the late afternoon','Bring water and mosquito spray for dusk','Most are free — just respect posted hours']}
+    ];
+  }
+
+  guideRefFor(label){ const L=label||''; if(/Airport/.test(L)) return {ref:'G2',slug:'g-arl'}; if(/BTS|MRT/.test(L)) return {ref:'G1',slug:'g-train'}; if(/Grab|taxi/.test(L)) return {ref:'G3',slug:'g-taxi'}; if(/boat/.test(L)) return {ref:'G4',slug:'g-boat'}; if(/Walk/.test(L)) return {ref:'G5',slug:'g-walk'}; if(/van/.test(L)) return {ref:'G6',slug:'g-van'}; return {ref:'G1',slug:'g-train'}; }
+  placeRefFor(cat){ const m={Temple:{ref:'K1',slug:'k-temple'},Restaurant:{ref:'K2',slug:'k-food'},Cafe:{ref:'K3',slug:'k-cafe'},Market:{ref:'K4',slug:'k-market'},Mall:{ref:'K4',slug:'k-market'},Museum:{ref:'K5',slug:'k-museum'},'Rooftop bar':{ref:'K6',slug:'k-bar'},'Sky bar':{ref:'K6',slug:'k-bar'},Hotel:{ref:'K7',slug:'k-hotel'},Viewpoint:{ref:'K8',slug:'k-park'},Attraction:{ref:'K8',slug:'k-park'},Flight:{ref:'',slug:''}}; return m[cat]||{ref:'',slug:''}; }
+  lineCells(line,color){ if(!line) return []; return line.map(st=>{ const big=st.l&&(st===line[0]||st===line[line.length-1]); const dotStyle = st.t ? {width:'16px',height:'16px',borderRadius:'50%',background:'#fff',border:'3px solid '+color,boxSizing:'border-box'} : {width:big?'16px':'11px',height:big?'16px':'11px',borderRadius:'50%',background:color,border:big?'3px solid #fff':'none',boxShadow:big?'0 0 0 2px '+color:'none',boxSizing:'border-box'}; return {l:st.l,s:st.s||'',hasS:!!st.s,dotStyle,cellStyle:{flex:1,minWidth:0,display:'flex',flexDirection:'column',alignItems:'center',gap:'8px'},labelStyle:{fontSize:'12px',fontWeight:700,color:'#2A211C',textAlign:'center',lineHeight:1.2,whiteSpace:'nowrap'},subStyle:{fontSize:'10px',fontWeight:600,color:'#AA9F96',textAlign:'center',whiteSpace:'nowrap'}}; }); }
+
+  data(){
+    const o=(label,best)=>({label,best:!!best});
+    return [
+      { wd:'Tue', date:'Feb 10', title:'Arrival & Riverside Welcome', hours:'5 hrs', budget:'฿3,720',
+        intro:'A gentle start — land in the afternoon, ride into the city, check into a riverside hotel, then a rustic Thai dinner in the old town.', stops:[
+        {t:'14:00',name:'Suvarnabhumi Airport',th:'สนามบินสุวรรณภูมิ',cat:'Flight',price:'',desc:'Land, clear immigration and collect bags. The Airport Rail Link from level B is the smoothest way into town.',to:'Riva Surya Bangkok',opts:[o('Airport Rail · 26 min · ฿45',true),o('Grab / taxi · 45 min · ฿400')],note:'Rail beats traffic at rush hour; tap a credit card or buy a token at the gate.'},
+        {t:'16:00',name:'Riva Surya Bangkok',th:'โรงแรมริว่า สุริยา',cat:'Hotel',price:'฿3,200',desc:'Check into a river-view room and unwind before dinner.',to:'Err Urban Rustic Thai',opts:[o('Walk · 5 min · Free',true)],note:'Quiet riverside lane, well lit in the evening.'},
+        {t:'19:00',name:'Err Urban Rustic Thai',th:'ร้านเอิร์ธ',cat:'Restaurant',price:'฿520',desc:'A beloved old-town spot near Tha Tien — crispy pork and chili dips. Table is booked.'}
+      ]},
+      { wd:'Wed', date:'Feb 11', title:'Old Town & Royal Bangkok', hours:'6 hrs', budget:'฿1,080',
+        intro:'Open at the Grand Palace, wander the river wall north for lunch, then the teak calm of the Jim Thompson House.', stops:[
+        {t:'09:00',name:'Grand Palace',th:'พระบรมมหาราชวัง',cat:'Temple',price:'฿500',desc:'The Emerald Buddha and Thai royal architecture. Dress modestly — wraps for rent at the gate.',to:'Tha Maharaj Riverside',opts:[o('Walk · 10 min · Free',true),o('Grab · 7 min · ฿60')],note:'Follow the river wall north — vendors the whole way.'},
+        {t:'12:00',name:'Tha Maharaj Riverside',th:'ท่ามหาราช',cat:'Restaurant',price:'฿380',desc:'An airy riverside complex; pick a table by the water for the breeze.',to:'Jim Thompson House',opts:[o('River boat · 8 min · ฿16',true),o('Grab · 20 min · ฿120')],note:'Take the orange-flag express boat; pay onboard.'},
+        {t:'15:00',name:'Jim Thompson House',th:'บ้านจิม ทอมป์สัน',cat:'Museum',price:'฿200',desc:'Teak houses and a Thai silk collection. Guided tours run on a loop — last entry mid-afternoon.'}
+      ]},
+      { wd:'Thu', date:'Feb 12', title:'Riverside Temples & Sunset', hours:'10 hrs', budget:'฿1,480',
+        intro:'The highlight day — Wat Pho, coffee with a Wat Arun view, a classic Thai lunch, the flower market, and a rooftop sunset.', stops:[
+        {t:'08:30',name:'Wat Pho',th:'วัดโพธิ์',cat:'Temple',price:'฿200',desc:'The giant Reclining Buddha and the home of Thai massage. Come early to beat crowds and heat.',to:'The Deck by Arun',opts:[o('Walk + ferry · 8 min · ฿4',true)],note:'Cross-river ferry to the Wat Arun side runs every few minutes.'},
+        {t:'10:30',name:'The Deck by Arun',th:'เดอะ เด็ค บาย อรุณ',cat:'Cafe',price:'฿180',desc:'Coffee with a full Wat Arun view across the water. Best photo angle is the top floor.',to:'Supanniga Eating Room',opts:[o('Walk · 6 min · Free',true)],note:'Straight down the riverside road.'},
+        {t:'12:30',name:'Supanniga Eating Room',th:'สุพรรณิการ์',cat:'Restaurant',price:'฿650',desc:'Bold heirloom recipes from Trat — the moo chamuang and crab omelette are essential. Booked.',to:'Pak Khlong Talat',opts:[o('Grab · 18 min · ฿90',true),o('River boat · 20 min · ฿30')],note:'Book a Grab to beat the 4–7pm jam; aim to arrive before 6pm.'},
+        {t:'15:00',name:'Pak Khlong Talat',th:'ปากคลองตลาด',cat:'Market',price:'Free',desc:'Bangkok’s largest fresh-flower market — a riot of colour, lovely to wander and photograph.',to:'Eagle’s Nest Bar',opts:[o('Grab · 12 min · ฿70',true)],note:'Arrive at the rooftop before 18:00 for a rail seat.'},
+        {t:'18:30',name:'Eagle’s Nest Bar',th:'อีเกิลส เนสต์',cat:'Rooftop bar',price:'฿450',desc:'Close the day on a rooftop with the sun setting behind Wat Arun.'}
+      ]},
+      { wd:'Fri', date:'Feb 13', title:'Markets & Green Spaces', hours:'7 hrs', budget:'฿250',
+        intro:'A relaxed pace through Chatuchak’s endless stalls, a famous dessert stop, then the city’s central park.', stops:[
+        {t:'09:30',name:'Chatuchak Weekend Market',th:'ตลาดนัดจตุจักร',cat:'Market',price:'Free',desc:'The vast weekend market — everything from street food to homeware. Wear comfortable shoes.',to:'After You Dessert Cafe',opts:[o('BTS + MRT · 22 min · ฿88',true),o('Grab · 25 min · ฿150')],note:'BTS to the interchange, walk the link bridge, then MRT — buy a separate MRT token.'},
+        {t:'13:00',name:'After You Dessert Cafe',th:'อาฟเตอร์ ยู',cat:'Cafe',price:'฿250',desc:'A dessert break — the Shibuya toast and shaved ice that made the chain famous.',to:'Lumphini Park',opts:[o('Walk · 8 min · Free',true)],note:'Short walk through the Si Lom blocks.'},
+        {t:'16:00',name:'Lumphini Park',th:'สวนลุมพินี',cat:'Viewpoint',price:'Free',desc:'Stroll or paddle a swan boat in the city’s green heart. Lovely light in the late afternoon.'}
+      ]},
+      { wd:'Sat', date:'Feb 14', title:'Art & Skyline', hours:'9 hrs', budget:'฿1,180',
+        intro:'A day for art and good eating — Thai contemporary art, a gourmet market lunch, then a legendary sky bar at night.', stops:[
+        {t:'10:00',name:'MOCA Bangkok',th:'โมก้า',cat:'Museum',price:'฿280',desc:'Five floors of Thai contemporary art in a light-filled building — a favourite for photographers.',to:'Or Tor Kor Market',opts:[o('MRT + Grab · 38 min · ฿210',true),o('Grab · 25 min · ฿150')],note:'MRT Blue Line then a short Grab is cheaper than Grab all the way; tap out before booking.'},
+        {t:'13:30',name:'Or Tor Kor Market',th:'ตลาด อ.ต.ก.',cat:'Restaurant',price:'฿300',desc:'A premium fresh market — curries, grills, sweets and famously good fruit.',to:'Sirocco Sky Bar',opts:[o('Grab · 30 min · ฿200',true)],note:'Long ride across town in evening traffic — dress smart, no shorts.'},
+        {t:'19:00',name:'Sirocco Sky Bar',th:'ซิรอคโค',cat:'Sky bar',price:'฿600',desc:'A legendary open-air sky bar high above the Chao Phraya. Smart dress code applies.'}
+      ]},
+      { wd:'Sun', date:'Feb 15', title:'Floating Markets Day Trip', hours:'11 hrs', budget:'฿700',
+        intro:'Out of the city — the floating market, the umbrella-pulldown railway market, then a relaxed evening at Asiatique.', stops:[
+        {t:'08:00',name:'Damnoen Saduak',th:'ตลาดน้ำดำเนินสะดวก',cat:'Market',price:'฿700',desc:'The classic floating market — ride a longtail past vendors selling from their boats. Earlier is calmer.',to:'Maeklong Railway Market',opts:[o('Day-trip van · 40 min · Included',true)],note:'Driver waits at the market exit — confirm the pickup time.'},
+        {t:'13:00',name:'Maeklong Railway Market',th:'ตลาดร่มหุบ',cat:'Market',price:'Free',desc:'A market built across live train tracks — watch the awnings fold away as the train rolls through.',to:'Asiatique The Riverfront',opts:[o('Day-trip van · 90 min · Included',true)],note:'The long ride back — nap on the way; check the train timetable before you go.'},
+        {t:'18:00',name:'Asiatique The Riverfront',th:'เอเชียทีค',cat:'Attraction',price:'Free',desc:'A riverside night market — shop, eat, and ride the Ferris wheel for a skyline view.'}
+      ]},
+      { wd:'Mon', date:'Feb 16', title:'Last Bites & Farewell', hours:'5 hrs', budget:'—',
+        intro:'A calm final morning — gifts at ICONSIAM, check out, and to the airport with plenty of buffer.', stops:[
+        {t:'10:00',name:'ICONSIAM',th:'ไอคอนสยาม',cat:'Mall',price:'Shopping',desc:'A riverside mall — the SOOKSIAM floor gathers the best of regional Thai crafts and snacks for gifts.',to:'Riva Surya · Checkout',opts:[o('Boat shuttle · 6 min · Free',true),o('Walk · 8 min · Free')],note:'Free ICONSIAM shuttle boat to Si Phraya pier.'},
+        {t:'13:00',name:'Riva Surya · Checkout',th:'เช็คเอาท์',cat:'Hotel',price:'',desc:'Pack up and check out. The lobby can hold bags if your flight is later.',to:'Suvarnabhumi · Departure',opts:[o('Airport Rail · 30 min · ฿45',true),o('Grab · 45 min · ฿400')],note:'Taxi to Phaya Thai then Airport Rail; allow 3 hours before the flight.'},
+        {t:'15:30',name:'Suvarnabhumi · Departure',th:'สนามบินสุวรรณภูมิ',cat:'Flight',price:'',desc:'Arrive at least three hours before departure for check-in and security.'}
+      ]}
+    ];
+  }
+
+  renderVals(){
+    const raw=this.data();
+    const indexRows=raw.map((d,i)=>({n:i+1, date:this.fullDate(d.wd,d.date), title:d.title, stops:d.stops.length, hours:d.hours, budget:d.budget}));
+    const chip=(best)=>({display:'inline-flex',alignItems:'center',gap:'5px',padding:'5px 10px',borderRadius:'8px',fontSize:'11.5px',fontWeight:700,lineHeight:1,whiteSpace:'nowrap',background: best?'#FFF1E6':'#fff', color:'#2A211C', border: best?'1.5px solid #FD6318':'1px solid #E0D8D0'});
+    const mapChip=(color)=>({display:'inline-flex',alignItems:'center',gap:'5px',padding:'3px 9px',borderRadius:'999px',fontSize:'10.5px',fontWeight:700,color:'#fff',background:color,whiteSpace:'nowrap'});
+
+    const days=raw.map((d,di)=>{
+      const items=[];
+      d.stops.forEach((s,i)=>{
+        const last=i===d.stops.length-1;
+        const hrs=this.hoursFor(s.cat), info=this.content(s.name,s.cat);
+        const pr=this.placeRefFor(s.cat);
+        items.push({ isStop:true, num:i+1, time:s.t, name:s.name, th:s.th, hasTh:!!s.th, cat:s.cat,
+          pref:pr.ref, phref:'#'+pr.slug, hasPref:!!pr.ref,
+          iconEl:this.icoEl(this.iconFor(s.cat),{width:'11px',height:'11px',color:'#2A211C',marginRight:'1px'}),
+          iconBig:this.icoEl(this.iconFor(s.cat),{position:'absolute',right:'-6px',bottom:'-8px',width:'46px',height:'46px',color:'rgba(255,255,255,.34)'}),
+          thumbStyle:{position:'relative',width:'118px',height:'90px',borderRadius:'11px',flex:'0 0 118px',backgroundImage:this.cover(s.name,s.cat),backgroundSize:'cover',backgroundPosition:'center',overflow:'hidden',border:'1px solid rgba(43,33,24,.06)'},
+          hours:hrs, hasHours:!!hrs, price:s.price, hasPrice:!!s.price, desc:s.desc, acts:info.a, dos:info.d, donts:info.x });
+        if(!last && s.opts){
+          const rec=(s.opts.find(x=>x.best)||s.opts[0]).label;
+          const recMeta=rec.split(' · ').slice(1).join(' · ');
+          const g=this.guideFor(rec);
+          const gr=this.guideRefFor(rec);
+          items.push({ isTransit:true, toName:s.to||d.stops[i+1].name, recMeta, note:s.note||'',
+            tref:gr.ref, thref:'#'+gr.slug,
+            opts:s.opts.map(x=>({label:x.label,best:x.best,chipStyle:chip(x.best)})),
+            steps:(g.steps||[]).map((t,k)=>({n:k+1,t})), hasSteps:!!(g.steps&&g.steps.length),
+            fare:g.fare||[], hasFare:!!(g.fare&&g.fare.length), scam:g.scam||[],
+            maps:(g.maps||[]).map(m=>({label:m.label,chipStyle:mapChip(m.color)})), hasMaps:!!(g.maps&&g.maps.length) });
+        }
+      });
+      const pts=this.dayMapPts(d.stops.length);
+      const mapPath=pts.map((p,i)=>(i===0?'M ':'L ')+p.x+' '+p.y).join(' ');
+      const pins=pts.map((p,i)=>({num:i+1, pinStyle:{position:'absolute',left:p.x+'%',top:p.y+'%',transform:'translate(-50%,-50%)'}}));
+      return { n:di+1, nn:String(di+1).padStart(2,'0'), dateFull:this.fullDate(d.wd,d.date), title:d.title, intro:d.intro, items, mapPath, pins, stopsN:d.stops.length, hours:d.hours, budget:d.budget };
+    });
+
+    const transitOverview=this.transitGuideData().map(g=>({ name:g.name, summary:g.summary, ref:g.ref, href:'#'+g.slug,
+      rowStyle:{display:'flex',alignItems:'center',gap:'12px',padding:'13px 15px',border:'1px solid #ECE7E1',borderRadius:'13px',background:'#fff',marginBottom:'10px',textDecoration:'none'},
+      iconWrap:{width:'40px',height:'40px',borderRadius:'11px',background:g.color,display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 40px'},
+      iconEl:this.icoEl(g.icon,{width:'20px',height:'20px',color:'#fff'}),
+      refStyle:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',fontWeight:700,color:'#fff',background:g.color,padding:'3px 0',width:'34px',textAlign:'center',borderRadius:'7px',whiteSpace:'nowrap',flex:'0 0 34px'} }));
+    const transitPages=this.transitGuideData().map(g=>({ slug:g.slug, ref:g.ref, name:g.name, color:g.color, summary:g.summary, hours:g.hours, fare:g.fare, tips:g.tips,
+      iconEl:this.icoEl(g.icon,{width:'22px',height:'22px',color:'#fff'}),
+      iconWrap:{width:'40px',height:'40px',borderRadius:'11px',background:'rgba(255,255,255,.22)',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 40px'},
+      headStyle:{display:'flex',alignItems:'center',gap:'13px',padding:'20px 24px',background:g.color,color:'#fff'},
+      refBadge:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'12px',fontWeight:700,color:'#fff',background:'rgba(0,0,0,.22)',padding:'4px 10px',borderRadius:'8px'},
+      coverStyle:{position:'relative',height:'150px',borderRadius:'14px',overflow:'hidden',backgroundImage:'url("https://loremflickr.com/640/300/'+g.img+'?lock='+(g.slug.length*7)+'"), url("https://picsum.photos/seed/cg-'+g.slug+'/640/300"), linear-gradient(135deg,#D9CEC2,#8C7A66)',backgroundSize:'cover',backgroundPosition:'center',border:'1px solid rgba(43,33,24,.06)'},
+      hasLine:!!g.line, lineColor:g.color,
+      lineCells:this.lineCells(g.line,g.color),
+      lineBarStyle:{position:'absolute',left:'12%',right:'12%',top:'7.5px',height:'3px',borderRadius:'2px',background:g.color,opacity:.45,zIndex:1} }));
+    const placeOverview=this.placeGuideData().map(g=>({ name:g.name, summary:g.summary, ref:g.ref, href:'#'+g.slug,
+      rowStyle:{display:'flex',alignItems:'center',gap:'12px',padding:'13px 15px',border:'1px solid #ECE7E1',borderRadius:'13px',background:'#fff',marginBottom:'10px',textDecoration:'none'},
+      iconWrap:{width:'40px',height:'40px',borderRadius:'11px',background:'#F2EDE7',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 40px'},
+      iconEl:this.icoEl(g.icon,{width:'20px',height:'20px',color:'#2A211C'}),
+      refStyle:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',fontWeight:700,color:'#fff',background:'#2A211C',padding:'3px 0',width:'34px',textAlign:'center',borderRadius:'7px',whiteSpace:'nowrap',flex:'0 0 34px'} }));
+    const placeColor={'k-temple':'#C19A4E','k-food':'#C77F49','k-cafe':'#B98E63','k-market':'#B5556B','k-museum':'#8A8174','k-bar':'#E5500B','k-hotel':'#8C7A66','k-park':'#6E8C6A'};
+    const placePages=this.placeGuideData().map(g=>{ const c=placeColor[g.slug]||'#2A211C'; return { slug:g.slug, ref:g.ref, name:g.name, summary:g.summary, tips:g.tips, note:g.note||'', hasNote:!!g.note, color:c,
+      iconEl:this.icoEl(g.icon,{width:'22px',height:'22px',color:'#fff'}),
+      iconWrap:{width:'40px',height:'40px',borderRadius:'11px',background:'rgba(255,255,255,.22)',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 40px'},
+      headStyle:{display:'flex',alignItems:'center',gap:'13px',padding:'22px 24px',background:c,color:'#fff',margin:'-50px -60px 0'},
+      refBadge:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'12px',fontWeight:700,color:'#fff',background:'rgba(0,0,0,.22)',padding:'4px 10px',borderRadius:'8px'},
+      coverStyle:{position:'relative',height:'150px',borderRadius:'14px',overflow:'hidden',backgroundImage:'url("https://loremflickr.com/640/300/'+g.img+'?lock='+(g.slug.length*9)+'"), url("https://picsum.photos/seed/cg-'+g.slug+'/640/300"), linear-gradient(135deg,#D9CEC2,#8C7A66)',backgroundSize:'cover',backgroundPosition:'center',border:'1px solid rgba(43,33,24,.06)'} }; });
+
+    return { indexRows, days, transitOverview, transitPages, placeOverview, placePages, headerShapes:this.buildHeader(), onPrint: ()=>{ try{ window.print(); }catch(e){} } };
+  }
+}
+</script>
+</body>
+</html>

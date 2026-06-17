@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CallAways · Layout Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  :root{
+    --bg:#E7E2DC; --panel:#FBFAF8; --ink:#2A211C; --muted:#8B7F76; --line:#E6DFD7;
+    --orange:#FD6318; --orange-soft:#FFF1E7;
+  }
+  html,body{margin:0;height:100%;}
+  body{font-family:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--ink);background:var(--bg);display:flex;flex-direction:column;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+
+  /* ---- top bar ---- */
+  #top{display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex:0 0 auto;z-index:5;}
+  .brand{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:14px;letter-spacing:.04em;white-space:nowrap;}
+  .brand .logo{width:26px;height:26px;border-radius:8px;background:var(--ink);display:flex;align-items:center;justify-content:center;}
+  .brand b{color:var(--orange);}
+  .tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+  .spacer{flex:1;}
+  label.fld{display:inline-flex;flex-direction:column;gap:3px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+  select{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 30px 7px 11px;cursor:pointer;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B7F76' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;}
+  /* segmented toggle */
+  .seg{display:inline-flex;background:#F1ECE5;border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px;}
+  .seg button{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--muted);background:none;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(43,33,24,.12);}
+  .seg button svg{width:14px;height:14px;}
+  .ghost{font-family:inherit;font-size:12px;font-weight:600;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 11px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+  .ghost svg{width:14px;height:14px;color:var(--orange);}
+
+  /* ---- body split ---- */
+  #body{flex:1;display:flex;min-height:0;}
+  #side{flex:0 0 230px;background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:14px 12px;}
+  .side-h{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:6px 10px 8px;}
+  .pg{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);background:none;border:none;border-radius:10px;padding:9px 10px;cursor:pointer;line-height:1.3;}
+  .pg:hover{background:#F1ECE5;}
+  .pg.on{background:var(--orange-soft);color:var(--orange);}
+  .pg .n{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;color:var(--muted);flex:0 0 auto;width:20px;}
+  .pg.on .n{color:var(--orange);}
+  .pg .lab{flex:1;min-width:0;}
+  .pg .sub{display:block;font-weight:500;font-size:10.5px;color:var(--muted);}
+
+  /* ---- stage ---- */
+  #stage{flex:1;min-width:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:26px;}
+  #frameWrap{position:relative;flex:0 0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 28px 60px -22px rgba(43,33,24,.4);overflow:hidden;transition:width .25s ease;}
+  #fr{display:block;border:0;width:100%;height:100%;background:#E7E2DC;}
+  /* current page caption */
+  #cap{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9;display:flex;align-items:center;gap:9px;background:var(--ink);color:#fff;padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;box-shadow:0 10px 30px -10px rgba(43,33,24,.6);pointer-events:none;opacity:0;transition:opacity .2s ease;}
+  #cap.show{opacity:1;}
+  #cap .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);}
+  #loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--muted);font-size:13px;background:rgba(251,250,248,.85);backdrop-filter:blur(2px);z-index:4;}
+  #loading.hide{display:none;}
+  .spin{width:26px;height:26px;border:3px solid #E6DFD7;border-top-color:var(--orange);border-radius:50%;animation:sp 1s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .note{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div id="top">
+  <span class="brand"><span class="logo"><svg viewBox="0 0 100 100" style="width:15px;height:15px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>CallAway<b>s</b></span>
+  <span class="tag">Layout&nbsp;Overview</span>
+
+  <label class="fld">Source
+    <select id="srcSel">
+      <option value="doc">Document (interactive)</option>
+      <option value="pdf">PDF export</option>
+    </select>
+  </label>
+
+  <div class="seg" id="modeSeg">
+    <button data-mode="wireframe" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path></svg>Wireframe</button>
+    <button data-mode="preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>Preview</button>
+  </div>
+
+  <span class="spacer"></span>
+  <a class="ghost" id="rawLink" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7M21 3l-9 9M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>Open raw</a>
+</div>
+
+<div id="body">
+  <aside id="side"></aside>
+  <section id="stage">
+    <div id="frameWrap">
+      <iframe id="fr" title="layout preview"></iframe>
+      <div id="loading"><div class="spin"></div><div>Rendering layout…</div><div class="note" id="loadNote"></div></div>
+    </div>
+  </section>
+</div>
+<div id="cap"><span class="dot"></span><span id="capText"></span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- source config -------------------------------------------------------
+  var FILES = {
+    doc: "Trip%20Plan%20Doc.dc.html",
+    pdf: "Trip%20Plan%20PDF.dc.html"
+  };
+  // Frame size per source (px). Doc = phone card; PDF = A4 page.
+  var FRAME = { doc:{w:480,h:880}, pdf:{w:840,h:980} };
+
+  // Doc screens are state-driven — each "page" sets the app state.
+  var DOC_PAGES = [
+    { label:"Overview", sub:"masthead · highlights · 7-day list",
+      drive:function(lg){ lg.setState({view:"overview",drawer:null,pd:null,gt:null}); } },
+    { label:"Day · itinerary", sub:"day masthead · map · stops",
+      drive:function(lg){ lg.setState({view:"day",sel:0,cp:-1,drawer:null,pd:null,gt:null}); } },
+    { label:"Day · node selected", sub:"route segment + popup",
+      drive:function(lg){ lg.setState({view:"day",sel:2,cp:1,drawer:null,pd:null,gt:null}); } },
+    { label:"Transport drawer", sub:"bottom sheet · how to get there",
+      drive:function(lg){ try{
+        var day=lg.tripDays()[0], s=day.stops[0], o=s.move&&s.move[0];
+        if(!o) throw 0;
+        lg.setState({view:"day",sel:0,pd:null,gt:null,dlegs:{},
+          drawer:Object.assign({},o,{from:s.name,to:day.stops[1].name,best:true,kind:(lg.moveKind?lg.moveKind(o.mode):"road")})});
+      }catch(e){ console.warn("drive drawer:",e); lg.setState({view:"day",sel:0,cp:-1,drawer:null}); } } },
+    { label:"Place detail", sub:"bottom sheet · what to do",
+      drive:function(lg){ try{
+        var sel=1,i=0,day=lg.tripDays()[sel],s=day.stops[i];
+        var info=(lg.placeContent?lg.placeContent(s.name,s.cat):{})||{};
+        lg.setState({view:"day",sel:sel,drawer:null,gt:null,
+          pd:{name:s.name,th:(lg.placeTh?lg.placeTh(s.name):""),cat:s.cat,icon:s.icon,
+              hours:(lg.hoursFor?lg.hoursFor(s.cat):""),price:s.price,desc:s.desc,
+              acts:info.acts||[],dos:info.dos||[],donts:info.donts||[],idx:i}});
+      }catch(e){ console.warn("drive place:",e); lg.setState({view:"day",sel:1,cp:-1,pd:null}); } } },
+    { label:"Good to know", sub:"bottom sheet · tips index",
+      drive:function(lg){ lg.setState({view:"day",sel:0,drawer:null,pd:null,gt:"__idx"}); } }
+  ];
+
+  // Friendlier names for PDF .page data-screen-label values
+  var PDF_RENAME = {
+    "PDF Cover":"Cover / Index", "PDF Day":"Day", "PDF Transit Overview":"Transit · overview",
+    "PDF Transit":"Transit", "PDF Place Overview":"Places · overview", "PDF Place":"Place"
+  };
+
+  // Wireframe overlay injected into the iframe document.
+  var WIREFRAME_CSS =
+    "html.ca-wf{filter:grayscale(1) contrast(.93);}"+
+    "html.ca-wf *{box-shadow:none !important;text-shadow:none !important;}"+
+    "html.ca-wf img,html.ca-wf [style*='background-image']{opacity:.16 !important;}"+
+    "html.ca-wf svg{opacity:.38 !important;}"+
+    "html.ca-wf .maplibregl-canvas{opacity:.5 !important;}"+
+    "html.ca-wf div,html.ca-wf section,html.ca-wf header,html.ca-wf article,html.ca-wf nav,html.ca-wf button,html.ca-wf a,html.ca-wf li,html.ca-wf h1,html.ca-wf h2,html.ca-wf h3{outline:1px solid rgba(40,30,25,.11) !important;outline-offset:-1px;}"+
+    /* named-zone overlays — only visible in wireframe mode */
+    ".ca-zone{display:none;}"+
+    "html.ca-wf .ca-zonerel{position:relative !important;}"+
+    "html.ca-wf .ca-zonebox{outline:1.6px dashed rgba(253,99,24,.7) !important;outline-offset:-2px;}"+
+    "html.ca-wf .ca-zone{display:block;position:absolute;top:0;left:0;background:#FD6318;color:#fff;font:600 9.5px/1.4 'IBM Plex Mono',monospace;letter-spacing:.02em;padding:1px 6px;border-radius:0 0 5px 0;z-index:99998;white-space:nowrap;pointer-events:none;filter:grayscale(0) !important;}"+
+    /* finer sub-zones — smaller dark tag, dotted outline, anchored top-right */
+    ".ca-subzone{display:none;}"+
+    "html.ca-wf .ca-subzonebox{outline:1.2px dotted rgba(43,33,24,.5) !important;outline-offset:-2px;}"+
+    "html.ca-wf .ca-subzone{display:block;position:absolute;top:0;right:0;background:#2A211C;color:#fff;font:600 8.5px/1.35 'IBM Plex Mono',monospace;letter-spacing:.02em;padding:1px 5px;border-radius:0 0 0 5px;z-index:99997;white-space:nowrap;pointer-events:none;filter:grayscale(0) !important;}";
+
+  // ---- state ----------------------------------------------------------------
+  var state = { source:"doc", mode:"wireframe", page:0 };
+  var pages = [];          // current page list ({label,sub,drive?} or {label,el})
+  var fr = document.getElementById("fr");
+  var sideEl = document.getElementById("side");
+  var loadingEl = document.getElementById("loading");
+  var loadNote = document.getElementById("loadNote");
+  var capEl = document.getElementById("cap");
+  var capText = document.getElementById("capText");
+  var rawLink = document.getElementById("rawLink");
+  var capTimer = null;
+
+  // ---- helpers ---------------------------------------------------------------
+  function docLogic(){
+    try{
+      var doc = fr.contentDocument; if(!doc) return null;
+      var h = doc.querySelector(".sc-host"); if(!h) return null;
+      var k = Object.keys(h).filter(function(x){return x.indexOf("__reactFiber")===0;})[0];
+      if(!k) return null;
+      var f = h[k], d = 0;
+      while(f && d < 60){
+        if(f.stateNode && f.stateNode.logic && f.stateNode.logic.state) return f.stateNode.logic;
+        f = f.return; d++;
+      }
+    }catch(e){}
+    return null;
+  }
+
+  // When a bottom sheet (drawer / place / good-to-know) is open, only label that
+  // sheet — not the day screen behind it. Otherwise label the whole body.
+  function docScope(doc){
+    var lg = docLogic();
+    if(lg && lg.state){
+      if(lg.state.drawer) return doc.querySelector('[data-sheet="drawer"]') || doc.body;
+      if(lg.state.pd)     return doc.querySelector('[data-sheet="pd"]')     || doc.body;
+      if(lg.state.gt)     return doc.querySelector('[data-sheet="gt"]')     || doc.body;
+    }
+    return doc.body;
+  }
+
+  // Re-assert wireframe class + zone badges. Retried after navigation because the
+  // dc-runtime re-renders asynchronously and sheets animate in.
+  function refreshOverlay(){ applyMode(); injectZones(); }
+  function scheduleOverlay(){ [0,90,260,560].forEach(function(t){ setTimeout(refreshOverlay, t); }); }
+
+  function injectWireframeCSS(){
+    try{
+      var doc = fr.contentDocument;
+      if(!doc || doc.getElementById("ca-wf-style")) return;
+      var st = doc.createElement("style");
+      st.id = "ca-wf-style"; st.textContent = WIREFRAME_CSS;
+      doc.head.appendChild(st);
+    }catch(e){}
+  }
+
+  function applyMode(){
+    try{
+      var doc = fr.contentDocument; if(!doc) return;
+      doc.documentElement.classList.toggle("ca-wf", state.mode==="wireframe");
+    }catch(e){}
+  }
+
+  // Overlay a name badge + dashed outline on every [data-zone] element so the
+  // user can refer to regions by name. Scoped to the current PDF page; whole
+  // body for Doc (only one screen renders at a time).
+  function injectZones(){
+    try{
+      var doc = fr.contentDocument; if(!doc) return;
+      [].forEach.call(doc.querySelectorAll(".ca-zone,.ca-subzone"), function(b){ b.remove(); });
+      [].forEach.call(doc.querySelectorAll(".ca-zonebox,.ca-subzonebox,.ca-zonerel"), function(e){ e.classList.remove("ca-zonebox","ca-subzonebox","ca-zonerel"); });
+      var scope = (state.source==="pdf") ? (pages[state.page] && pages[state.page].el) : docScope(doc);
+      if(!scope) return;
+      addBadges(doc, scope, "data-zone", "ca-zonebox", "ca-zone");
+      addBadges(doc, scope, "data-subzone", "ca-subzonebox", "ca-subzone");
+    }catch(e){}
+  }
+  function addBadges(doc, scope, attr, boxCls, badgeCls){
+    [].forEach.call(scope.querySelectorAll("["+attr+"]"), function(el){
+      el.classList.add(boxCls);
+      try{ if(getComputedStyle(el).position === "static") el.classList.add("ca-zonerel"); }catch(e){}
+      var b = doc.createElement("span");
+      b.className = badgeCls; b.textContent = el.getAttribute(attr);
+      el.appendChild(b);
+    });
+  }
+
+  function showCap(text){
+    capText.textContent = text;
+    capEl.classList.add("show");
+    clearTimeout(capTimer);
+    capTimer = setTimeout(function(){ capEl.classList.remove("show"); }, 1600);
+  }
+
+  // ---- sidebar ---------------------------------------------------------------
+  function renderSidebar(){
+    var html = '<div class="side-h">'+(state.source==="doc"?"Screens · Document":"Pages · PDF")+'</div>';
+    pages.forEach(function(p, i){
+      html += '<button class="pg'+(i===state.page?" on":"")+'" data-i="'+i+'">'+
+                '<span class="n">'+(i+1)+'</span>'+
+                '<span class="lab">'+escapeHtml(p.label)+
+                  (p.sub?'<span class="sub">'+escapeHtml(p.sub)+'</span>':'')+
+                '</span></button>';
+    });
+    sideEl.innerHTML = html;
+    [].forEach.call(sideEl.querySelectorAll(".pg"), function(b){
+      b.addEventListener("click", function(){ goPage(+b.getAttribute("data-i")); });
+    });
+  }
+
+  function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+  function countLabel(els, raw){ var n=0; [].forEach.call(els,function(el){ if((el.getAttribute("data-screen-label")||"")===raw) n++; }); return n; }
+
+  // ---- navigation ------------------------------------------------------------
+  function goPage(i){
+    if(i<0 || i>=pages.length) return;
+    state.page = i;
+    renderSidebar();
+    var p = pages[i];
+    if(state.source==="doc"){
+      var lg = docLogic();
+      if(lg && p.drive){ try{ p.drive(lg); }catch(e){ console.warn(e); } }
+      // dc-runtime re-renders async + sheets animate in → retry the overlay
+      scheduleOverlay();
+    } else {
+      if(p.el){
+        // instant scroll (smooth is unreliable in this iframe); recompute from the
+        // current position so late image/content reflow can be corrected.
+        var scrollToEl = function(){ try{ var iw = fr.contentWindow; iw.scrollTo(0, (iw.scrollY||0) + p.el.getBoundingClientRect().top - 8); }catch(e){} };
+        scrollToEl();
+        setTimeout(scrollToEl, 220);
+        setTimeout(scrollToEl, 650);
+      }
+      scheduleOverlay();
+    }
+    showCap(p.label);
+  }
+
+  // ---- build page list after a frame loads -----------------------------------
+  function buildPages(){
+    if(state.source==="doc"){
+      pages = DOC_PAGES.slice();
+    } else {
+      pages = [];
+      try{
+        var els = fr.contentDocument.querySelectorAll(".page[data-screen-label]");
+        // Pages whose layout is identical across repeats -> show a single entry.
+        var COLLAPSE = { "PDF Day": true };
+        var counts = {};
+        [].forEach.call(els, function(el){
+          var raw = el.getAttribute("data-screen-label") || "Page";
+          if(!COLLAPSE[raw]) counts[raw] = (counts[raw]||0) + 1;
+        });
+        var doneCollapsed = {}, seenN = {};
+        [].forEach.call(els, function(el){
+          var raw = el.getAttribute("data-screen-label") || "Page";
+          var base = PDF_RENAME[raw] || raw;
+          if(COLLAPSE[raw]){
+            if(doneCollapsed[raw]) return;            // keep only the first
+            doneCollapsed[raw] = true;
+            pages.push({ label:base, sub:"same template ×"+(els.length && countLabel(els,raw)), el:el, zoneKey:raw });
+            return;
+          }
+          var label = base;
+          if(counts[raw] > 1){ seenN[raw] = (seenN[raw]||0)+1; label = base+" "+seenN[raw]; }
+          pages.push({ label:label, sub:null, el:el, zoneKey:raw });
+        });
+      }catch(e){ console.warn("buildPages pdf:", e); }
+    }
+    renderSidebar();
+  }
+
+  // ---- frame loading ---------------------------------------------------------
+  function setFrameSize(){
+    var f = FRAME[state.source];
+    var wrap = document.getElementById("frameWrap");
+    var stage = document.getElementById("stage");
+    wrap.style.width = f.w + "px";
+    wrap.style.height = f.h + "px";
+    // Scale down to fit the available stage width (mainly for the wide A4 PDF).
+    // `zoom` reflows the box so flex-centering + scrolling stay correct (Chromium).
+    var avail = stage.clientWidth - 52;
+    wrap.style.zoom = Math.min(1, avail / f.w);
+  }
+  window.addEventListener("resize", function(){ if(state.source) setFrameSize(); });
+
+  function loadSource(src){
+    state.source = src;
+    state.page = 0;
+    pages = [];
+    sideEl.innerHTML = "";
+    setFrameSize();
+    loadingEl.classList.remove("hide");
+    loadNote.textContent = "";
+    rawLink.href = FILES[src];
+    fr.onload = function(){ onFrameLoad(0); };
+    fr.src = FILES[src] + "?v=" + Date.now();
+  }
+
+  function onFrameLoad(tries){
+    var ready = false;
+    try{
+      var doc = fr.contentDocument;
+      if(doc && doc.querySelector(".sc-host")){
+        ready = (state.source==="pdf")
+          ? doc.querySelectorAll(".page").length > 0
+          : !!docLogic();
+      }
+    }catch(e){ // cross-origin (opened via file://) — degrade gracefully
+      loadingEl.classList.add("hide");
+      loadNote.textContent = "";
+      sideEl.innerHTML = '<div class="side-h">Cross-origin</div><div style="padding:10px;font-size:12px;color:var(--muted);line-height:1.5">Serve this folder over http (e.g. the local preview) so the viewer can read the document. Showing live preview only.</div>';
+      return;
+    }
+    if(ready){
+      injectWireframeCSS();
+      buildPages();
+      applyMode();
+      goPage(0);
+      // settle, then hide loader (dc-runtime + map need a beat)
+      setTimeout(function(){ loadingEl.classList.add("hide"); }, 350);
+      return;
+    }
+    if(tries > 90){ loadingEl.classList.add("hide"); loadNote.textContent = "Took too long to render."; return; }
+    if(tries === 12) loadNote.textContent = "Loading React / map from CDN…";
+    setTimeout(function(){ onFrameLoad(tries+1); }, 150);
+  }
+
+  // ---- wire up controls ------------------------------------------------------
+  document.getElementById("srcSel").addEventListener("change", function(e){ loadSource(e.target.value); });
+  [].forEach.call(document.querySelectorAll("#modeSeg button"), function(b){
+    b.addEventListener("click", function(){
+      state.mode = b.getAttribute("data-mode");
+      [].forEach.call(document.querySelectorAll("#modeSeg button"), function(x){ x.classList.toggle("on", x===b); });
+      applyMode();
+      showCap(state.mode==="wireframe" ? "Wireframe" : "Preview");
+    });
+  });
+
+  // ---- go --------------------------------------------------------------------
+  loadSource("doc");
+})();
+</script>
+</body>
+</html>
