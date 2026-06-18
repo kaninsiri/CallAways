@@ -28,13 +28,11 @@
   /* ===== Print: native browser print → true A4 PDF (no library) =====
      Each topic (cover, day, guide section) starts a fresh page; long topics flow onto
      extra pages; atomic blocks (.avoid) never split across a page boundary. */
-  /* @page side margins are 0 — each .page keeps its OWN inner padding (same as the screen
-     sheet) so every page has a consistent inset like the cover, and the look matches the web.
-     The TOP margin gives a gap on every page (incl. pages a long day flows onto); the bottom
-     margin reserves room for the running footer. */
-  @page{ size:A4 portrait; margin:20mm 0 14mm; }
-  /* the cover uses a full-bleed page so its dark hero reaches the very top & side edges */
-  @page coverpage{ margin:0 0 14mm; }
+  /* Page margins are applied by the PDF generator (api/pdf.js → page.pdf margin) because the
+     serverless Chrome ignores CSS @page margins. So @page here only declares the size; the
+     top/bottom/side gaps come from page.pdf. Sides stay 0 there — each .page's own inner
+     padding provides the side inset (consistent with the cover, matching the web look). */
+  @page{ size:A4 portrait; }
   .topic{ break-before:page; page-break-before:always; }
   .topic:first-child{ break-before:avoid; page-break-before:avoid; }
   .avoid{ break-inside:avoid; page-break-inside:avoid; }
@@ -49,8 +47,6 @@
     /* keep each page's inner padding (the offset) and white sheet look — just drop the
        screen-only card chrome (shadow/border/radius/min-height). */
     .page{ width:auto !important; min-height:0 !important; margin:0 !important; padding-top:0 !important; background:#fff !important; box-shadow:none !important; border:none !important; border-radius:0 !important; overflow:visible !important; }
-    /* cover prints full-bleed (hero to the top & side edges) */
-    .page[data-screen-label="PDF Cover"]{ page:coverpage; }
     /* per-topic inline footer prints once per topic; hide it so the running footer (every page) is the single source */
     .pg-foot{ display:none !important; }
     /* OUR footer, repeated on every printed page (no running header — it collided with the

@@ -32,7 +32,14 @@ module.exports = async (req, res) => {
     try { await page.evaluate(() => document.fonts && document.fonts.ready); } catch (e) {}
     await new Promise(r => setTimeout(r, 1000)); // let the dc-runtime finish rendering
 
-    const pdf = await page.pdf({ printBackground: true, preferCSSPageSize: true });
+    // Margins are set HERE (not via CSS @page — headless Chrome ignores @page margins).
+    // Top gives a gap on every page incl. overflow pages; bottom reserves room for the running
+    // footer; sides are 0 so each page's own inner padding defines the side inset.
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '17mm', right: '0mm', bottom: '14mm', left: '0mm' }
+    });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="' + doc.file + '"');
