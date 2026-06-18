@@ -45,7 +45,11 @@
     #pdf-source{ width:auto !important; zoom:1 !important; margin:0 !important; }
     /* keep each page's inner padding (the offset) and white sheet look — just drop the
        screen-only card chrome (shadow/border/radius/min-height). */
-    .page{ width:auto !important; min-height:0 !important; margin:0 !important; padding-top:0 !important; background:#fff !important; box-shadow:none !important; border:none !important; border-radius:0 !important; overflow:visible !important; }
+    .page{ width:auto !important; min-height:0 !important; margin:0 !important; background:#fff !important; box-shadow:none !important; border:none !important; border-radius:0 !important; overflow:visible !important; }
+    /* only day pages drop their top padding (top gap comes from @page so page-1 and overflow
+       pages match). Guide pages KEEP their padding so their bleed headers don't shoot up into
+       the previous page's footer. */
+    .page[data-screen-label="PDF Day"]{ padding-top:0 !important; }
     /* per-topic inline footer prints once per topic; hide it so the running footer (every page) is the single source */
     .pg-foot{ display:none !important; }
     /* OUR footer, repeated on every printed page (no running header — it collided with the
