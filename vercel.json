@@ -3,6 +3,6 @@
     "api/pdf.js": { "memory": 1024, "maxDuration": 60 }
   },
   "rewrites": [
-    { "source": "/", "destination": "/Trip%20Plan%20Doc.dc.html" }
+    { "source": "/", "destination": "/doc.dc.html" }
   ]
 }

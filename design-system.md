@@ -1,8 +1,8 @@
 # CallAways — Design System
 
-The visual language of the **Bangkok Slow Days** interactive trip Doc (`Trip Plan Doc.dc.html`).
+The visual language of the **Bangkok Slow Days** interactive trip Doc (`doc.dc.html`).
 This is the reference for rebuilding the PDF version on the same tokens. A live, rendered
-version lives in `Design System.html`.
+version lives in `design-system.dc.html`.
 
 > Last synced: Feb 2026
 

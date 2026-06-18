@@ -1,5 +1,5 @@
 // Serverless PDF export.
-// Renders the deployed "Trip Plan PDF.dc.html" with headless Chrome and returns a real,
+// Renders the deployed "pdf.dc.html" with headless Chrome and returns a real,
 // vector A4 .pdf as a download. The page's @media print CSS (true A4 pages + our running
 // header/footer) is what page.pdf() uses, so the file looks exactly like the print layout.
 //
@@ -9,7 +9,7 @@ const puppeteer = require('puppeteer-core');
 
 // Which page to render → output filename. Add more entries to export other docs.
 const DOCS = {
-  trip: { path: '/Trip%20Plan%20PDF.dc.html', file: 'Bangkok-Slow-Days.pdf' }
+  trip: { path: '/pdf.dc.html', file: 'Bangkok-Slow-Days.pdf' }
 };
 
 module.exports = async (req, res) => {
