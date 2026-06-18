@@ -16,12 +16,13 @@
   html{background:#F4F2EE;}
   body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:'IBM Plex Sans','IBM Plex Sans Thai',-apple-system,sans-serif;color:#2A211C;line-height:1.6;}
 
-  /* ===== Screen: real A4 page sheets, scaled to fit the screen width =====
-     Each .page is a true A4 box (794x1123px ≈ 210x297mm) so the layout is identical to
-     the printed PDF. On a narrow screen the WHOLE sheet is scaled down (transform) to fit
-     the width — like a PDF viewer — instead of reflowing, so nothing overlaps. */
-  #pdf-viewport{ overflow:hidden; display:flex; justify-content:center; }
-  #pdf-source{ width:794px; transform-origin:top center; }
+  /* ===== Screen: real A4 page sheets, zoomed to fit the screen width =====
+     Each .page is a true A4 box (794x1123px ≈ 210x297mm) so the layout is identical to the
+     printed PDF. On a narrow screen the whole document is scaled down with CSS `zoom` (which
+     scales layout too — so the document flows normally and nothing gets clipped) like a PDF
+     viewer, instead of reflowing. */
+  #pdf-viewport{ }
+  #pdf-source{ width:794px; margin:0 auto; }
   .page{ width:794px !important; min-height:1123px !important; margin:0 auto 22px !important; background:#fff !important; border:1px solid #EAE4DB !important; border-radius:3px !important; box-shadow:0 1px 3px rgba(43,33,24,.07),0 18px 44px -24px rgba(43,33,24,.4) !important; overflow:hidden !important; }
 
   /* ===== Print: native browser print → true A4 PDF (no library) =====
@@ -38,7 +39,7 @@
     html,body{ background:#fff; }
     .pdf-bar{ display:none !important; }
     #pdf-viewport{ overflow:visible !important; display:block !important; height:auto !important; }
-    #pdf-source{ width:auto !important; transform:none !important; }
+    #pdf-source{ width:auto !important; zoom:1 !important; margin:0 !important; }
     .page{ width:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; background:#fff !important; box-shadow:none !important; border:none !important; border-radius:0 !important; overflow:visible !important; }
     /* the per-topic inline footer prints once per topic; hide it so the running footer (every page) is the single source */
     .pg-foot{ display:none !important; }
@@ -432,10 +433,9 @@ class Component extends DCLogic {
     // Scale a true-A4 sheet (794x1123px) to fit the viewport — both width AND height —
     // so a whole page is visible like a PDF viewer, with the layout kept intact (no reflow).
     const fit=()=>{ const vp=document.getElementById('pdf-viewport'), src=document.getElementById('pdf-source'); if(!vp||!src) return;
-      src.style.transform='none';
       const vw=vp.clientWidth, vh=window.innerHeight;
       const s=Math.min(1, vw/794, (vh-32)/1123);
-      src.style.transform='scale('+s+')'; vp.style.height=(src.offsetHeight*s)+'px'; };
+      src.style.zoom=s; };
     this._fit=fit;
     setTimeout(fit,60); setTimeout(fit,400); setTimeout(fit,1200);
     if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(fit); }
