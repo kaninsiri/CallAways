@@ -14,20 +14,27 @@
 <style>
   *{box-sizing:border-box;}
   html{background:#E7E2DC;}
-  body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:'IBM Plex Sans','IBM Plex Sans Thai',-apple-system,sans-serif;color:#2A211C;line-height:1.6;}
+
+  /* ===== A4 print pagination (native browser print → true A4 PDF, no extra library) =====
+     A topic (cover, each day, each guide section) starts a fresh page; long topics flow onto
+     extra pages automatically; atomic blocks (.avoid) never split across a page boundary. */
+  /* On screen: one clean continuous document (no fake paper sheets). The real A4
+     pagination happens in the browser's native print engine via @page below — that is
+     what produces the downloaded PDF (true A4, vector, not distorted). */
+  #pdf-source{ max-width:794px; margin:0 auto; }
+  .page{ width:auto !important; max-width:none !important; margin:0 auto 2px !important; background:transparent !important; box-shadow:none !important; border-radius:0 !important; min-height:0 !important; }
+
+  @page{ size:A4 portrait; margin:14mm 15mm 15mm; }
+  .topic{ break-before:page; page-break-before:always; }
+  .topic:first-child{ break-before:avoid; page-break-before:avoid; }
+  .avoid{ break-inside:avoid; page-break-inside:avoid; }
+  h2,h3{ break-after:avoid; page-break-after:avoid; }
   @media print{
-    html,body{background:#fff;}
-    .pdf-bar{display:none !important;}
-    /* Flowing layout: pages are content-height, never clipped. A topic (cover, each
-       day, each guide section) starts a fresh page via .topic; long topics flow onto
-       extra pages. Atomic blocks (.avoid) never split across a page boundary. */
-    .page{box-shadow:none !important;border-radius:0 !important;margin:0 !important;width:auto !important;max-width:none !important;min-height:0 !important;height:auto !important;}
-    .topic{break-before:page;page-break-before:always;}
-    .topic:first-child{break-before:auto;page-break-before:auto;}
-    .avoid{break-inside:avoid;page-break-inside:avoid;}
-    h2,h3{break-after:avoid;page-break-after:avoid;}
+    html,body{ background:#fff; }
+    .pdf-bar{ display:none !important; }
+    .page{ padding:0 !important; }
   }
-  @page{ size:A4 portrait; margin:13mm 0; }
 </style>
 </helmet>
 
@@ -66,44 +73,46 @@
     <button onClick="{{ onPrint }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:none;border-radius:12px;background:#2A211C;color:#fff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px -8px rgba(43,33,24,.5);"><svg style="width:17px;height:17px;color:#FD8E1C;"><use href="#p-pdf"></use></svg>Save as PDF</button>
   </div>
 
+  <div id="pdf-source">
+
   <!-- ===== COVER ===== -->
   <div class="page" data-screen-label="PDF Cover" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;">
-    <div data-zone="Hero" style="position:relative;height:360px;overflow:hidden;background:linear-gradient(160deg,#2A211C 0%,#3B302A 55%,#241C18 100%);color:#fff;flex:0 0 auto;">
+    <div data-zone="Hero" style="position:relative;height:220px;overflow:hidden;background:linear-gradient(160deg,#2A211C 0%,#3B302A 55%,#241C18 100%);color:#fff;flex:0 0 auto;">
       {{ headerShapes }}
       <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,.34) 0%,rgba(42,33,28,.04) 45%,rgba(42,33,28,.7) 100%);"></div>
-      <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:42px 60px;">
+      <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:26px 60px;">
         <div style="display:flex;align-items:center;gap:12px;">
           <span style="width:38px;height:38px;border-radius:11px;background:rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 100 100" style="width:22px;height:22px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>
           <span style="font-size:17px;font-weight:700;letter-spacing:.07em;">CallAway<span style="color:#FFC890;">s</span></span>
         </div>
         <div style="flex:1;"></div>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:#FFD0A1;margin-bottom:14px;">7-Day Itinerary · Offline copy</div>
-        <h1 style="font-size:62px;font-weight:700;letter-spacing:-.03em;line-height:.98;margin:0;">Bangkok<br>Slow Days</h1>
-        <div style="display:flex;align-items:center;gap:16px;margin-top:22px;font-size:15px;font-weight:600;">
+        <h1 style="font-size:46px;font-weight:700;letter-spacing:-.03em;line-height:1;margin:0;">Bangkok Slow Days</h1>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:14px;font-size:14px;font-weight:600;">
           <span style="display:inline-flex;align-items:center;gap:8px;"><svg style="width:17px;height:17px;color:#FFC890;"><use href="#p-cal"></use></svg>Feb 10 – 16, 2026</span>
           <span style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.6);"></span><span>2 travelers</span>
           <span style="width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.6);"></span><span>Bangkok, Thailand</span>
         </div>
       </div>
     </div>
-    <div style="flex:1;padding:46px 60px 40px;display:flex;flex-direction:column;">
-      <p style="font-size:17px;line-height:1.7;color:#4B423B;margin:0 0 30px;max-width:560px;text-wrap:pretty;">Seven unhurried days along the Chao Phraya. Each day spells out every stop and exactly how to get between them. At the back, a short general guide covers how the trains, taxis and each kind of place work — handy the first time you try them.</p>
-      <div data-zone="Stats bar" style="display:flex;gap:0;border:1px solid #ECE7E1;border-radius:16px;overflow:hidden;margin-bottom:34px;">
-        <div style="flex:1;padding:18px 22px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Days</div><div style="font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:4px;">7</div></div>
-        <div style="flex:1;padding:18px 22px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Stops</div><div style="font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:4px;">24</div></div>
-        <div style="flex:1;padding:18px 22px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Budget</div><div style="font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:4px;">฿24,800</div></div>
-        <div style="flex:1;padding:18px 22px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Status</div><div style="font-size:18px;font-weight:700;margin-top:8px;color:#2E8B57;display:inline-flex;align-items:center;gap:6px;"><svg style="width:16px;height:16px;color:#2E8B57;"><use href="#p-check"></use></svg>Confirmed</div></div>
+    <div style="flex:1;padding:28px 60px 26px;display:flex;flex-direction:column;">
+      <p style="font-size:14.5px;line-height:1.6;color:#4B423B;margin:0 0 18px;max-width:600px;text-wrap:pretty;">Seven unhurried days along the Chao Phraya. Each day spells out every stop and exactly how to get between them. At the back, a short general guide covers how the trains, taxis and each kind of place work — handy the first time you try them.</p>
+      <div data-zone="Stats bar" style="display:flex;gap:0;border:1px solid #ECE7E1;border-radius:16px;overflow:hidden;margin-bottom:18px;">
+        <div style="flex:1;padding:12px 18px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Days</div><div style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:3px;">7</div></div>
+        <div style="flex:1;padding:12px 18px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Stops</div><div style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:3px;">24</div></div>
+        <div style="flex:1;padding:12px 18px;border-right:1px solid #ECE7E1;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Budget</div><div style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:3px;">฿24,800</div></div>
+        <div style="flex:1;padding:12px 18px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Status</div><div style="font-size:18px;font-weight:700;margin-top:8px;color:#2E8B57;display:inline-flex;align-items:center;gap:6px;"><svg style="width:16px;height:16px;color:#2E8B57;"><use href="#p-check"></use></svg>Confirmed</div></div>
       </div>
       <div data-zone="Itinerary index" style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#FD6318;margin-bottom:6px;">Itinerary index</div>
       <sc-for list="{{ indexRows }}" as="row" hint-placeholder-count="7">
-        <div style="display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid #ECE7E1;">
+        <div style="display:flex;align-items:baseline;gap:16px;padding:8px 0;border-bottom:1px solid #ECE7E1;">
           <span style="font-size:15px;font-weight:700;width:54px;flex:0 0 54px;white-space:nowrap;"><span style="color:#2A211C;">Day </span><span style="color:#FD6318;">{{ row.n }}</span></span>
           <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#AA9F96;width:108px;flex:0 0 108px;white-space:nowrap;">{{ row.date }}</span>
           <span style="flex:1;min-width:0;font-size:16px;font-weight:600;color:#2A211C;">{{ row.title }}</span>
           <span style="font-size:13px;font-weight:600;color:#8B7F76;white-space:nowrap;text-align:right;">{{ row.stops }} stops · {{ row.hours }}<br><span style="color:#2A211C;font-weight:700;">{{ row.budget }}</span></span>
         </div>
       </sc-for>
-      <div style="display:flex;align-items:baseline;gap:16px;padding:12px 0;border-bottom:1px solid #ECE7E1;">
+      <div style="display:flex;align-items:baseline;gap:16px;padding:8px 0;border-bottom:1px solid #ECE7E1;">
         <span style="font-size:15px;font-weight:700;color:#2A211C;width:54px;flex:0 0 54px;">Guide</span>
         <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#AA9F96;width:108px;flex:0 0 108px;white-space:nowrap;">Appendix</span>
         <span style="flex:1;min-width:0;font-size:16px;font-weight:600;color:#2A211C;">Getting around · Know before you go</span>
@@ -167,6 +176,20 @@
 
       <div>
         <sc-for list="{{ day.items }}" as="it">
+          <!-- HOTEL BASE (start / end of day) -->
+          <sc-if value="{{ it.isBase }}" hint-placeholder-val="{{ true }}">
+            <div data-zone="Hotel base" style="display:grid;grid-template-columns:30px 1fr;gap:16px;break-inside:avoid;">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <span style="width:30px;height:30px;border-radius:9px;background:#FD6318;display:flex;align-items:center;justify-content:center;flex:0 0 30px;">{{ it.iconEl }}</span>
+                <span style="width:0;flex:1;min-height:12px;border-left:2px dashed #FD6318;margin-top:6px;"></span>
+              </div>
+              <div style="padding-bottom:14px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#FD6318;">{{ it.role }} · your base</span>
+                <span style="font-size:16px;font-weight:700;letter-spacing:-.012em;">{{ it.name }}</span>
+                <span style="font-size:12px;color:#8B7F76;">{{ it.th }}</span>
+              </div>
+            </div>
+          </sc-if>
           <!-- STOP -->
           <sc-if value="{{ it.isStop }}" hint-placeholder-val="{{ true }}">
             <div data-zone="Stop row" style="display:grid;grid-template-columns:30px 1fr;gap:16px;">
@@ -382,6 +405,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · {{ g.ref }} {{ g.name }}</span></div>
     </div>
   </sc-for>
+  </div><!-- /#pdf-source -->
 
 </div>
 </x-dc>
@@ -565,8 +589,20 @@ class Component extends DCLogic {
     const chip=(best)=>({display:'inline-flex',alignItems:'center',gap:'5px',padding:'5px 10px',borderRadius:'8px',fontSize:'11.5px',fontWeight:700,lineHeight:1,whiteSpace:'nowrap',background: best?'#FFF1E6':'#fff', color:'#2A211C', border: best?'1.5px solid #FD6318':'1px solid #E0D8D0'});
     const mapChip=(color)=>({display:'inline-flex',alignItems:'center',gap:'5px',padding:'3px 9px',borderRadius:'999px',fontSize:'10.5px',fontWeight:700,color:'#fff',background:color,whiteSpace:'nowrap'});
 
+    const HOTEL='Riva Surya Bangkok';
+    const hotelOpts=[{label:'Grab / taxi · 15 min · ฿90',best:true},{label:'Walk · 12 min · Free'}];
+    const baseRow=(role)=>({ isBase:true, role, name:HOTEL, th:this.placeTh(HOTEL),
+      iconEl:this.icoEl('#p-bed',{width:'15px',height:'15px',color:'#fff'}) });
+    const hotelTransit=(toName,note)=>{ const g=this.guideFor('Grab / taxi'); return { isTransit:true, toName, recMeta:'15 min · ฿90', note,
+      tref:'G3', thref:'#g-taxi',
+      opts:hotelOpts.map(x=>({label:x.label,best:!!x.best,chipStyle:chip(x.best)})),
+      steps:[], hasSteps:false, fare:g.fare||[], hasFare:!!(g.fare&&g.fare.length), scam:g.scam||[], maps:[], hasMaps:false }; };
     const days=raw.map((d,di)=>{
       const items=[];
+      const isFirst=di===0, isLast=di===raw.length-1;
+      // Each day starts and ends at the hotel — except arrival day (from the airport) and
+      // departure day (to the airport). Mirrors the Doc's hotel loop.
+      if(!isFirst){ items.push(baseRow('Start')); items.push(hotelTransit(d.stops[0].name,'Head out from Riva Surya, your riverside base.')); }
       d.stops.forEach((s,i)=>{
         const last=i===d.stops.length-1;
         const hrs=this.hoursFor(s.cat), info=this.content(s.name,s.cat);
@@ -590,6 +626,7 @@ class Component extends DCLogic {
             maps:(g.maps||[]).map(m=>({label:m.label,chipStyle:mapChip(m.color)})), hasMaps:!!(g.maps&&g.maps.length) });
         }
       });
+      if(!isLast){ items.push(hotelTransit(HOTEL+' · your base','Head back to Riva Surya to rest for the night.')); items.push(baseRow('End')); }
       const pts=this.dayMapPts(d.stops.length);
       const mapPath=pts.map((p,i)=>(i===0?'M ':'L ')+p.x+' '+p.y).join(' ');
       const pins=pts.map((p,i)=>({num:i+1, pinStyle:{position:'absolute',left:p.x+'%',top:p.y+'%',transform:'translate(-50%,-50%)'}}));
