@@ -13,18 +13,20 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;}
-  html{background:#E7E2DC;}
+  html{background:#F4F2EE;}
   body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:'IBM Plex Sans','IBM Plex Sans Thai',-apple-system,sans-serif;color:#2A211C;line-height:1.6;}
 
-  /* ===== A4 print pagination (native browser print → true A4 PDF, no extra library) =====
-     A topic (cover, each day, each guide section) starts a fresh page; long topics flow onto
-     extra pages automatically; atomic blocks (.avoid) never split across a page boundary. */
-  /* On screen: one clean continuous document (no fake paper sheets). The real A4
-     pagination happens in the browser's native print engine via @page below — that is
-     what produces the downloaded PDF (true A4, vector, not distorted). */
-  #pdf-source{ max-width:794px; margin:0 auto; }
-  .page{ width:auto !important; max-width:none !important; margin:0 auto 2px !important; background:transparent !important; box-shadow:none !important; border-radius:0 !important; min-height:0 !important; }
+  /* ===== Screen: real A4 page sheets, scaled to fit the screen width =====
+     Each .page is a true A4 box (794x1123px ≈ 210x297mm) so the layout is identical to
+     the printed PDF. On a narrow screen the WHOLE sheet is scaled down (transform) to fit
+     the width — like a PDF viewer — instead of reflowing, so nothing overlaps. */
+  #pdf-viewport{ overflow:hidden; display:flex; justify-content:center; }
+  #pdf-source{ width:794px; transform-origin:top center; }
+  .page{ width:794px !important; min-height:1123px !important; margin:0 auto 22px !important; background:#fff !important; border:1px solid #EAE4DB !important; border-radius:3px !important; box-shadow:0 1px 3px rgba(43,33,24,.07),0 18px 44px -24px rgba(43,33,24,.4) !important; overflow:hidden !important; }
 
+  /* ===== Print: native browser print → true A4 PDF (no library) =====
+     Each topic (cover, day, guide section) starts a fresh page; long topics flow onto
+     extra pages; atomic blocks (.avoid) never split across a page boundary. */
   @page{ size:A4 portrait; margin:14mm 15mm 15mm; }
   .topic{ break-before:page; page-break-before:always; }
   .topic:first-child{ break-before:avoid; page-break-before:avoid; }
@@ -33,7 +35,9 @@
   @media print{
     html,body{ background:#fff; }
     .pdf-bar{ display:none !important; }
-    .page{ padding:0 !important; }
+    #pdf-viewport{ overflow:visible !important; display:block !important; height:auto !important; }
+    #pdf-source{ width:auto !important; transform:none !important; }
+    .page{ width:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; background:#fff !important; box-shadow:none !important; border:none !important; border-radius:0 !important; overflow:visible !important; }
   }
 </style>
 </helmet>
@@ -67,12 +71,13 @@
   <symbol id="p-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"></path><path d="M10 21h4"></path><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.2 1 2.5h6c0-1.3.3-1.8 1-2.5A6 6 0 0 0 12 3Z"></path></symbol>
 </defs></svg>
 
-<div style="min-height:100vh;background:#E7E2DC;padding:30px 16px 60px;font-family:'IBM Plex Sans','IBM Plex Sans Thai',-apple-system,sans-serif;color:#2A211C;line-height:1.6;-webkit-font-smoothing:antialiased;">
+<div style="min-height:100vh;background:#F4F2EE;padding:26px 14px 48px;font-family:'IBM Plex Sans','IBM Plex Sans Thai',-apple-system,sans-serif;color:#2A211C;line-height:1.6;-webkit-font-smoothing:antialiased;">
 
   <div class="pdf-bar" style="position:fixed;top:18px;right:22px;z-index:50;">
     <button onClick="{{ onPrint }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:none;border-radius:12px;background:#2A211C;color:#fff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px -8px rgba(43,33,24,.5);"><svg style="width:17px;height:17px;color:#FD8E1C;"><use href="#p-pdf"></use></svg>Save as PDF</button>
   </div>
 
+  <div id="pdf-viewport">
   <div id="pdf-source">
 
   <!-- ===== COVER ===== -->
@@ -406,11 +411,22 @@
     </div>
   </sc-for>
   </div><!-- /#pdf-source -->
+  </div><!-- /#pdf-viewport -->
 
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:854,&quot;height&quot;:1180}}">
 class Component extends DCLogic {
+  componentDidMount(){
+    const fit=()=>{ const vp=document.getElementById('pdf-viewport'), src=document.getElementById('pdf-source'); if(!vp||!src) return;
+      src.style.transform='none'; const vw=vp.clientWidth; const s=Math.min(1, vw/794);
+      src.style.transform='scale('+s+')'; vp.style.height=(src.offsetHeight*s)+'px'; };
+    this._fit=fit;
+    setTimeout(fit,60); setTimeout(fit,400); setTimeout(fit,1200);
+    if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(fit); }
+    window.addEventListener('resize', fit);
+  }
+  componentWillUnmount(){ if(this._fit){ try{ window.removeEventListener('resize', this._fit); }catch(e){} } }
   fullDate(wd,date){ const p=(date||'').split(' '); return p.length===2 ? (wd+' '+p[1]+' '+p[0]) : (wd+' '+date); }
   buildHeader(){ if(this._hdr) return this._hdr; const pal=['#FD6318','#FD8E1C','#FFA86F','#FFC890','#E5500B','#FFB892']; const R=(a,b)=>a+Math.random()*(b-a); const ch=[]; for(let i=0;i<20;i++){ const f=pal[Math.floor(Math.random()*pal.length)]; const o=R(0.08,0.30); const t=Math.random(); if(t<0.5){ const cx=R(-5,105),cy=R(-8,86),s=R(10,34),rot=R(0,360); ch.push(React.createElement('polygon',{key:i,points:cx+','+(cy-s)+' '+(cx-s*0.92)+','+(cy+s*0.72)+' '+(cx+s*0.92)+','+(cy+s*0.72),fill:f,opacity:o,transform:'rotate('+rot+' '+cx+' '+cy+')'})); } else if(t<0.8){ ch.push(React.createElement('circle',{key:i,cx:R(0,100),cy:R(-8,80),r:R(6,22),fill:f,opacity:o})); } else { const x=R(-6,96),y=R(-8,78),w=R(14,40),h=R(9,22),rot=R(0,360); ch.push(React.createElement('rect',{key:i,x:x,y:y,width:w,height:h,rx:3,fill:f,opacity:o,transform:'rotate('+rot+' '+(x+w/2)+' '+(y+h/2)+')'})); } } this._hdr=React.createElement('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'xMidYMid slice',style:{position:'absolute',inset:0,width:'100%',height:'100%'}},ch); return this._hdr; }
   dayMapPts(n){ const pool=[[20,68],[40,48],[28,30],[58,24],[78,40],[88,66]]; const out=[]; for(let i=0;i<n;i++) out.push({x:pool[i%pool.length][0], y:pool[i%pool.length][1]}); return out; }
