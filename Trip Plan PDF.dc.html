@@ -27,17 +27,24 @@
   /* ===== Print: native browser print → true A4 PDF (no library) =====
      Each topic (cover, day, guide section) starts a fresh page; long topics flow onto
      extra pages; atomic blocks (.avoid) never split across a page boundary. */
-  @page{ size:A4 portrait; margin:14mm 15mm 15mm; }
+  @page{ size:A4 portrait; margin:17mm 15mm 14mm; }
   .topic{ break-before:page; page-break-before:always; }
   .topic:first-child{ break-before:avoid; page-break-before:avoid; }
   .avoid{ break-inside:avoid; page-break-inside:avoid; }
   h2,h3{ break-after:avoid; page-break-after:avoid; }
+  /* running header/footer: hidden on screen (sheets show their own), shown in print */
+  .run-head,.run-foot{ display:none; }
   @media print{
     html,body{ background:#fff; }
     .pdf-bar{ display:none !important; }
     #pdf-viewport{ overflow:visible !important; display:block !important; height:auto !important; }
     #pdf-source{ width:auto !important; transform:none !important; }
     .page{ width:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; background:#fff !important; box-shadow:none !important; border:none !important; border-radius:0 !important; overflow:visible !important; }
+    /* the per-topic inline footer prints once per topic; hide it so the running footer (every page) is the single source */
+    .pg-foot{ display:none !important; }
+    /* OUR header/footer, repeated on every printed page */
+    .run-head{ display:flex !important; position:fixed; top:0; left:0; right:0; align-items:center; justify-content:space-between; padding:6mm 15mm 0; font-family:'IBM Plex Mono',monospace; font-size:8.5pt; letter-spacing:.06em; text-transform:uppercase; color:#8B7F76; }
+    .run-foot{ display:flex !important; position:fixed; bottom:0; left:0; right:0; align-items:center; justify-content:space-between; padding:0 15mm 6mm; font-size:8.5pt; color:#AA9F96; border-top:1px solid #ECE7E1; padding-top:3mm; }
   }
 </style>
 </helmet>
@@ -76,6 +83,10 @@
   <div class="pdf-bar" style="position:fixed;top:18px;right:22px;z-index:50;">
     <button onClick="{{ onPrint }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:none;border-radius:12px;background:#2A211C;color:#fff;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 8px 20px -8px rgba(43,33,24,.5);"><svg style="width:17px;height:17px;color:#FD8E1C;"><use href="#p-pdf"></use></svg>Save as PDF</button>
   </div>
+
+  <!-- Running header & footer: print-only, repeat on EVERY page (position:fixed). Our own, not the browser's. -->
+  <div class="run-head"><span style="display:inline-flex;align-items:center;gap:7px;"><svg viewBox="0 0 100 100" style="width:13px;height:13px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#2A211C" stroke-width="22" stroke-linecap="round"></path></svg><b style="font-weight:700;letter-spacing:.04em;">CallAways</b></span><span>Bangkok Slow Days · 7-Day Itinerary</span></div>
+  <div class="run-foot"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">callaways.com</span></div>
 
   <div id="pdf-viewport">
   <div id="pdf-source">
@@ -124,7 +135,7 @@
         <span style="font-size:13px;font-weight:600;color:#8B7F76;white-space:nowrap;">general tips</span>
       </div>
       <div style="flex:1;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;font-size:12px;color:#AA9F96;">
+      <div class="pg-foot" style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;font-size:12px;color:#AA9F96;">
         <span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">callaways.com</span>
       </div>
     </div>
@@ -285,7 +296,7 @@
       </div>
 
       <div style="flex:1;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;">
+      <div class="pg-foot" style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;">
         <span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Day {{ day.n }} / 7</span>
       </div>
     </div>
@@ -313,7 +324,7 @@
       </a>
     </sc-for>
     <div style="flex:1;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · Getting around</span></div>
+    <div class="pg-foot" style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · Getting around</span></div>
   </div>
 
   <!-- ===== per transport mode ===== -->
@@ -355,7 +366,7 @@
         </div>
         <div style="flex:1;"></div>
         <div style="margin-top:18px;padding:11px 14px;border-radius:11px;background:#F7F3EE;border:1px dashed #D9CFC7;font-size:11.5px;color:#8B7F76;font-style:italic;">Official network map to be inserted here.</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · {{ g.ref }} {{ g.name }}</span></div>
+        <div class="pg-foot" style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · {{ g.ref }} {{ g.name }}</span></div>
       </div>
     </div>
   </sc-for>
@@ -382,7 +393,7 @@
       </a>
     </sc-for>
     <div style="flex:1;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · Know before you go</span></div>
+    <div class="pg-foot" style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · Know before you go</span></div>
   </div>
 
   <!-- ===== per place category ===== -->
@@ -407,7 +418,7 @@
         </div>
       </sc-if>
       <div style="flex:1;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · {{ g.ref }} {{ g.name }}</span></div>
+      <div class="pg-foot" style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #ECE7E1;font-size:11px;color:#AA9F96;"><span>© 2026 CallAways · All rights reserved</span><span style="font-family:'IBM Plex Mono',monospace;">Guide · {{ g.ref }} {{ g.name }}</span></div>
     </div>
   </sc-for>
   </div><!-- /#pdf-source -->
@@ -418,8 +429,12 @@
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:854,&quot;height&quot;:1180}}">
 class Component extends DCLogic {
   componentDidMount(){
+    // Scale a true-A4 sheet (794x1123px) to fit the viewport — both width AND height —
+    // so a whole page is visible like a PDF viewer, with the layout kept intact (no reflow).
     const fit=()=>{ const vp=document.getElementById('pdf-viewport'), src=document.getElementById('pdf-source'); if(!vp||!src) return;
-      src.style.transform='none'; const vw=vp.clientWidth; const s=Math.min(1, vw/794);
+      src.style.transform='none';
+      const vw=vp.clientWidth, vh=window.innerHeight;
+      const s=Math.min(1, vw/794, (vh-32)/1123);
       src.style.transform='scale('+s+')'; vp.style.height=(src.offsetHeight*s)+'px'; };
     this._fit=fit;
     setTimeout(fit,60); setTimeout(fit,400); setTimeout(fit,1200);
