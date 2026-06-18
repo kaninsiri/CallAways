@@ -1,0 +1,9 @@
+{
+  "name": "callaways",
+  "private": true,
+  "description": "CallAways Bangkok itinerary — static site + serverless PDF export",
+  "dependencies": {
+    "@sparticuz/chromium": "^131.0.0",
+    "puppeteer-core": "^23.9.0"
+  }
+}
