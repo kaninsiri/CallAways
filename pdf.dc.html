@@ -31,7 +31,7 @@
   /* Print via the browser (Doc "Export PDF" opens this page and triggers Save-as-PDF), which
      DOES honor @page margins. Top gap on every page (incl. overflow); bottom reserves the
      running footer; sides 0 — each page's own inner padding provides the side inset. */
-  @page{ size:A4 portrait; margin:17mm 0 14mm; }
+  @page{ size:A4 portrait; margin:0.25in 0 14mm; }
   .topic{ break-before:page; page-break-before:always; }
   .topic:first-child{ break-before:avoid; page-break-before:avoid; }
   .avoid{ break-inside:avoid; page-break-inside:avoid; }
