@@ -28,9 +28,12 @@ module.exports = async (req, res) => {
       headless: chromium.headless
     });
     const page = await browser.newPage();
-    await page.goto(target, { waitUntil: 'networkidle0', timeout: 45000 });
+    // Don't wait for full network idle — the page pulls flaky external images (loremflickr/
+    // picsum) that can hang or 500 and would stall networkidle0 until timeout. Wait for the
+    // DOM, then give the dc-runtime + fonts a moment; missing images are fine.
+    try { await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 30000 }); } catch (e) {}
     try { await page.evaluate(() => document.fonts && document.fonts.ready); } catch (e) {}
-    await new Promise(r => setTimeout(r, 1000)); // let the dc-runtime finish rendering
+    await new Promise(r => setTimeout(r, 2500)); // let the dc-runtime finish rendering
 
     // Margins are set HERE (not via CSS @page — headless Chrome ignores @page margins).
     // Top gives a gap on every page incl. overflow pages; bottom reserves room for the running
