@@ -18,11 +18,16 @@
   @media print{
     html,body{background:#fff;}
     .pdf-bar{display:none !important;}
-    .page{box-shadow:none !important;border-radius:0 !important;margin:0 !important;width:210mm !important;min-height:273mm !important;height:auto !important;overflow:visible !important;break-after:page;page-break-after:always;}
-    .page:last-child{break-after:auto;page-break-after:auto;}
+    /* Flowing layout: pages are content-height, never clipped. A topic (cover, each
+       day, each guide section) starts a fresh page via .topic; long topics flow onto
+       extra pages. Atomic blocks (.avoid) never split across a page boundary. */
+    .page{box-shadow:none !important;border-radius:0 !important;margin:0 !important;width:auto !important;max-width:none !important;min-height:0 !important;height:auto !important;}
+    .topic{break-before:page;page-break-before:always;}
+    .topic:first-child{break-before:auto;page-break-before:auto;}
     .avoid{break-inside:avoid;page-break-inside:avoid;}
+    h2,h3{break-after:avoid;page-break-after:avoid;}
   }
-  @page{ size:A4 portrait; margin:12mm 0; }
+  @page{ size:A4 portrait; margin:13mm 0; }
 </style>
 </helmet>
 
@@ -62,7 +67,7 @@
   </div>
 
   <!-- ===== COVER ===== -->
-  <div class="page" data-screen-label="PDF Cover" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;">
+  <div class="page" data-screen-label="PDF Cover" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;">
     <div data-zone="Hero" style="position:relative;height:360px;overflow:hidden;background:linear-gradient(160deg,#2A211C 0%,#3B302A 55%,#241C18 100%);color:#fff;flex:0 0 auto;">
       {{ headerShapes }}
       <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(42,33,28,.34) 0%,rgba(42,33,28,.04) 45%,rgba(42,33,28,.7) 100%);"></div>
@@ -113,7 +118,7 @@
 
   <!-- ===== DAY PAGES (full detail inline) ===== -->
   <sc-for list="{{ days }}" as="day" hint-placeholder-count="7">
-    <div class="page" data-screen-label="PDF Day" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+    <div class="page topic" data-screen-label="PDF Day" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;">
       <div data-zone="Page header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #2A211C;margin-bottom:24px;">
         <span style="display:inline-flex;align-items:center;gap:9px;">
           <span style="width:24px;height:24px;border-radius:7px;background:#2A211C;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 100 100" style="width:14px;height:14px;"><path d="M72 79 A31 31 0 1 1 72 21" fill="none" stroke="#FD6318" stroke-width="22" stroke-linecap="round"></path><path d="M67 74 A31 31 0 1 1 67 26" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"></path></svg></span>
@@ -259,7 +264,7 @@
   </sc-for>
 
   <!-- ===== GETTING AROUND — overview ===== -->
-  <div class="page" data-screen-label="PDF Transit Overview" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+  <div class="page topic" data-screen-label="PDF Transit Overview" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;">
     <div data-zone="Page header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #2A211C;margin-bottom:8px;">
       <span style="font-size:12px;font-weight:700;letter-spacing:.06em;">CallAway<span style="color:#FD6318;">s</span></span>
       <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#AA9F96;">Guide · Getting around</span>
@@ -285,7 +290,7 @@
 
   <!-- ===== per transport mode ===== -->
   <sc-for list="{{ transitPages }}" as="g" hint-placeholder-count="6">
-    <div class="page" id="{{ g.slug }}" data-screen-label="PDF Transit" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;break-before:page;">
+    <div class="page avoid" id="{{ g.slug }}" data-screen-label="PDF Transit" style="width:794px;max-width:100%;margin:0 auto 22px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;">
       <div data-zone="Page header" style="{{ g.headStyle }}">
         <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
         <div style="flex:1;min-width:0;">
@@ -328,7 +333,7 @@
   </sc-for>
 
   <!-- ===== KNOW BEFORE YOU GO — overview ===== -->
-  <div class="page" data-screen-label="PDF Place Overview" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+  <div class="page topic" data-screen-label="PDF Place Overview" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;">
     <div data-zone="Page header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #2A211C;margin-bottom:8px;">
       <span style="font-size:12px;font-weight:700;letter-spacing:.06em;">CallAway<span style="color:#FD6318;">s</span></span>
       <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#AA9F96;">Guide · Know before you go</span>
@@ -354,7 +359,7 @@
 
   <!-- ===== per place category ===== -->
   <sc-for list="{{ placePages }}" as="g" hint-placeholder-count="8">
-    <div class="page" id="{{ g.slug }}" data-screen-label="PDF Place" style="width:794px;max-width:100%;min-height:1123px;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;break-before:page;">
+    <div class="page avoid" id="{{ g.slug }}" data-screen-label="PDF Place" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;">
       <div data-zone="Page header" style="{{ g.headStyle }}">
         <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
         <div style="flex:1;min-width:0;">
@@ -386,28 +391,59 @@ class Component extends DCLogic {
   buildHeader(){ if(this._hdr) return this._hdr; const pal=['#FD6318','#FD8E1C','#FFA86F','#FFC890','#E5500B','#FFB892']; const R=(a,b)=>a+Math.random()*(b-a); const ch=[]; for(let i=0;i<20;i++){ const f=pal[Math.floor(Math.random()*pal.length)]; const o=R(0.08,0.30); const t=Math.random(); if(t<0.5){ const cx=R(-5,105),cy=R(-8,86),s=R(10,34),rot=R(0,360); ch.push(React.createElement('polygon',{key:i,points:cx+','+(cy-s)+' '+(cx-s*0.92)+','+(cy+s*0.72)+' '+(cx+s*0.92)+','+(cy+s*0.72),fill:f,opacity:o,transform:'rotate('+rot+' '+cx+' '+cy+')'})); } else if(t<0.8){ ch.push(React.createElement('circle',{key:i,cx:R(0,100),cy:R(-8,80),r:R(6,22),fill:f,opacity:o})); } else { const x=R(-6,96),y=R(-8,78),w=R(14,40),h=R(9,22),rot=R(0,360); ch.push(React.createElement('rect',{key:i,x:x,y:y,width:w,height:h,rx:3,fill:f,opacity:o,transform:'rotate('+rot+' '+(x+w/2)+' '+(y+h/2)+')'})); } } this._hdr=React.createElement('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'xMidYMid slice',style:{position:'absolute',inset:0,width:'100%',height:'100%'}},ch); return this._hdr; }
   dayMapPts(n){ const pool=[[20,68],[40,48],[28,30],[58,24],[78,40],[88,66]]; const out=[]; for(let i=0;i<n;i++) out.push({x:pool[i%pool.length][0], y:pool[i%pool.length][1]}); return out; }
   icoEl(href,style){ return href?React.createElement('svg',{style},React.createElement('use',{href})):null; }
-  hoursFor(cat){ const m={Temple:'08:00–18:30',Museum:'10:00–17:00',Cafe:'08:00–19:00',Restaurant:'11:00–22:00',Market:'07:00–18:00',Mall:'10:00–22:00','Rooftop bar':'17:00–01:00','Sky bar':'17:00–01:00',Viewpoint:'04:30–21:00',Attraction:'16:00–24:00',Hotel:'24h front desk',Flight:'Terminal 24h'}; return m[cat]||null; }
+  hoursFor(cat){ const m={Temple:'08:00–18:30',Museum:'10:00–17:00',Cafe:'08:00–19:00',Restaurant:'11:00–22:00',Market:'07:00–18:00',Mall:'10:00–22:00','Rooftop bar':'17:00–01:00','Sky bar':'17:00–01:00',Viewpoint:'04:30–21:00',Attraction:'16:00–24:00',Hotel:'Front desk · 24h',Flight:'Terminal · 24h'}; return m[cat]||null; }
+  placeTh(name){ const m={
+    'Suvarnabhumi Airport':'สนามบินสุวรรณภูมิ','Riva Surya Bangkok':'โรงแรมริว่า สุริยา กรุงเทพ','Err Urban Rustic Thai':'ร้านเอิร์ธ',
+    'Grand Palace':'พระบรมมหาราชวัง','Tha Maharaj Riverside':'ท่ามหาราช','Jim Thompson House':'บ้านจิม ทอมป์สัน',
+    'Wat Pho':'วัดโพธิ์ (วัดพระเชตุพนฯ)','The Deck by Arun':'เดอะ เด็ค บาย อรุณ','Supanniga Eating Room':'สุพรรณิการ์ อีทติ้ง รูม','Pak Khlong Talat':'ปากคลองตลาด',"Eagle's Nest Bar":'อีเกิลส เนสต์ บาร์',
+    'Chatuchak Weekend Market':'ตลาดนัดจตุจักร','After You Dessert Cafe':'อาฟเตอร์ ยู','Lumphini Park':'สวนลุมพินี',
+    'MOCA Bangkok':'พิพิธภัณฑ์ศิลปะไทยร่วมสมัย (โมก้า)','Or Tor Kor Market':'ตลาด อ.ต.ก.','Sirocco Sky Bar':'ซิรอคโค สกาย บาร์',
+    'Damnoen Saduak':'ตลาดน้ำดำเนินสะดวก','Maeklong Railway Market':'ตลาดร่มหุบ แม่กลอง','Asiatique The Riverfront':'เอเชียทีค เดอะ ริเวอร์ฟร้อนท์',
+    'ICONSIAM':'ไอคอนสยาม','Riva Surya · Checkout':'โรงแรมริว่า สุริยา','Suvarnabhumi · Departure':'สนามบินสุวรรณภูมิ'
+  }; return m[name]||''; }
+  gtipModes(){ return {
+    'BTS / MRT':{t:'BTS & MRT trains',tips:['Buy a token or tap a stored-value card at the gate','Separate fares — tap out and buy again when you switch lines','Runs ~06:00–24:00, every few minutes','No eating or drinking onboard']},
+    'Airport Rail':{t:'Airport Rail Link',tips:['City Line: Suvarnabhumi ↔ Phaya Thai in ~26 min','Tap a credit card or buy a token at level B','Transfer to BTS at Phaya Thai, MRT at Makkasan']},
+    'Grab / taxi':{t:'Grab & taxis',tips:['Grab shows a fixed fare up front — easiest for visitors','Metered taxi: insist on the meter (flag-fall ฿35)','Refuse flat ฿300+ quotes; flag a moving taxi','Keep small notes for change']},
+    'River boat':{t:'River boats',tips:['Orange flag = fast express, no flag = all stops, blue = tourist','Buy at the pier booth or pay onboard','Cross-river ferries are ฿4–5 and frequent']},
+    'Walk':{t:'On foot',tips:['Footpaths can be uneven — wear flat shoes','Cross at lights or skybridges','Carry water in the midday heat']},
+    'Day-trip van':{t:'Day-trip van',tips:['Meet the driver at the agreed time','Driver waits at the market exit','Nap on the long stretches']}
+  }; }
+  gtipPlaces(){ return {
+    Temple:{t:'Temples',tips:['Cover shoulders & knees — wraps rent at major temples','Remove shoes before entering halls','Lower your voice; ask before photographing monks'],note:'Women shouldn’t touch monks or hand things to them directly.'},
+    Restaurant:{t:'Restaurants & food',tips:['Order a few dishes to share, with rice separately','At street stalls, point at what looks good','Drink bottled water, not tap'],note:'Tipping isn’t expected; rounding up the bill is a kind gesture.'},
+    Cafe:{t:'Cafés & desserts',tips:['Popular spots fill up — go off-peak for a seat','Many close by 19:00','Carry cash for small cafés']},
+    Market:{t:'Markets',tips:['Carry small notes; most stalls are cash-only','Bargain politely with a smile, then commit','Go early to beat the heat & crowds'],note:'A fair counter-offer is about 10–20% off the first price.'},
+    Museum:{t:'Museums & galleries',tips:['Buy tickets at the entrance; check last entry','Use lockers for big bags','No flash; some rooms ban photos']},
+    'Rooftop bar':{t:'Rooftop & sky bars',tips:['Smart-casual: no shorts or sandals','Arrive before sunset for a seat','Drinks are pricey — it’s for the view']},
+    Hotel:{t:'Hotels & stays',tips:['Check-in ~14:00, check-out ~12:00 — store bags otherwise','Keep your passport for check-in','Ask about the free shuttle boat'],note:'A small deposit may be held at check-in and refunded when you leave.'},
+    Viewpoint:{t:'Parks & viewpoints',tips:['Best light & cooler air late afternoon','Bring water and mosquito spray at dusk','Most are free — mind posted hours']}
+  }; }
   iconFor(cat){ const m={Temple:'#p-temple',Museum:'#p-museum',Cafe:'#p-coffee',Restaurant:'#p-food',Market:'#p-market',Mall:'#p-market','Rooftop bar':'#p-bar','Sky bar':'#p-bar',Viewpoint:'#p-camera',Attraction:'#p-camera',Hotel:'#p-bed',Flight:'#p-plane'}; return m[cat]||'#p-flag'; }
   gmap(cat){ const m={Temple:'linear-gradient(135deg,#E6DCCE,#C9A876)',Cafe:'linear-gradient(135deg,#EAD9C2,#B98E63)',Restaurant:'linear-gradient(135deg,#E9C9A8,#C77F49)',Market:'linear-gradient(135deg,#E8C7C0,#B5556B)',Mall:'linear-gradient(135deg,#E8C7C0,#B5556B)','Rooftop bar':'linear-gradient(135deg,#FFC78A,#E5500B)','Sky bar':'linear-gradient(135deg,#FFC78A,#E5500B)',Museum:'linear-gradient(135deg,#D8D2C8,#8A8174)',Hotel:'linear-gradient(135deg,#D9CEC2,#8C7A66)',Flight:'linear-gradient(135deg,#CBD3D8,#6E7A82)',Viewpoint:'linear-gradient(135deg,#CFE0CE,#6E8C6A)',Attraction:'linear-gradient(135deg,#CFE0CE,#6E8C6A)'}; return m[cat]||'linear-gradient(135deg,#CFE0CE,#6E8C6A)'; }
   imgKw(name,cat){ const kw={'Suvarnabhumi Airport':'airport,terminal','Riva Surya Bangkok':'bangkok,river,hotel','Err Urban Rustic Thai':'thai,food','Grand Palace':'bangkok,grand,palace','Tha Maharaj Riverside':'bangkok,river,restaurant','Jim Thompson House':'teak,house,garden','Wat Pho':'wat,pho,temple','The Deck by Arun':'wat,arun,river','Supanniga Eating Room':'thai,food,curry','Pak Khlong Talat':'flower,market','Eagle’s Nest Bar':'rooftop,bar,sunset','Chatuchak Weekend Market':'chatuchak,market','After You Dessert Cafe':'dessert,cafe','Lumphini Park':'lumphini,park','MOCA Bangkok':'museum,art','Or Tor Kor Market':'thai,market,fruit','Sirocco Sky Bar':'skybar,night','Damnoen Saduak':'floating,market','Maeklong Railway Market':'railway,market','Asiatique The Riverfront':'ferris,wheel,river','ICONSIAM':'bangkok,mall,river','Riva Surya · Checkout':'bangkok,river,hotel','Suvarnabhumi · Departure':'airport,airplane'}; const fb={Temple:'temple,thailand',Museum:'museum,art',Cafe:'cafe,coffee',Restaurant:'thai,food',Market:'market,thailand',Mall:'mall,shopping','Rooftop bar':'rooftop,bar','Sky bar':'skybar,night',Viewpoint:'park,bangkok',Attraction:'bangkok,river',Hotel:'hotel,room',Flight:'airport,airplane'}; return kw[name]||fb[cat]||'bangkok,thailand'; }
   cover(name,cat){ let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%99991; return 'url("https://loremflickr.com/360/280/'+this.imgKw(name,cat)+'?lock='+h+'"), url("https://picsum.photos/seed/ca-'+encodeURIComponent(name)+'/360/280"), '+this.gmap(cat); }
   content(name,cat){
     const byCat={
-      Temple:{a:['Walk the main halls','See the principal Buddha','Make merit with incense'],d:['Cover shoulders & knees','Remove shoes in halls'],x:['Feet at Buddha','Touching monks']},
-      Museum:{a:['Follow the gallery route','Join a timed tour','Photograph permitted works'],d:['Buy tickets at entry','Check last-entry time'],x:['Flash photos','Touching art']},
-      Cafe:{a:['Take the view seat','Order the signature drink','Photos from the top floor'],d:['Come off-peak','Try the specialty'],x:['Rushing staff','Saving seats long']},
-      Restaurant:{a:['Order the signature dishes','Share family-style'],d:['Reserve for dinner','Ask the spice level'],x:['Over-ordering','Skipping local plates']},
-      Market:{a:['Wander the lanes','Sample street food','Hunt for local finds'],d:['Carry small cash','Bargain with a smile'],x:['Flashing valuables','Blocking aisles']},
-      Mall:{a:['Browse the Thai-craft floor','Riverside photos','Pick up gifts'],d:['Take the shuttle boat','Keep VAT receipts'],x:['Rushing — it’s huge','Missing the deck']},
-      'Rooftop bar':{a:['Catch the river sunset','Order a signature cocktail'],d:['Arrive before sunset','Smart-casual dress'],x:['Shorts or sandals','Being late']},
-      'Sky bar':{a:['Take in the skyline','Toast with a signature drink'],d:['Smart dress code','Book an edge table'],x:['Shorts/flip-flops','Large bags']},
-      Viewpoint:{a:['Stroll the grounds','Rent a paddle boat','Relax at golden hour'],d:['Bring water','Go late afternoon'],x:['Littering','Feeding lizards']},
-      Attraction:{a:['Walk the riverfront','Shop & dine','Ride the Ferris wheel'],d:['Come at dusk','Keep your ticket'],x:['Missing the last boat','Overpaying stalls']},
-      Hotel:{a:['Check in / out at the desk','Store luggage if needed'],d:['Keep your passport handy','Ask about the boat'],x:['Losing the key card','Forgetting the deposit']},
-      Flight:{a:['Check in & clear security','Head to rail / gate'],d:['Arrive 3 hours early','Keep documents ready'],x:['Liquids in carry-on','Cutting the buffer']}
+      Temple:{acts:['Walk the main halls and chapels','See the principal Buddha image','Make merit with incense & gold leaf'],dos:['Cover shoulders and knees','Remove shoes before entering halls','Keep your voice low'],donts:['Don’t point your feet at Buddha images','Don’t touch monks or sacred art','Don’t climb on statues']},
+      Museum:{acts:['Follow the gallery route','Join a guided tour if timed right','Photograph permitted exhibits'],dos:['Buy tickets at the entrance','Check the last-entry time','Use lockers for big bags'],donts:['Don’t use flash','Don’t touch the artworks','Don’t bring food inside']},
+      Cafe:{acts:['Grab a seat with the view','Order signature coffee & cake','Take photos from the top floor'],dos:['Come off-peak for a window seat','Try the house specialty'],donts:['Don’t expect fast service when busy','Don’t save seats for long']},
+      Restaurant:{acts:['Order the signature dishes','Share plates family-style'],dos:['Reserve ahead for dinner','Ask staff for spice level'],donts:['Don’t over-order — portions are generous','Don’t skip the regional specials']},
+      Market:{acts:['Wander the lanes & stalls','Sample street food','Hunt for local finds'],dos:['Carry small cash','Bargain politely with a smile','Go earlier to beat the heat'],donts:['Don’t flash valuables','Don’t block narrow aisles','Don’t expect card payment everywhere']},
+      Mall:{acts:['Browse Thai craft & design floors','Grab riverside photos','Pick up gifts to take home'],dos:['Use the river shuttle boat','Keep your receipt for VAT refund'],donts:['Don’t rush — it’s huge','Don’t miss the riverfront deck']},
+      'Rooftop bar':{acts:['Catch the sunset over the river','Order a signature cocktail','Find the rail-side view'],dos:['Arrive before sunset for a seat','Smart-casual dress'],donts:['Don’t wear shorts or sandals','Don’t be late for golden hour']},
+      'Sky bar':{acts:['Take in the skyline view','Toast with a signature drink'],dos:['Follow the smart dress code','Reserve a table near the edge'],donts:['Don’t wear shorts or flip-flops','Don’t bring large bags']},
+      Viewpoint:{acts:['Stroll the grounds','Rent a paddle boat','Relax at golden hour'],dos:['Bring water','Go late afternoon for cool air'],donts:['Don’t litter','Don’t feed the monitor lizards']},
+      Attraction:{acts:['Walk the riverfront','Shop and dine','Ride the Ferris wheel'],dos:['Come at dusk for lights','Keep your ticket handy'],donts:['Don’t miss the last boat','Don’t overpay — compare stalls']},
+      Hotel:{acts:['Check in / out at the desk','Store luggage if needed'],dos:['Keep your passport handy','Ask about the shuttle boat'],donts:['Don’t lose your key card','Don’t forget the deposit refund']},
+      Flight:{acts:['Check in & clear security','Head to the rail link / gate'],dos:['Arrive 3 hours early','Keep documents accessible'],donts:['Don’t pack liquids in carry-on','Don’t cut the buffer time short']}
     };
-    const over={'Damnoen Saduak':{a:['Ride a longtail boat','Buy from boat vendors','Photograph canal life'],d:['Go early','Agree the boat price first'],x:['Overpaying the boat','Leaning out far']},'Maeklong Railway Market':{a:['Watch the awnings fold','Browse trackside stalls'],d:['Check the train time','Stand clear of tracks'],x:['Standing on rails','Blocking the train']}};
-    return over[name]||byCat[cat]||{a:['Explore at your pace'],d:['Plan your timing'],x:['Rushing']};
+    const over={
+      'Damnoen Saduak':{acts:['Ride a longtail through the market','Buy snacks from boat vendors','Photograph the canal life'],dos:['Go early before the crowds','Agree the boat price first'],donts:['Don’t overpay for the boat','Don’t lean out too far']},
+      'Maeklong Railway Market':{acts:['Watch the awnings fold for the train','Browse the trackside stalls'],dos:['Check the train timetable','Stand well clear of the tracks'],donts:['Don’t stand on the rails','Don’t block the train’s path']},
+      'Pak Khlong Talat':{acts:['Wander the flower stalls','Photograph the garland makers'],dos:['Visit late afternoon for color','Carry small cash'],donts:['Don’t block the loading carts','Don’t touch the arranged flowers']}
+    };
+    return over[name]||byCat[cat]||{acts:['Explore at your own pace'],dos:['Plan your timing'],donts:['Don’t rush']};
   }
   guideFor(recLabel){
     const L=recLabel||'';
@@ -447,54 +483,80 @@ class Component extends DCLogic {
   placeRefFor(cat){ const m={Temple:{ref:'K1',slug:'k-temple'},Restaurant:{ref:'K2',slug:'k-food'},Cafe:{ref:'K3',slug:'k-cafe'},Market:{ref:'K4',slug:'k-market'},Mall:{ref:'K4',slug:'k-market'},Museum:{ref:'K5',slug:'k-museum'},'Rooftop bar':{ref:'K6',slug:'k-bar'},'Sky bar':{ref:'K6',slug:'k-bar'},Hotel:{ref:'K7',slug:'k-hotel'},Viewpoint:{ref:'K8',slug:'k-park'},Attraction:{ref:'K8',slug:'k-park'},Flight:{ref:'',slug:''}}; return m[cat]||{ref:'',slug:''}; }
   lineCells(line,color){ if(!line) return []; return line.map(st=>{ const big=st.l&&(st===line[0]||st===line[line.length-1]); const dotStyle = st.t ? {width:'16px',height:'16px',borderRadius:'50%',background:'#fff',border:'3px solid '+color,boxSizing:'border-box'} : {width:big?'16px':'11px',height:big?'16px':'11px',borderRadius:'50%',background:color,border:big?'3px solid #fff':'none',boxShadow:big?'0 0 0 2px '+color:'none',boxSizing:'border-box'}; return {l:st.l,s:st.s||'',hasS:!!st.s,dotStyle,cellStyle:{flex:1,minWidth:0,display:'flex',flexDirection:'column',alignItems:'center',gap:'8px'},labelStyle:{fontSize:'12px',fontWeight:700,color:'#2A211C',textAlign:'center',lineHeight:1.2,whiteSpace:'nowrap'},subStyle:{fontSize:'10px',fontWeight:600,color:'#AA9F96',textAlign:'center',whiteSpace:'nowrap'}}; }); }
 
-  data(){
-    const o=(label,best)=>({label,best:!!best});
+  tripDaysRaw() {
+    const opt=(mode,time,cost,tips)=>({mode,time,cost,tips});
+    const walk=(m,tips)=>opt('Walk',m+' min','Free',tips);
+    const grab=(m,c,tips)=>opt('Grab / taxi',m+' min','฿'+c,tips);
+    const boat=(m,c,tips)=>opt('River boat',m+' min','฿'+c,tips);
+    const bts=(m,c,tips)=>opt('BTS / MRT',m+' min','฿'+c,tips);
+    const rail=(m,c,tips)=>opt('Airport Rail',m+' min','฿'+c,tips);
+    const van=(m,tips)=>opt('Day-trip van',m+' min','Included',tips);
+    const combo=(mode,time,cost,tips)=>({mode,time:time+' min',cost:(typeof cost==='number'?'฿'+cost:cost),tips});
     return [
-      { wd:'Tue', date:'Feb 10', title:'Arrival & Riverside Welcome', hours:'5 hrs', budget:'฿3,720',
-        intro:'A gentle start — land in the afternoon, ride into the city, check into a riverside hotel, then a rustic Thai dinner in the old town.', stops:[
-        {t:'14:00',name:'Suvarnabhumi Airport',th:'สนามบินสุวรรณภูมิ',cat:'Flight',price:'',desc:'Land, clear immigration and collect bags. The Airport Rail Link from level B is the smoothest way into town.',to:'Riva Surya Bangkok',opts:[o('Airport Rail · 26 min · ฿45',true),o('Grab / taxi · 45 min · ฿400')],note:'Rail beats traffic at rush hour; tap a credit card or buy a token at the gate.'},
-        {t:'16:00',name:'Riva Surya Bangkok',th:'โรงแรมริว่า สุริยา',cat:'Hotel',price:'฿3,200',desc:'Check into a river-view room and unwind before dinner.',to:'Err Urban Rustic Thai',opts:[o('Walk · 5 min · Free',true)],note:'Quiet riverside lane, well lit in the evening.'},
-        {t:'19:00',name:'Err Urban Rustic Thai',th:'ร้านเอิร์ธ',cat:'Restaurant',price:'฿520',desc:'A beloved old-town spot near Tha Tien — crispy pork and chili dips. Table is booked.'}
+      { wd:'Tue', date:'Feb 10', title:'Arrival & Riverside Welcome',
+        intro:'A gentle start. Land in the early afternoon, ride into the city, check into a Chao Phraya riverside hotel, then ease in with a rustic Thai dinner in the old town.',
+        sum:{h:'5 hrs',b:'฿3,720'}, stops:[
+        { t:'14:00', cat:'Flight', name:'Suvarnabhumi Airport', desc:'Land, clear immigration and collect bags. The Airport Rail Link from the basement is the smoothest way into town.', price:'', move:[ rail(26,'45',['Runs every 10–15 min from level B','No traffic — the fastest way into the city','Transfer to BTS at Phaya Thai']), grab(45,'400',['Door to door but slow in rush hour','Use the Grab app for a fixed fare']) ] },
+        { t:'16:00', cat:'Hotel', name:'Riva Surya Bangkok', desc:'Check into a river-view room and unwind. Watch the express boats go by before heading out for dinner.', price:'฿3,200', move:[ walk(5,['Quiet lane along the river','Well lit in the evening']), grab(8,'60',['Handy if it rains']) ] },
+        { t:'19:00', cat:'Restaurant', name:'Err Urban Rustic Thai', desc:'A beloved old-town spot near Tha Tien. The crispy pork and chili dips are the move. Table is booked.', price:'฿520', move:null }
       ]},
-      { wd:'Wed', date:'Feb 11', title:'Old Town & Royal Bangkok', hours:'6 hrs', budget:'฿1,080',
-        intro:'Open at the Grand Palace, wander the river wall north for lunch, then the teak calm of the Jim Thompson House.', stops:[
-        {t:'09:00',name:'Grand Palace',th:'พระบรมมหาราชวัง',cat:'Temple',price:'฿500',desc:'The Emerald Buddha and Thai royal architecture. Dress modestly — wraps for rent at the gate.',to:'Tha Maharaj Riverside',opts:[o('Walk · 10 min · Free',true),o('Grab · 7 min · ฿60')],note:'Follow the river wall north — vendors the whole way.'},
-        {t:'12:00',name:'Tha Maharaj Riverside',th:'ท่ามหาราช',cat:'Restaurant',price:'฿380',desc:'An airy riverside complex; pick a table by the water for the breeze.',to:'Jim Thompson House',opts:[o('River boat · 8 min · ฿16',true),o('Grab · 20 min · ฿120')],note:'Take the orange-flag express boat; pay onboard.'},
-        {t:'15:00',name:'Jim Thompson House',th:'บ้านจิม ทอมป์สัน',cat:'Museum',price:'฿200',desc:'Teak houses and a Thai silk collection. Guided tours run on a loop — last entry mid-afternoon.'}
+      { wd:'Wed', date:'Feb 11', title:'Old Town & Royal Bangkok',
+        intro:'Open the day at the Grand Palace, wander the river wall north for lunch, then close the afternoon in the teak calm of the Jim Thompson House.',
+        sum:{h:'6 hrs',b:'฿1,080'}, stops:[
+        { t:'09:00', cat:'Temple', name:'Grand Palace', desc:'The Emerald Buddha and Thai royal architecture. Dress modestly — shoulders and knees covered (wraps for rent at the gate).', price:'฿500', move:[ walk(10,['Follow the river wall north','Street vendors the whole way']), grab(7,'60',['Short hop, light traffic here']) ] },
+        { t:'12:00', cat:'Restaurant', name:'Tha Maharaj Riverside', desc:'An airy riverside complex with several restaurants — pick a table by the water for the breeze.', price:'฿380', move:[ boat(8,'16',['Chao Phraya Express from Tha Maharaj','Orange-flag line is fastest','Pay onboard']), grab(20,'120',['Slower in midday traffic']) ] },
+        { t:'15:00', cat:'Museum', name:'Jim Thompson House', desc:'A cluster of teak houses and a Thai silk collection. Guided tours run on a loop — last entry is mid-afternoon.', price:'฿200', move:null }
       ]},
-      { wd:'Thu', date:'Feb 12', title:'Riverside Temples & Sunset', hours:'10 hrs', budget:'฿1,480',
-        intro:'The highlight day — Wat Pho, coffee with a Wat Arun view, a classic Thai lunch, the flower market, and a rooftop sunset.', stops:[
-        {t:'08:30',name:'Wat Pho',th:'วัดโพธิ์',cat:'Temple',price:'฿200',desc:'The giant Reclining Buddha and the home of Thai massage. Come early to beat crowds and heat.',to:'The Deck by Arun',opts:[o('Walk + ferry · 8 min · ฿4',true)],note:'Cross-river ferry to the Wat Arun side runs every few minutes.'},
-        {t:'10:30',name:'The Deck by Arun',th:'เดอะ เด็ค บาย อรุณ',cat:'Cafe',price:'฿180',desc:'Coffee with a full Wat Arun view across the water. Best photo angle is the top floor.',to:'Supanniga Eating Room',opts:[o('Walk · 6 min · Free',true)],note:'Straight down the riverside road.'},
-        {t:'12:30',name:'Supanniga Eating Room',th:'สุพรรณิการ์',cat:'Restaurant',price:'฿650',desc:'Bold heirloom recipes from Trat — the moo chamuang and crab omelette are essential. Booked.',to:'Pak Khlong Talat',opts:[o('Grab · 18 min · ฿90',true),o('River boat · 20 min · ฿30')],note:'Book a Grab to beat the 4–7pm jam; aim to arrive before 6pm.'},
-        {t:'15:00',name:'Pak Khlong Talat',th:'ปากคลองตลาด',cat:'Market',price:'Free',desc:'Bangkok’s largest fresh-flower market — a riot of colour, lovely to wander and photograph.',to:'Eagle’s Nest Bar',opts:[o('Grab · 12 min · ฿70',true)],note:'Arrive at the rooftop before 18:00 for a rail seat.'},
-        {t:'18:30',name:'Eagle’s Nest Bar',th:'อีเกิลส เนสต์',cat:'Rooftop bar',price:'฿450',desc:'Close the day on a rooftop with the sun setting behind Wat Arun.'}
+      { wd:'Thu', date:'Feb 12', title:'Riverside Temples & Sunset',
+        intro:'The highlight day. Start early at Wat Pho, cross the river for coffee with a Wat Arun view, a classic Thai lunch, the flower market, then a rooftop sunset over the river.',
+        sum:{h:'10 hrs',b:'฿1,480'}, stops:[
+        { t:'08:30', cat:'Temple', name:'Wat Pho', desc:'The giant Reclining Buddha and the home of traditional Thai massage. Come early to beat the crowds and the heat.', price:'฿200', move:[ walk(8,['Walk to the pier — the cafe is riverside','Shady in the morning']), boat(5,'16',['Cross-river ferry to the Wat Arun side']) ] },
+        { t:'10:30', cat:'Cafe', name:'The Deck by Arun', desc:'Coffee with a full-frontal Wat Arun view across the water. The top floor has the best photo angle.', price:'฿180', move:[ boat(5,'16',['Cross-river ferry back to Tha Tien','Runs every few minutes']), walk(15,['Longer loop via the bridge']) ] },
+        { t:'12:30', cat:'Restaurant', name:'Supanniga Eating Room', desc:'Bold heirloom recipes from Trat — the moo chamuang and crab omelette are essential. Table is booked.', price:'฿650', move:[ walk(6,['Straight down the riverside road']), grab(8,'60',['Cooler option at midday']) ] },
+        { t:'15:00', cat:'Market', name:'Pak Khlong Talat', desc:'Bangkok’s largest fresh-flower market — a riot of color, lovely to wander and photograph.', price:'Free', move:[ grab(18,'90',['Book a Grab to beat the 4–7pm jam','Aim to arrive before 6pm for sunset']), boat(20,'30',['Scenic but slower']) ] },
+        { t:'18:30', cat:'Rooftop bar', name:"Eagle's Nest Bar", desc:'Close the day on a rooftop with the sun setting behind Wat Arun. Arrive before 18:00 for a rail seat.', price:'฿450', move:null }
       ]},
-      { wd:'Fri', date:'Feb 13', title:'Markets & Green Spaces', hours:'7 hrs', budget:'฿250',
-        intro:'A relaxed pace through Chatuchak’s endless stalls, a famous dessert stop, then the city’s central park.', stops:[
-        {t:'09:30',name:'Chatuchak Weekend Market',th:'ตลาดนัดจตุจักร',cat:'Market',price:'Free',desc:'The vast weekend market — everything from street food to homeware. Wear comfortable shoes.',to:'After You Dessert Cafe',opts:[o('BTS + MRT · 22 min · ฿88',true),o('Grab · 25 min · ฿150')],note:'BTS to the interchange, walk the link bridge, then MRT — buy a separate MRT token.'},
-        {t:'13:00',name:'After You Dessert Cafe',th:'อาฟเตอร์ ยู',cat:'Cafe',price:'฿250',desc:'A dessert break — the Shibuya toast and shaved ice that made the chain famous.',to:'Lumphini Park',opts:[o('Walk · 8 min · Free',true)],note:'Short walk through the Si Lom blocks.'},
-        {t:'16:00',name:'Lumphini Park',th:'สวนลุมพินี',cat:'Viewpoint',price:'Free',desc:'Stroll or paddle a swan boat in the city’s green heart. Lovely light in the late afternoon.'}
+      { wd:'Fri', date:'Feb 13', title:'Markets & Green Spaces',
+        intro:'A relaxed pace through Chatuchak’s endless stalls, a famous dessert stop, then unwind in the city’s central park as the afternoon cools.',
+        sum:{h:'7 hrs',b:'฿250'}, stops:[
+        { t:'09:30', cat:'Market', name:'Chatuchak Weekend Market', desc:'The vast weekend market — everything from street food to homeware. Wear comfortable shoes and pace yourself.', price:'Free', move:[ walk(4,['Inside the market zone','Head for the Section 2 exit']), grab(7,'60',[]) ] },
+        { t:'13:00', cat:'Cafe', name:'After You Dessert Cafe', desc:'A dessert break — the Shibuya toast and shaved ice that made the chain famous.', price:'฿250', move:[ combo('BTS + MRT',22,88,['BTS Sukhumvit Line from Mo Chit to Asok','Walk the link bridge to MRT Sukhumvit','MRT Blue Line down to Si Lom — buy a separate MRT token']), bts(20,'59',['MRT from Chatuchak Park to Si Lom','Then a 5-min walk to the park']), grab(25,'150',['Slower in the afternoon']) ] },
+        { t:'16:00', cat:'Viewpoint', name:'Lumphini Park', desc:'Stroll or paddle a swan boat in the city’s green heart. The light is lovely in the late afternoon.', price:'Free', move:null }
       ]},
-      { wd:'Sat', date:'Feb 14', title:'Art & Skyline', hours:'9 hrs', budget:'฿1,180',
-        intro:'A day for art and good eating — Thai contemporary art, a gourmet market lunch, then a legendary sky bar at night.', stops:[
-        {t:'10:00',name:'MOCA Bangkok',th:'โมก้า',cat:'Museum',price:'฿280',desc:'Five floors of Thai contemporary art in a light-filled building — a favourite for photographers.',to:'Or Tor Kor Market',opts:[o('MRT + Grab · 38 min · ฿210',true),o('Grab · 25 min · ฿150')],note:'MRT Blue Line then a short Grab is cheaper than Grab all the way; tap out before booking.'},
-        {t:'13:30',name:'Or Tor Kor Market',th:'ตลาด อ.ต.ก.',cat:'Restaurant',price:'฿300',desc:'A premium fresh market — curries, grills, sweets and famously good fruit.',to:'Sirocco Sky Bar',opts:[o('Grab · 30 min · ฿200',true)],note:'Long ride across town in evening traffic — dress smart, no shorts.'},
-        {t:'19:00',name:'Sirocco Sky Bar',th:'ซิรอคโค',cat:'Sky bar',price:'฿600',desc:'A legendary open-air sky bar high above the Chao Phraya. Smart dress code applies.'}
+      { wd:'Sat', date:'Feb 14', title:'Art & Skyline',
+        intro:'A day for art and good eating — five floors of Thai contemporary art, a gourmet market lunch, then a legendary sky bar over the river at night.',
+        sum:{h:'9 hrs',b:'฿1,180'}, stops:[
+        { t:'10:00', cat:'Museum', name:'MOCA Bangkok', desc:'Five floors of Thai contemporary art in a light-filled building — a favorite for art lovers and photographers.', price:'฿280', move:[ combo('MRT + Grab',38,210,['Ride the MRT Blue Line to Phahon Yothin, then Grab the last leg','Cheaper than Grab all the way, faster than the bus','Tap out of the MRT before booking the Grab']), grab(25,'150',['Book a Grab — MOCA is far from transit','Allow a buffer for traffic']), bts(35,'59',['Bus + MRT combo, the budget option']) ] },
+        { t:'13:30', cat:'Restaurant', name:'Or Tor Kor Market', desc:'A premium fresh market — a feast of curries, grills, sweets and famously good fruit.', price:'฿300', move:[ walk(6,['Walk to the MRT, then ride down']), grab(30,'200',['Long ride across town in evening traffic','Dress code: smart, no shorts']) ] },
+        { t:'19:00', cat:'Sky bar', name:'Sirocco Sky Bar', desc:'A legendary open-air sky bar high above the Chao Phraya. There is a smart dress code.', price:'฿600', move:null }
       ]},
-      { wd:'Sun', date:'Feb 15', title:'Floating Markets Day Trip', hours:'11 hrs', budget:'฿700',
-        intro:'Out of the city — the floating market, the umbrella-pulldown railway market, then a relaxed evening at Asiatique.', stops:[
-        {t:'08:00',name:'Damnoen Saduak',th:'ตลาดน้ำดำเนินสะดวก',cat:'Market',price:'฿700',desc:'The classic floating market — ride a longtail past vendors selling from their boats. Earlier is calmer.',to:'Maeklong Railway Market',opts:[o('Day-trip van · 40 min · Included',true)],note:'Driver waits at the market exit — confirm the pickup time.'},
-        {t:'13:00',name:'Maeklong Railway Market',th:'ตลาดร่มหุบ',cat:'Market',price:'Free',desc:'A market built across live train tracks — watch the awnings fold away as the train rolls through.',to:'Asiatique The Riverfront',opts:[o('Day-trip van · 90 min · Included',true)],note:'The long ride back — nap on the way; check the train timetable before you go.'},
-        {t:'18:00',name:'Asiatique The Riverfront',th:'เอเชียทีค',cat:'Attraction',price:'Free',desc:'A riverside night market — shop, eat, and ride the Ferris wheel for a skyline view.'}
+      { wd:'Sun', date:'Feb 15', title:'Floating Markets Day Trip',
+        intro:'Out of the city for the day. An early start to the floating market, the famous umbrella-pulldown railway market, then back along the river for a relaxed evening at Asiatique.',
+        sum:{h:'11 hrs',b:'฿700'}, stops:[
+        { t:'08:00', cat:'Market', name:'Damnoen Saduak', desc:'The classic floating market — ride a longtail past vendors selling from their boats. Earlier is calmer.', price:'฿700', move:[ van(40,['Included in the day-trip van','Driver waits at the market exit']), grab(45,'500',['Only if travelling independently']) ] },
+        { t:'13:00', cat:'Market', name:'Maeklong Railway Market', desc:'A market built across live train tracks — watch the awnings fold away as the train rolls through. Check the train schedule.', price:'Free', move:[ van(90,['The long ride back to the city — nap on the way']), grab(100,'1200',['Expensive solo']) ] },
+        { t:'18:00', cat:'Attraction', name:'Asiatique The Riverfront', desc:'A riverside night market — shop, eat, and ride the Ferris wheel for a skyline view.', price:'Free', move:null }
       ]},
-      { wd:'Mon', date:'Feb 16', title:'Last Bites & Farewell', hours:'5 hrs', budget:'—',
-        intro:'A calm final morning — gifts at ICONSIAM, check out, and to the airport with plenty of buffer.', stops:[
-        {t:'10:00',name:'ICONSIAM',th:'ไอคอนสยาม',cat:'Mall',price:'Shopping',desc:'A riverside mall — the SOOKSIAM floor gathers the best of regional Thai crafts and snacks for gifts.',to:'Riva Surya · Checkout',opts:[o('Boat shuttle · 6 min · Free',true),o('Walk · 8 min · Free')],note:'Free ICONSIAM shuttle boat to Si Phraya pier.'},
-        {t:'13:00',name:'Riva Surya · Checkout',th:'เช็คเอาท์',cat:'Hotel',price:'',desc:'Pack up and check out. The lobby can hold bags if your flight is later.',to:'Suvarnabhumi · Departure',opts:[o('Airport Rail · 30 min · ฿45',true),o('Grab · 45 min · ฿400')],note:'Taxi to Phaya Thai then Airport Rail; allow 3 hours before the flight.'},
-        {t:'15:30',name:'Suvarnabhumi · Departure',th:'สนามบินสุวรรณภูมิ',cat:'Flight',price:'',desc:'Arrive at least three hours before departure for check-in and security.'}
+      { wd:'Mon', date:'Feb 16', title:'Last Bites & Farewell',
+        intro:'A calm final morning. Pick up gifts at ICONSIAM, check out, and make for the airport with plenty of buffer.',
+        sum:{h:'5 hrs',b:'—'}, stops:[
+        { t:'10:00', cat:'Mall', name:'ICONSIAM', desc:'A riverside mall — the SOOKSIAM floor gathers the best of regional Thai crafts and snacks for gifts.', price:'Shopping', move:[ walk(8,['Riverside walkway back to Riva Surya']), boat(6,'16',['Free ICONSIAM shuttle boat to Si Phraya']) ] },
+        { t:'13:00', cat:'Hotel', name:'Riva Surya · Checkout', desc:'Pack up and check out. The lobby can hold bags if your flight is later in the day.', price:'', move:[ rail(30,'45',['Taxi to Phaya Thai, then Airport Rail','Allow 3 hours before the flight']), grab(45,'400',['Door to door, mind the rush hour']) ] },
+        { t:'15:30', cat:'Flight', name:'Suvarnabhumi · Departure', desc:'Arrive at least three hours before departure for check-in and security.', price:'', move:null }
       ]}
     ];
+  }
+  data(){
+    return this.tripDaysRaw().map(d=>({
+      wd:d.wd, date:d.date, title:d.title, hours:d.sum.h, budget:d.sum.b, intro:d.intro,
+      stops:d.stops.map((s,i)=>{
+        const next=d.stops[i+1];
+        const opts=(s.move||[]).map((m,k)=>({label:m.mode+' · '+m.time+' · '+m.cost, best:k===0}));
+        const recTip=(s.move&&s.move[0]&&s.move[0].tips&&s.move[0].tips[0])||'';
+        return { t:s.t, name:s.name, th:this.placeTh(s.name), cat:s.cat, price:s.price, desc:s.desc,
+                 to: next?next.name:'', opts: opts.length?opts:null, note: recTip };
+      })
+    }));
   }
 
   renderVals(){
@@ -514,7 +576,7 @@ class Component extends DCLogic {
           iconEl:this.icoEl(this.iconFor(s.cat),{width:'11px',height:'11px',color:'#2A211C',marginRight:'1px'}),
           iconBig:this.icoEl(this.iconFor(s.cat),{position:'absolute',right:'-6px',bottom:'-8px',width:'46px',height:'46px',color:'rgba(255,255,255,.34)'}),
           thumbStyle:{position:'relative',width:'118px',height:'90px',borderRadius:'11px',flex:'0 0 118px',backgroundImage:this.cover(s.name,s.cat),backgroundSize:'cover',backgroundPosition:'center',overflow:'hidden',border:'1px solid rgba(43,33,24,.06)'},
-          hours:hrs, hasHours:!!hrs, price:s.price, hasPrice:!!s.price, desc:s.desc, acts:info.a, dos:info.d, donts:info.x });
+          hours:hrs, hasHours:!!hrs, price:s.price, hasPrice:!!s.price, desc:s.desc, acts:info.acts, dos:info.dos, donts:info.donts });
         if(!last && s.opts){
           const rec=(s.opts.find(x=>x.best)||s.opts[0]).label;
           const recMeta=rec.split(' · ').slice(1).join(' · ');
@@ -539,7 +601,8 @@ class Component extends DCLogic {
       iconWrap:{width:'40px',height:'40px',borderRadius:'11px',background:g.color,display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 40px'},
       iconEl:this.icoEl(g.icon,{width:'20px',height:'20px',color:'#fff'}),
       refStyle:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',fontWeight:700,color:'#fff',background:g.color,padding:'3px 0',width:'34px',textAlign:'center',borderRadius:'7px',whiteSpace:'nowrap',flex:'0 0 34px'} }));
-    const transitPages=this.transitGuideData().map(g=>({ slug:g.slug, ref:g.ref, name:g.name, color:g.color, summary:g.summary, hours:g.hours, fare:g.fare, tips:g.tips,
+    const tKey={'g-train':'BTS / MRT','g-arl':'Airport Rail','g-taxi':'Grab / taxi','g-boat':'River boat','g-walk':'Walk','g-van':'Day-trip van'};
+    const transitPages=this.transitGuideData().map(g=>({ slug:g.slug, ref:g.ref, name:g.name, color:g.color, summary:g.summary, hours:g.hours, fare:g.fare, tips:(this.gtipModes()[tKey[g.slug]]||{tips:g.tips}).tips,
       iconEl:this.icoEl(g.icon,{width:'22px',height:'22px',color:'#fff'}),
       iconWrap:{width:'40px',height:'40px',borderRadius:'11px',background:'rgba(255,255,255,.22)',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 40px'},
       headStyle:{display:'flex',alignItems:'center',gap:'13px',padding:'20px 24px',background:g.color,color:'#fff'},
@@ -554,7 +617,8 @@ class Component extends DCLogic {
       iconEl:this.icoEl(g.icon,{width:'20px',height:'20px',color:'#2A211C'}),
       refStyle:{fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',fontWeight:700,color:'#fff',background:'#2A211C',padding:'3px 0',width:'34px',textAlign:'center',borderRadius:'7px',whiteSpace:'nowrap',flex:'0 0 34px'} }));
     const placeColor={'k-temple':'#C19A4E','k-food':'#C77F49','k-cafe':'#B98E63','k-market':'#B5556B','k-museum':'#8A8174','k-bar':'#E5500B','k-hotel':'#8C7A66','k-park':'#6E8C6A'};
-    const placePages=this.placeGuideData().map(g=>{ const c=placeColor[g.slug]||'#2A211C'; return { slug:g.slug, ref:g.ref, name:g.name, summary:g.summary, tips:g.tips, note:g.note||'', hasNote:!!g.note, color:c,
+    const pKey={'k-temple':'Temple','k-food':'Restaurant','k-cafe':'Cafe','k-market':'Market','k-museum':'Museum','k-bar':'Rooftop bar','k-hotel':'Hotel','k-park':'Viewpoint'};
+    const placePages=this.placeGuideData().map(g=>{ const c=placeColor[g.slug]||'#2A211C'; const gp=this.gtipPlaces()[pKey[g.slug]]||{}; return { slug:g.slug, ref:g.ref, name:g.name, summary:g.summary, tips:gp.tips||g.tips, note:gp.note||g.note||'', hasNote:!!(gp.note||g.note), color:c,
       iconEl:this.icoEl(g.icon,{width:'22px',height:'22px',color:'#fff'}),
       iconWrap:{width:'40px',height:'40px',borderRadius:'11px',background:'rgba(255,255,255,.22)',display:'flex',alignItems:'center',justifyContent:'center',flex:'0 0 40px'},
       headStyle:{display:'flex',alignItems:'center',gap:'13px',padding:'22px 24px',background:c,color:'#fff',margin:'-50px -60px 0'},

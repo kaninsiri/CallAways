@@ -1599,7 +1599,7 @@ class Component extends DCLogic {
       drawerFrom: dr?dr.from:'', drawerTo: dr?dr.to:'', drawerBest: dr?dr.best:false, drawerTips: dr&&dr.tips?dr.tips:[], drawerHasTips: !!(dr&&dr.tips&&dr.tips.length),
       drawerLegs, mapBtns, drawerIsCombo, drawerNote, drawerHasNote: !!drawerNote, drawerHasMaps: mapBtns.length>0, drawerStops, drawerHasStops,
       drawerTimeline, drawerLegSummary, drawerLegCount,
-      onExport: ()=>{ try{ window.print(); }catch(e){} },
+      onExport: ()=>{ try{ window.open('Trip%20Plan%20PDF.dc.html','_blank'); }catch(e){ try{ window.location.href='Trip%20Plan%20PDF.dc.html'; }catch(e2){} } },
       onCloseDrawer: ()=>this.setState({drawer:null}),
       onAllTips: ()=>this.setState({drawer:null,gt:'__idx',gtTab:'transport'}),
       mapRef:this.mapRef,
