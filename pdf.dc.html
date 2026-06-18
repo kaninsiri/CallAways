@@ -28,11 +28,10 @@
   /* ===== Print: native browser print → true A4 PDF (no library) =====
      Each topic (cover, day, guide section) starts a fresh page; long topics flow onto
      extra pages; atomic blocks (.avoid) never split across a page boundary. */
-  /* Page margins are applied by the PDF generator (api/pdf.js → page.pdf margin) because the
-     serverless Chrome ignores CSS @page margins. So @page here only declares the size; the
-     top/bottom/side gaps come from page.pdf. Sides stay 0 there — each .page's own inner
-     padding provides the side inset (consistent with the cover, matching the web look). */
-  @page{ size:A4 portrait; }
+  /* Print via the browser (Doc "Export PDF" opens this page and triggers Save-as-PDF), which
+     DOES honor @page margins. Top gap on every page (incl. overflow); bottom reserves the
+     running footer; sides 0 — each page's own inner padding provides the side inset. */
+  @page{ size:A4 portrait; margin:17mm 0 14mm; }
   .topic{ break-before:page; page-break-before:always; }
   .topic:first-child{ break-before:avoid; page-break-before:avoid; }
   .avoid{ break-inside:avoid; page-break-inside:avoid; }
@@ -335,7 +334,7 @@
 
   <!-- ===== per transport mode ===== -->
   <sc-for list="{{ transitPages }}" as="g" hint-placeholder-count="6">
-    <div class="page avoid" id="{{ g.slug }}" data-screen-label="PDF Transit" style="width:794px;max-width:100%;margin:0 auto 22px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;">
+    <div class="page topic" id="{{ g.slug }}" data-screen-label="PDF Transit" style="width:794px;max-width:100%;margin:0 auto 22px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);display:flex;flex-direction:column;overflow:hidden;">
       <div data-zone="Page header" style="{{ g.headStyle }}">
         <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
         <div style="flex:1;min-width:0;">
@@ -404,7 +403,7 @@
 
   <!-- ===== per place category ===== -->
   <sc-for list="{{ placePages }}" as="g" hint-placeholder-count="8">
-    <div class="page avoid" id="{{ g.slug }}" data-screen-label="PDF Place" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;">
+    <div class="page topic" id="{{ g.slug }}" data-screen-label="PDF Place" style="width:794px;max-width:100%;margin:0 auto 28px;background:#FBFAF8;box-shadow:0 2px 4px -1px rgba(43,33,24,.06),0 24px 50px -16px rgba(43,33,24,.3);padding:50px 60px 40px;display:flex;flex-direction:column;">
       <div data-zone="Page header" style="{{ g.headStyle }}">
         <span style="{{ g.iconWrap }}">{{ g.iconEl }}</span>
         <div style="flex:1;min-width:0;">
@@ -445,6 +444,13 @@ class Component extends DCLogic {
     setTimeout(fit,60); setTimeout(fit,400); setTimeout(fit,1200);
     if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(fit); }
     window.addEventListener('resize', fit);
+    // Opened from the Doc's "Export PDF" (?print=1) → auto-open the Save-as-PDF dialog
+    // once fonts/layout settle. Browser print uses @media print → true A4 + running footer.
+    if(/[?&]print=1/.test(location.search)){
+      const go=()=>{ try{ window.print(); }catch(e){} };
+      const ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+      Promise.resolve(ready).then(()=>setTimeout(go, 900));
+    }
   }
   componentWillUnmount(){ if(this._fit){ try{ window.removeEventListener('resize', this._fit); }catch(e){} } }
   fullDate(wd,date){ const p=(date||'').split(' '); return p.length===2 ? (wd+' '+p[1]+' '+p[0]) : (wd+' '+date); }
