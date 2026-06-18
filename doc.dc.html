@@ -1599,9 +1599,23 @@ class Component extends DCLogic {
       drawerFrom: dr?dr.from:'', drawerTo: dr?dr.to:'', drawerBest: dr?dr.best:false, drawerTips: dr&&dr.tips?dr.tips:[], drawerHasTips: !!(dr&&dr.tips&&dr.tips.length),
       drawerLegs, mapBtns, drawerIsCombo, drawerNote, drawerHasNote: !!drawerNote, drawerHasMaps: mapBtns.length>0, drawerStops, drawerHasStops,
       drawerTimeline, drawerLegSummary, drawerLegCount,
-      onExport: ()=>{ try{ this.ping('Generating your PDF…'); }catch(e){}
-        try{ const f=document.createElement('iframe'); f.style.display='none'; f.src='/api/pdf?doc=trip'; document.body.appendChild(f); setTimeout(()=>{ try{ f.remove(); }catch(e){} }, 120000); }
-        catch(e){ try{ window.open('/api/pdf?doc=trip','_blank'); }catch(e2){} } },
+      onExport: async ()=>{
+        if(this._exporting) return; this._exporting=true;
+        try{
+          this.ping('Generating your PDF… (a few seconds)');
+          const res=await fetch('/api/pdf?doc=trip');
+          if(!res.ok) throw new Error('HTTP '+res.status);
+          const blob=await res.blob();
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement('a');
+          a.href=url; a.download='Bangkok-Slow-Days.pdf';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 5000);
+          this.ping('PDF downloaded');
+        }catch(e){
+          this.ping('PDF export failed — try again');
+        }finally{ this._exporting=false; }
+      },
       onCloseDrawer: ()=>this.setState({drawer:null}),
       onAllTips: ()=>this.setState({drawer:null,gt:'__idx',gtTab:'transport'}),
       mapRef:this.mapRef,
