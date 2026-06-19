@@ -795,8 +795,46 @@
           <sc-if value="{{ pdHasPrice }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;background:#F2EDE7;font-size:11.5px;font-weight:700;color:#2A211C;line-height:1;white-space:nowrap;"><svg style="width:12px;height:12px;color:#AA9F96;"><use href="#i-wallet"></use></svg>{{ pdPrice }}</span></sc-if>
         </div>
 
+        <!-- highlights chips -->
+        <sc-if value="{{ pdHasTags }}" hint-placeholder-val="{{ true }}">
+          <div data-zone="Highlights" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">
+            <sc-for list="{{ pdTags }}" as="tag" hint-placeholder-count="3">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:#FFF1E6;border:1px solid #FFE0C7;font-size:11.5px;font-weight:600;color:#B85C12;line-height:1;"><svg style="width:11px;height:11px;color:#FD8E1C;"><use href="#i-star"></use></svg>{{ tag }}</span>
+            </sc-for>
+          </div>
+        </sc-if>
+
         <!-- map button -->
         <button data-zone="Show on map" onClick="{{ onPdMap }}" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px;border:1.5px solid #2A211C;border-radius:14px;background:#fff;color:#2A211C;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;"><svg style="width:16px;height:16px;color:#FD6318;"><use href="#i-pin"></use></svg>Show on map</button>
+
+        <!-- admission tiles -->
+        <sc-if value="{{ pdHasAdm }}" hint-placeholder-val="{{ true }}">
+          <div data-zone="Admission" style="margin-top:16px;">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px;"><svg style="width:14px;height:14px;color:#FD6318;"><use href="#i-wallet"></use></svg><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B7F76;">Admission</span></div>
+            <div style="{{ pdAdmWrap }}">
+              <sc-for list="{{ pdAdm }}" as="t" hint-placeholder-count="2">
+                <div style="border:1px solid #ECE7E1;border-radius:12px;padding:9px 8px;background:#fff;text-align:center;">
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:#AA9F96;white-space:nowrap;">{{ t.label }}</div>
+                  <div style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:#2A211C;margin-top:2px;">{{ t.v }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ pdHasAdmNote }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;gap:6px;margin-top:8px;align-items:flex-start;"><svg style="width:12px;height:12px;color:#AA9F96;flex:0 0 12px;margin-top:2px;"><use href="#i-info"></use></svg><span style="font-size:11.5px;color:#8B7F76;line-height:1.45;">{{ pdAdmNote }}</span></div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- getting in -->
+        <sc-if value="{{ pdHasEntrance }}" hint-placeholder-val="{{ true }}">
+          <div data-zone="Getting in" style="display:flex;gap:10px;margin-top:12px;padding:11px 13px;border:1px solid #ECE7E1;border-radius:12px;background:#fff;align-items:flex-start;">
+            <span style="width:28px;height:28px;border-radius:8px;background:#F2EDE7;display:flex;align-items:center;justify-content:center;flex:0 0 28px;"><svg style="width:15px;height:15px;color:#FD6318;"><use href="#i-door"></use></svg></span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#AA9F96;">Getting in</div>
+              <div style="font-size:13px;font-weight:600;color:#2A211C;line-height:1.4;margin-top:2px;">{{ pdEntrance }}</div>
+            </div>
+          </div>
+        </sc-if>
 
         <p style="font-size:14.5px;font-weight:400;line-height:1.7;color:#4B423B;margin:16px 0 0;text-wrap:pretty;">{{ pdDesc }}</p>
 
@@ -983,6 +1021,32 @@ class Component extends DCLogic {
     const base=over[name]||byCat[cat]||{acts:['Explore at your own pace'],dos:['Plan your timing'],donts:['Don\u2019t rush']};
     return base;
   }
+  // Quick facts shown as visual tiles/chips (not prose): admission (adult/child, foreigner rate),
+  // how to get in, and highlight tags. Only places with real data show the block.
+  placeFacts(name){
+    const m={
+      'Grand Palace':{adm:[{l:'Adult',v:'\u0e3f500'},{l:'Child <120cm',v:'Free'}],note:'Foreigner rate \u00b7 Thai ID is free',entrance:'Na Phra Lan gate \u2014 strict dress code',tags:['Emerald Buddha','Royal halls','Wat Phra Kaew']},
+      'Wat Pho':{adm:[{l:'Adult',v:'\u0e3f200'},{l:'Child',v:'Free'}],note:'Foreigner rate \u00b7 free water included',entrance:'Th Sanam Chai gate',tags:['Reclining Buddha','Massage school','Stupas']},
+      'Jim Thompson House':{adm:[{l:'Adult',v:'\u0e3f200'},{l:'Student',v:'\u0e3f100'}],entrance:'Soi Kasemsan 2 \u2014 guided tour only',tags:['Teak houses','Silk collection','Garden']},
+      'MOCA Bangkok':{adm:[{l:'Adult',v:'\u0e3f280'},{l:'Student',v:'\u0e3f140'},{l:'Child <15',v:'Free'}],entrance:'Vibhavadi Rd \u2014 lockers at entry',tags:['5 floors','Thai contemporary art','Photo-friendly']},
+      'The Deck by Arun':{adm:[],entrance:'Tha Tien riverside \u2014 \u00e0 la carte',tags:['Wat Arun view','Rooftop seats','Coffee']},
+      'Supanniga Eating Room':{adm:[],entrance:'Riverside \u2014 reserve ahead',tags:['Trat cuisine','Crab omelette','Moo chamuang']},
+      'Err Urban Rustic Thai':{adm:[],entrance:'Old-town soi near Tha Tien',tags:['Crispy pork','Chili dips','Craft drinks']},
+      'Tha Maharaj Riverside':{adm:[],entrance:'Riverside complex by the pier',tags:['River breeze','Riverside cafes','Lunch']},
+      'Pak Khlong Talat':{adm:[],entrance:'24-hour flower market',tags:['Garlands','Orchids','Photo spot']},
+      "Eagle's Nest Bar":{adm:[],entrance:'Sala Rattanakosin rooftop \u2014 smart-casual',tags:['Wat Arun sunset','Cocktails','Rail seats']},
+      'Sirocco Sky Bar':{adm:[],entrance:'Lebua Tower 63F \u2014 strict dress code',tags:['Skyline','Open-air','Sunset']},
+      'Chatuchak Weekend Market':{adm:[],entrance:'Sat\u2013Sun \u00b7 MRT Kamphaeng Phet Exit 1',tags:['8,000+ stalls','Street food','Vintage finds']},
+      'After You Dessert Cafe':{adm:[],entrance:'In the mall \u2014 queues at peak',tags:['Shibuya toast','Kakigori','Sweets']},
+      'Lumphini Park':{adm:[],entrance:'Open 04:30\u201321:00 \u00b7 free',tags:['Swan boats','Jogging path','Monitor lizards']},
+      'Or Tor Kor Market':{adm:[],entrance:'MRT Kamphaeng Phet Exit 3',tags:['Premium produce','Curries','Famous fruit']},
+      'Damnoen Saduak':{adm:[{l:'Longtail',v:'\u0e3f700'}],note:'Agree the boat price before boarding',entrance:'Boat pier',tags:['Floating vendors','Longtail ride','Photos']},
+      'Maeklong Railway Market':{adm:[],entrance:'Built on live tracks \u2014 mind the train',tags:['Umbrella pulldown','Trackside stalls','Train times']},
+      'Asiatique The Riverfront':{adm:[],entrance:'Free shuttle boat from Sathorn pier',tags:['Ferris wheel','Riverside dining','Night shopping']},
+      'ICONSIAM':{adm:[],entrance:'Free shuttle boat \u00b7 SOOKSIAM on G',tags:['Thai crafts','Riverside','Gifts']}
+    };
+    return m[name]||null;
+  }
   highlights(){ const g=this.gmap(); return [
     {name:'Riva Surya · Your base',day:'Stay',g:g.hotel,icon:'#i-bed',cat:'Hotel'},
     {name:'Grand Palace',day:'Day 2',g:g.temple,icon:'#i-temple',cat:'Temple'},
@@ -1079,6 +1143,19 @@ class Component extends DCLogic {
     'Damnoen Saduak':[99.9550,13.5210], 'Maeklong Railway Market':[99.9990,13.4072], 'Asiatique The Riverfront':[100.5030,13.7045],
     'ICONSIAM':[100.5100,13.7265], 'Riva Surya · Checkout':[100.4955,13.7596], 'Suvarnabhumi · Departure':[100.7470,13.6900]
   }; }
+  _km(a,b){ if(!a||!b) return 0; const R=6371,toR=x=>x*Math.PI/180; const dLat=toR(b[1]-a[1]),dLng=toR(b[0]-a[0]); const s=Math.sin(dLat/2)**2+Math.cos(toR(a[1]))*Math.cos(toR(b[1]))*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(s)); }
+  // Realistic hotel↔stop options derived from the real distance (no more flat 15-min/12-min-walk
+  // for every day). Far day-trips fall back to the booked van.
+  hotelOptsFor(stopName){
+    const H=this.geo()['Riva Surya Bangkok'], D=this.geo()[stopName];
+    if(!H||!D) return [{mode:'Grab / taxi',icon:'#i-bus',time:'15 min',cost:'฿90',tips:['Door to door from the hotel lobby','Fixed fare shown in the Grab app']}];
+    const km=this._km(H,D)*1.3; // straight-line → rough road distance
+    const gMin=Math.round(7+km*2.4), gCost=Math.round((40+km*13)/5)*5, wMin=Math.round(km*13);
+    if(gMin>80) return [{mode:'Day-trip van',icon:'#i-bus',time:'~1.5 hr',cost:'Included',tips:['Hotel pickup for the out-of-town day trip','Driver waits between the stops']}];
+    const opts=[{mode:'Grab / taxi',icon:'#i-bus',time:gMin+' min',cost:'฿'+gCost,tips:['Door to door from the hotel lobby','Fixed fare shown in the Grab app']}];
+    if(km<=1.7) opts.unshift({mode:'Walk',icon:'#i-walk',time:wMin+' min',cost:'Free',tips:['Quiet riverside lanes from Riva Surya','Flat and shaded most of the way']});
+    return opts;
+  }
 
   // Coordinates for the stops of a given day, in order: [{name,time,ll}]
   dayGeo(day){ const G=this.geo(); return day.stops.map(s=>({name:s.name,time:s.t,ll:G[s.name]})).filter(p=>Array.isArray(p.ll)); }
@@ -1336,7 +1413,7 @@ class Component extends DCLogic {
         iconEl:this.icoEl(s.icon,{position:'absolute',right:'-10px',bottom:'-12px',width:'70px',height:'70px',color:'rgba(255,255,255,.28)'}),
         thumbStyle:{position:'relative',height:'150px',backgroundImage:this.cover(s.name,s.cat),backgroundSize:'cover',backgroundPosition:'center',cursor:'pointer'},
         notLast: si!==d.stops.length-1,
-        onOpenPd: ()=>{ const info=this.placeContent(s.name,s.cat); this.setState({pd:{name:s.name, th:this.placeTh(s.name), cat:s.cat, icon:s.icon, hours:this.hoursFor(s.cat), price:s.price, desc:s.desc, acts:info.acts, dos:info.dos, donts:info.donts, idx:si}}); }
+        onOpenPd: ()=>{ const info=this.placeContent(s.name,s.cat); this.setState({pd:{name:s.name, th:this.placeTh(s.name), cat:s.cat, icon:s.icon, hours:this.hoursFor(s.cat), price:s.price, desc:s.desc, acts:info.acts, dos:info.dos, donts:info.donts, facts:this.placeFacts(s.name), idx:si}}); }
       }));
       return {
         n:i+1, nn:String(i+1).padStart(2,'0'), wd:d.wd, date:d.date, dateFull:this.fullDate(d.wd,d.date),
@@ -1391,7 +1468,7 @@ class Component extends DCLogic {
         onCat: ()=>this.setState({gt:s.cat}),
         statusIconEl: (st&&st.hasIcon)?this.icoEl(st.icon,{width:'11px',height:'11px'}):null,
         price:s.price, hasPrice:!!s.price, hasHours:!!hours, hoursLabel:hours,
-        onName: ()=>this.setState({pd:{name:s.name, th:this.placeTh(s.name), cat:s.cat, icon:s.icon, hours:hours, price:s.price, desc:s.desc, acts:info.acts, dos:info.dos, donts:info.donts, idx:i}}),
+        onName: ()=>this.setState({pd:{name:s.name, th:this.placeTh(s.name), cat:s.cat, icon:s.icon, hours:hours, price:s.price, desc:s.desc, acts:info.acts, dos:info.dos, donts:info.donts, facts:this.placeFacts(s.name), idx:i}}),
         coverStyle:{position:'relative',height:'152px',borderRadius:'14px',overflow:'hidden',backgroundImage:this.cover(s.name,s.cat),backgroundSize:'cover',backgroundPosition:'center',marginBottom:'13px',border:'1px solid rgba(43,33,24,.06)'},
         showStatus:!!st, statusStyle: st?{...badgeBase,...st.style}:badgeBase,
         statusLabel: st?st.label:'', statusIcon: st?st.icon:null, statusHasIcon: st?st.hasIcon:false, statusDot: st?st.dot:false,
@@ -1413,10 +1490,10 @@ class Component extends DCLogic {
       modeStyle:{flex:1,minWidth:0,fontSize:'12px',fontWeight:700,letterSpacing:'-.01em',color:'#2A211C',lineHeight:1.2},
       metaStyle:{display:'flex',alignItems:'center',gap:'6px',flexWrap:'wrap'} }; });
     const wrapFor=(n)=>({display:'grid',gridTemplateColumns:'repeat('+Math.max(1,n)+',minmax(0,1fr))',gap:'8px',marginBottom:'16px'});
-    const hotelOpts=[{mode:'Grab / taxi',icon:'#i-bus',time:'15 min',cost:'฿90',tips:['Door to door from the hotel lobby','Fixed fare shown in the Grab app']},{mode:'Walk',icon:'#i-walk',time:'12 min',cost:'Free',tips:['Quiet riverside lane from Riva Surya','Flat and shaded most of the way']}];
     const firstStop=day.stops[0]||{}, lastStop=day.stops[day.stops.length-1]||{};
-    const hotelStart={ nextName:firstStop.name||'', options:mkOpts('Riva Surya Bangkok',firstStop.name||'',hotelOpts), optionsWrap:wrapFor(hotelOpts.length) };
-    const hotelEnd={ options:mkOpts(lastStop.name||'','Riva Surya Bangkok',hotelOpts), optionsWrap:wrapFor(hotelOpts.length) };
+    const hsOpts=this.hotelOptsFor(firstStop.name), heOpts=this.hotelOptsFor(lastStop.name);
+    const hotelStart={ nextName:firstStop.name||'', options:mkOpts('Riva Surya Bangkok',firstStop.name||'',hsOpts), optionsWrap:wrapFor(hsOpts.length) };
+    const hotelEnd={ options:mkOpts(lastStop.name||'','Riva Surya Bangkok',heOpts), optionsWrap:wrapFor(heOpts.length) };
 
     // The interactive map (markers, route, popup, zoom) is driven imperatively by
     // the MapLibre engine in _syncMap()/_renderDay() — see the map engine section.
@@ -1462,6 +1539,16 @@ class Component extends DCLogic {
     const pdSheetStyle={position:'fixed',left:'50%',bottom:0,width:'460px',maxWidth:'100%',height:'auto',transform:'translateX(-50%) translateY('+(pdOpen?'0':'104%')+')',zIndex:83,background:'#FBFAF8',borderTopLeftRadius:'24px',borderTopRightRadius:'24px',boxShadow:'0 -12px 44px -12px rgba(43,33,24,.5)',transition:'transform .32s cubic-bezier(.4,0,.2,1), height .3s ease',overflow:'hidden'};
     const pdCoverStyle={position:'relative',height:'196px',backgroundImage:pd?this.cover(pd.name,pd.cat):'none',backgroundColor:'#E8E1D8',backgroundSize:'cover',backgroundPosition:'center'};
     const pdCopied=this.state.pdCopied;
+    const pf = (pd&&pd.facts) ? pd.facts : null;
+    const pdAdm = (pf&&pf.adm) ? pf.adm.map(t=>({label:t.l, v:t.v})) : [];
+    const pdHasAdm = pdAdm.length>0;
+    const pdAdmNote = (pf&&pf.note) ? pf.note : '';
+    const pdHasAdmNote = !!pdAdmNote;
+    const pdEntrance = (pf&&pf.entrance) ? pf.entrance : '';
+    const pdHasEntrance = !!pdEntrance;
+    const pdTags = (pf&&pf.tags) ? pf.tags : [];
+    const pdHasTags = pdTags.length>0;
+    const pdAdmWrap = {display:'grid',gridTemplateColumns:'repeat('+Math.max(1,pdAdm.length)+',1fr)',gap:'8px'};
     // general tips modal
     const gtKey=this.state.gt;
     const gtOpen=!!gtKey;
@@ -1618,6 +1705,7 @@ class Component extends DCLogic {
       pdChipEl: this.icoEl(pd?pd.icon:null,{width:'12px',height:'12px',color:'#2A211C'}),
       pdHours: pd?pd.hours:'', pdHasHours: !!(pd&&pd.hours), pdPrice: pd?pd.price:'', pdHasPrice: !!(pd&&pd.price),
       pdCat: pd?pd.cat:'', pdDesc: pd?pd.desc:'', pdActs: pd?pd.acts:[], pdDos: pd?pd.dos:[], pdDonts: pd?pd.donts:[],
+      pdAdm, pdHasAdm, pdAdmNote, pdHasAdmNote, pdEntrance, pdHasEntrance, pdTags, pdHasTags, pdAdmWrap,
       onClosePd: ()=>this.setState({pd:null}),
       onCopyTh: ()=>{ if(pd&&pd.th) this.copyTh(pd.th); },
       gtOpen, gtScrimStyle, gtSheetStyle, gtSheetRef:this.gtSheetRef, gtIsIndex, gtIsSub, gtTitle, gtGroup, gtIconEl, gtTips, gtHasTips: gtTips.length>0, gtNote, gtHasNote,
